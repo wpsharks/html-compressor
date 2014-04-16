@@ -41,7 +41,7 @@ For instance, if a theme/plugin developer is working within a set of PHP framewo
 
 ## Solution, the WebSharks™ HTML Compressor!
 
-**This WebSharks™ HTML Compressor works as an additional layer of functionality that can come in after your publishing platform pieces everything together.** The WebSharks™ HTML Compressor analyzes each page of your site in real-time; i.e. as it's being loaded; inspecting each line of HTML code.
+**The WebSharks™ HTML Compressor works as an additional layer of functionality that can come in after your publishing platform pieces everything together.** The WebSharks™ HTML Compressor analyzes each page of your site in real-time; i.e. as it's being loaded; inspecting each line of HTML code.
 
 CSS/JS files are combined (where possible) and compressed (where possible); then it can optimize the HTML code and any inline JavaScript/CSS too. The goal is to speed things up for your visitors and to reduce the number of HTTP connections that your server processes.
 
