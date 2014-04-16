@@ -93,7 +93,7 @@ All of these compression options are enabled by default, but you can modify this
 ## Some Usage Examples
 
 ### 1. HTML Compressor as an Output Buffer
-*This could snippet should be processed BEFORE any other output occurs.*
+*This code snippet should be processed BEFORE any other output occurs.*
 
 ```
 <?php
