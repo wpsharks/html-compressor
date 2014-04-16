@@ -179,7 +179,7 @@ $html = $html_compressor->compress($html);
 
 ----
 
-## Class Contructor Options
+## Class Constructor Options
 
 e.g. `new \websharks\html_compressor\core($options);`
 
