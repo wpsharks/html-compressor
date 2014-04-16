@@ -288,13 +288,12 @@ namespace websharks\html_compressor
 					if(!$css_tag_frags)
 						return array(); // Nothing to do.
 
-					$cache_checksum = $this->get_tag_frags_checksum($css_tag_frags);
+					$checksum             = $this->get_tag_frags_checksum($css_tag_frags);
+					$public_cache_dir     = $this->cache_dir($this::dir_public_type, $checksum);
+					$private_cache_dir    = $this->cache_dir($this::dir_private_type, $checksum);
+					$public_cache_dir_url = $this->cache_dir_url($this::dir_public_type, $checksum);
 
-					$public_cache_dir     = $this->cache_dir($this::dir_public_type);
-					$private_cache_dir    = $this->cache_dir($this::dir_private_type);
-					$public_cache_dir_url = $this->cache_dir_url($this::dir_public_type);
-
-					$cache_parts_file      = $cache_checksum.'-compressor-parts.css-cache';
+					$cache_parts_file      = $checksum.'-compressor-parts.css-cache';
 					$cache_parts_file_path = $private_cache_dir.'/'.$cache_parts_file;
 
 					$cache_part_file      = '%%code-checksum%%-compressor-part.css';
@@ -399,13 +398,12 @@ namespace websharks\html_compressor
 					if(!$js_tag_frags)
 						return array(); // Nothing to do.
 
-					$cache_checksum = $this->get_tag_frags_checksum($js_tag_frags);
+					$checksum             = $this->get_tag_frags_checksum($js_tag_frags);
+					$public_cache_dir     = $this->cache_dir($this::dir_public_type, $checksum);
+					$private_cache_dir    = $this->cache_dir($this::dir_private_type, $checksum);
+					$public_cache_dir_url = $this->cache_dir_url($this::dir_public_type, $checksum);
 
-					$public_cache_dir     = $this->cache_dir($this::dir_public_type);
-					$private_cache_dir    = $this->cache_dir($this::dir_private_type);
-					$public_cache_dir_url = $this->cache_dir_url($this::dir_public_type);
-
-					$cache_parts_file      = $cache_checksum.'-compressor-parts.js-cache';
+					$cache_parts_file      = $checksum.'-compressor-parts.js-cache';
 					$cache_parts_file_path = $private_cache_dir.'/'.$cache_parts_file;
 
 					$cache_part_file      = '%%code-checksum%%-compressor-part.js';
@@ -1580,49 +1578,68 @@ namespace websharks\html_compressor
 			/**
 			 * Get (and possibly create) the cache dir.
 			 *
-			 * @param string $type One of `$this::dir_public_type` or `$this::dir_private_type`.
+			 * @param string  $type One of `$this::dir_public_type` or `$this::dir_private_type`.
+			 * @param string  $checksum Optional. If supplied, we'll build a nested sub-directory based on the checksum.
+			 * @param boolean $base_only Defaults to a FALSE value. If TRUE, return only the base directory.
+			 *    i.e. Do NOT suffix the directory in any way. No host and no checksum.
 			 *
 			 * @return string Server path to cache dir.
 			 *
 			 * @throws \exception If unable to create the cache dir.
 			 * @throws \exception If cache directory is not readable/writable.
 			 */
-			protected function cache_dir($type)
+			protected function cache_dir($type, $checksum = '', $base_only = FALSE)
 				{
 					if($type !== $this::dir_public_type)
 						if($type !== $this::dir_private_type)
 							throw new \exception('Invalid type.');
+					$checksum = (string)$checksum;
 
-					if(isset($this->icache[__FUNCTION__.'_'.$type]))
-						return $this->icache[__FUNCTION__.'_'.$type];
+					if(isset($checksum[4]))
+						$checksum = substr($checksum, 0, 5);
+					else $checksum = ''; // Invalid or empty.
+
+					$cache_key = $type.$checksum.(integer)$base_only;
+
+					if(isset($this->icache[__FUNCTION__.'_'.$cache_key]))
+						return $this->icache[__FUNCTION__.'_'.$cache_key];
 
 					if(!empty($this->options[__FUNCTION__.'_'.$type]))
-						$dir = $this->n_dir_seps($this->options[__FUNCTION__.'_'.$type]);
+						$basedir = $this->n_dir_seps($this->options[__FUNCTION__.'_'.$type]);
 
 					else if(defined('WP_CONTENT_DIR'))
-						$dir = $this->n_dir_seps(WP_CONTENT_DIR.'/htmlc/cache/'.$type);
+						$basedir = $this->n_dir_seps(WP_CONTENT_DIR.'/htmlc/cache/'.$type);
 
 					else if(!empty($_SERVER['DOCUMENT_ROOT']))
-						$dir = $this->n_dir_seps($_SERVER['DOCUMENT_ROOT'].'/htmlc/cache/'.$type);
+						$basedir = $this->n_dir_seps($_SERVER['DOCUMENT_ROOT'].'/htmlc/cache/'.$type);
 
 					else throw new \exception(sprintf('Unable to find a good location for the cache directory. Please set option: `%1$s`.', __FUNCTION__.'_'.$type));
 
-					if(!is_dir($dir) && !mkdir($dir, 0775, TRUE))
-						throw new \exception(sprintf('Unable to create public cache directory: `%1$s`.', $dir));
+					if($base_only) $dir = $basedir; // Caller wants only the base directory.
 
-					if(!is_readable($dir) || !is_writable($dir))
-						throw new \exception(sprintf('Cache directory not readable/writable: `%1$s`.', $dir));
+					else // We add a suffix for the current host; and a possible set of sub-directories based on the checksum.
+						{
+							$dir = $basedir; // Start with the base directory.
+							$dir .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
+							$dir .= ($checksum) ? '/'.implode('/', str_split($checksum)) : '';
+						}
+					if(!is_dir($dir) && mkdir($dir, 0775, TRUE) && $type === $this::dir_private_type && !is_file($basedir.'/.htaccess'))
+						if(!file_put_contents($basedir.'/.htaccess', $this->dir_htaccess_deny)) // Secure the private directory.
+							throw new \exception(sprintf('Unable to create `.htaccess` file in private cache directory: `%1$s`.', $basedir));
 
-					if($type === $this::dir_private_type && !is_file($dir.'/.htaccess') && !file_put_contents($dir.'/.htaccess', $this->dir_htaccess_deny))
-						throw new \exception(sprintf('Unable to create `.htaccess` file in private cache directory: `%1$s`.', $dir));
+					if(!is_readable($dir) || !is_writable($dir)) // Must have this directory; and it MUST be readable/writable.
+						throw new \exception(sprintf('Cache directory not readable/writable: `%1$s`. Failed on `%2$s`.', $basedir, $dir));
 
-					return ($this->icache[__FUNCTION__.'_'.$type] = $dir);
+					return ($this->icache[__FUNCTION__.'_'.$cache_key] = $dir);
 				}
 
 			/**
 			 * Get (and possibly create) the cache dir URL.
 			 *
-			 * @param string $type One of `$this::public_type` or `$this::private_type`.
+			 * @param string  $type One of `$this::public_type` or `$this::private_type`.
+			 * @param string  $checksum Optional. If supplied, we'll build a nested sub-directory based on the checksum.
+			 * @param boolean $base_only Defaults to a FALSE value. If TRUE, return only the base directory.
+			 *    i.e. Do NOT suffix the directory in any way. No host and no checksum.
 			 *
 			 * @return string URL to server-side cache directory.
 			 *
@@ -1630,35 +1647,53 @@ namespace websharks\html_compressor
 			 * @throws \exception If cache directory is not readable/writable.
 			 * @throws \exception If unable to determine the URL for any reason.
 			 */
-			protected function cache_dir_url($type)
+			protected function cache_dir_url($type, $checksum = '', $base_only = FALSE)
 				{
 					if($type !== $this::dir_public_type)
 						if($type !== $this::dir_private_type)
 							throw new \exception('Invalid type.');
+					$checksum = (string)$checksum;
 
-					if(isset($this->icache[__FUNCTION__.'_'.$type]))
-						return $this->icache[__FUNCTION__.'_'.$type];
+					if(isset($checksum[4]))
+						$checksum = substr($checksum, 0, 5);
+					else $checksum = ''; // Invalid or empty.
 
-					$dir = $this->cache_dir($type); // Create if not exists.
+					$cache_key = $type.$checksum.(integer)$base_only;
+
+					if(isset($this->icache[__FUNCTION__.'_'.$cache_key]))
+						return $this->icache[__FUNCTION__.'_'.$cache_key];
+
+					$basedir = $this->cache_dir($type, '', TRUE);
 
 					if(!empty($this->options[__FUNCTION__.'_'.$type]))
-						$url = $this->set_url_scheme(rtrim($this->options[__FUNCTION__.'_'.$type], '/'));
+						$baseurl = $this->set_url_scheme(rtrim($this->options[__FUNCTION__.'_'.$type], '/'));
 
-					else if(defined('WP_CONTENT_DIR') && defined('WP_CONTENT_URL') && $dir === $this->n_dir_seps(WP_CONTENT_DIR.'/htmlc/cache/'.$type))
-						$url = $this->set_url_scheme(rtrim(WP_CONTENT_URL, '/').'/htmlc/cache/'.$type);
+					else if(defined('WP_CONTENT_DIR') && defined('WP_CONTENT_URL') && $basedir === $this->n_dir_seps(WP_CONTENT_DIR.'/htmlc/cache/'.$type))
+						$baseurl = $this->set_url_scheme(rtrim(WP_CONTENT_URL, '/').'/htmlc/cache/'.$type);
 
-					else if(!empty($_SERVER['DOCUMENT_ROOT']) && strpos($dir, $_SERVER['DOCUMENT_ROOT']) === 0)
+					else if(!empty($_SERVER['DOCUMENT_ROOT']) && strpos($basedir, $_SERVER['DOCUMENT_ROOT']) === 0)
 						{
-							$url = $this->current_url_scheme().'://'.$this->current_url_host();
-							$url .= str_replace(rtrim($_SERVER['DOCUMENT_ROOT'], '/'), '', $dir);
+							$baseurl = $this->current_url_scheme().'://'.$this->current_url_host();
+							$baseurl .= str_replace(rtrim($_SERVER['DOCUMENT_ROOT'], '/'), '', $basedir);
 						}
 					else throw new \exception(sprintf('Unable to determine URL to cache directory. Please set option: `%1$s`.', __FUNCTION__.'_'.$type));
 
-					return ($this->icache[__FUNCTION__.'_'.$type] = $url);
+					if($base_only) $url = $baseurl; // Caller wants only the base directory.
+
+					else // We add a suffix for the current host; and a possible set of sub-directories based on the checksum.
+						{
+							$url = $baseurl; // Start with the base URL.
+							$url .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
+							$url .= ($checksum) ? '/'.implode('/', str_split($checksum)) : '';
+						}
+					return ($this->icache[__FUNCTION__.'_'.$cache_key] = $url);
 				}
 
 			/**
 			 * Cache cleanup routine.
+			 *
+			 * @note This routine is always host-specific.
+			 *    i.e. We cleanup cache files for the current host only.
 			 *
 			 * @return null Simply cleans up the cache.
 			 */
