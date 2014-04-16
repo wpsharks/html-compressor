@@ -49,7 +49,7 @@ CSS/JS files are combined (where possible) and compressed (where possible); then
 
 All of these compression options are enabled by default, but you can modify this behavior as you see fit. Toward the bottom of this file you will find a list of all possible configuration options.
 
-1. The HTML Compressor starts by inspecting the `<head>` and `<body>` of the HTML document. An attempt is made to recursively combine all CSS resources (including inline styles, and all remote resources too) into a single CSS file. If `compress_css_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, hex color codes are optimized, etc, etc).
+- **1.** The HTML Compressor starts by inspecting the `<head>` and `<body>` of the HTML document. An attempt is made to recursively combine all CSS resources (including inline styles, and all remote resources too) into a single CSS file. If `compress_css_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, hex color codes are optimized, etc, etc).
 
    *A few NOTES regarding step `1`.*
 
@@ -65,9 +65,9 @@ All of these compression options are enabled by default, but you can modify this
 
    - **NOTE:** Conditional CSS (e.g. `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Cascading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
 
-2. Next, we inspect the `<head>` of the HTML document. An attempt is made to combine all JS resources in the `<head>` into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
+- **2.** Next, we inspect the `<head>` of the HTML document. An attempt is made to combine all JS resources in the `<head>` into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
 
-3. Next, we inspect a special area of the source code that can be flagged for compression by wrapping a section with `<!--footer-scripts--><!--footer-scripts-->`. This flagging is only necessary if you have scripts that you intentionally place in the footer. If the HTML Compressor finds a `<!--footer-scripts--><!--footer-scripts-->` section; an attempt is made to combine all JS resources into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
+- **3.** Next, we inspect a special area of the source code that can be flagged for compression by wrapping a section with `<!--footer-scripts--><!--footer-scripts-->`. This flagging is only necessary if you have scripts that you intentionally place in the footer. If the HTML Compressor finds a `<!--footer-scripts--><!--footer-scripts-->` section; an attempt is made to combine all JS resources into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
 
    *A few NOTES regarding steps `2` and `3`.*
 
@@ -84,9 +84,9 @@ All of these compression options are enabled by default, but you can modify this
 
    - **NOTE:** Conditional JS (e.g. `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Loading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
 
-4. Next, we look at the `<body>` for any inline `<script>` tags. While it is not possible  to consolidate inline JS; if `compress_inline_js_code` is enabled (on by default) an attempt is made to compress the JavaScript code in these inline code snippets to reduce the amount of overhead they might add.
+- **4.** Next, we look at the `<body>` for any inline `<script>` tags. While it is not possible  to consolidate inline JS; if `compress_inline_js_code` is enabled (on by default) an attempt is made to compress the JavaScript code in these inline code snippets to reduce the amount of overhead they might add.
 
-5. Last, we compress the HTML code itself (i.e. extra whitespace is removed). Care is taken to preserve special tags where raw formatting is important; but you should end up with a much smaller HTML file; and the external resources it depends on will have certainly be reduced to a bare minimum.
+- **5.** Last, we compress the HTML code itself (i.e. extra whitespace is removed). Care is taken to preserve special tags where raw formatting is important; but you should end up with a much smaller HTML file; and the external resources it depends on will have certainly be reduced to a bare minimum.
 
 ----
 
@@ -181,6 +181,7 @@ ob_start(array($html_compressor, 'compress'));
 ## Class Contructor Options
 
 e.g. `new \websharks\html_compressor\core($options);`
+
 *where `$options` is an associative array with one or more keys listed below.*
 
 #### Current List of All Possible Options
