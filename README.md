@@ -290,7 +290,7 @@ e.g. `new \websharks\html_compressor\core($options);`
 
 - (boolean)`benchmark` Off by default. If enabled, HTML comments are added to the output with benchmark data.
 
-- (string)`product_title` If you'd like to change the title of this compressor. Defauls to `HTML Compressor`.
+- (string)`product_title` If you'd like to change the title of this compressor. Defaults to `HTML Compressor`.
 
 - (array)`vendor_css_prefixes` An array of known vendor-specific CSS prefixes. Defaults to `array('moz','webkit','khtml','ms','o')`.
 
