@@ -172,8 +172,9 @@ $html_compressor_options = array(
 	'product_title' => 'HTML Compressor',
 	'vendor_css_prefixes' => array('moz','webkit','khtml','ms','o')
 );
+$html = '<html> ... </html>';
 $html_compressor = new \websharks\html_compressor\core($html_compressor_options);
-ob_start(array($html_compressor, 'compress'));
+$html = $html_compressor->compress($html);
 ```
 
 ----
