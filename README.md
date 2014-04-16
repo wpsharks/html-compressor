@@ -39,7 +39,7 @@ Ideally, your publishing platform (or theme) would minimize the number of extern
 
 For instance, if a theme/plugin developer is working within a set of PHP framework standards (e.g. doing things "the WordPress way"), the end result may not always be optimized in an ideal fashion. We know first-hand that this really bugs developers. Experienced developers don't create a mess by choice, it's just how the framework pulls everything together that can sometimes produce a mess. Also, when a site owner adds plugins to the mix later; where the publishing platform (or theme) is being supplemented by CSS/JS files that are plugin-specific — this is where things can really get crazy; e.g. a new CSS and/or JS file for each plugin.
 
-## The WebSharks™ HTML Compressor (a Smart Solution)
+## Solution, the WebSharks™ HTML Compressor!
 
 **This WebSharks™ HTML Compressor works as an additional layer of functionality that can come in after your publishing platform pieces everything together.** The WebSharks™ HTML Compressor analyzes each page of your site in real-time; i.e. as it's being loaded; inspecting each line of HTML code.
 
