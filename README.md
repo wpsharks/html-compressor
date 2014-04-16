@@ -6,7 +6,7 @@ HTML Compressor. This class automatically combines and compresses CSS/JS/HTML co
 
 ## Why did we create the HTML Compressor?
 
-The HTML Compressor class was developed because all of us here at WebSharks™ are growing tired of seeing WordPress installations out-in-the-wild that are running many different plugins; where each plugin would add a new set of CSS/JS files. This creates a slow-loading site, even if it's running a page caching plugin like Quick Cache.
+The HTML Compressor class was developed because all of us here at WebSharks™ are growing tired of seeing WordPress installations out-in-the-wild that are running many different plugins; where each plugin may add a new set of CSS/JS files. This creates a slow-loading site, even if it's running a page caching plugin like Quick Cache.
 
 **For example**, if you look at the HTML source code for most sites powered by a publishing platform such as WordPress (or audit one in a web developer console), you will find **a complete mess like this**...
 
