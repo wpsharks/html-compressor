@@ -233,6 +233,10 @@ e.g. `new \websharks\html_compressor\core($options);`
 - (string)`cache_dir_url_private` Not applicable. This option exists internally but URLs to the private cache directory
  are never generated. Therefore, under normal circumstances you can ignore this option value all together.
 
+- (boolean)`cleanup_cache_dirs` Defaults to TRUE. By default, cache directories are cleaned up automatically
+ over time; i.e. at semi-random intervals and also based on your `cache_expiration_time`. If you would prefer to cleanup
+ the cache on your own, you can set this to a FALSE value.
+
 ##### The following options can be used to specify the current URL.
  *Note that it is normally NOT necessary to supply any of these values.*
 

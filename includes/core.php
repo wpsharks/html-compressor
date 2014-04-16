@@ -145,6 +145,9 @@ namespace websharks\html_compressor
 							$time = number_format(microtime(TRUE) - $time, 5, '.', '');
 							$html .= "\n\n".'<!-- '.sprintf('%1$s took: %2$s seconds -->', htmlspecialchars($product_title), htmlspecialchars($time));
 						}
+					if(!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs'])
+						if(mt_rand(1, 20) === 1) $this->cleanup_cache_dirs();
+
 					return $html;
 				}
 
@@ -925,7 +928,7 @@ namespace websharks\html_compressor
 			protected function get_script_js_async(array $tag_frag)
 				{
 					if(!empty($tag_frag['script_open_tag']) && !empty($tag_frag['script_closing_tag']) && preg_match('/\<script\s*\>|type\s*\=\s*(["\'])(?:text\/javascript|application\/(?:x\-)?javascript)\\1|language\s*\=\s*(["\'])javascript\\2/i', $tag_frag['script_open_tag']))
-						if(preg_match('/\s+(?:async|defer)(?:\>|\s*\=\s*(["\'])(?P<value>[^"\']*?)\\1|\s+)?/i', $tag_frag['script_open_tag'], $async) && (empty($async['value']) || in_array(strtolower($async), array('1', 'on', 'yes', 'true', 'defer','async'), TRUE)) && ($script_js_async = 'async'))
+						if(preg_match('/\s+(?:async|defer)(?:\>|\s*\=\s*(["\'])(?P<value>[^"\']*?)\\1|\s+)?/i', $tag_frag['script_open_tag'], $async) && (empty($async['value']) || in_array(strtolower($async), array('1', 'on', 'yes', 'true', 'defer', 'async'), TRUE)) && ($script_js_async = 'async'))
 							return $script_js_async;
 
 					return '';
