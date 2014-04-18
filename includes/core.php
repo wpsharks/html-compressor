@@ -833,6 +833,9 @@ namespace websharks\html_compressor
 			 */
 			protected function _resolve_css_relatives_url_cb(array $m)
 				{
+					if(stripos($m['url'], 'data:') === 0)
+						return $m[0]; // Don't resolve `data:` URIs.
+
 					return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolve_relative_url($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
 				}
 
