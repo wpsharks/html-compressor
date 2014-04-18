@@ -529,6 +529,7 @@ namespace websharks\html_compressor
 												'if_closing_tag'        => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
 
 												'link_self_closing_tag' => isset($_tag_frag['link_self_closing_tag']) ? $_tag_frag['link_self_closing_tag'] : '',
+												'link_href_external'    => ($_link_href) ? $this->is_url_external($_link_href) : FALSE,
 												'link_href'             => $_link_href, // This could also be empty.
 
 												'style_open_tag'        => isset($_tag_frag['style_open_tag']) ? $_tag_frag['style_open_tag'] : '',
@@ -544,10 +545,10 @@ namespace websharks\html_compressor
 											if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'])
 												$_tag_frag_r['exclude'] = TRUE;
 
-											else if($this->regex_css_exclusions && $_tag_frag_r['link_href'] && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_self_closing_tag']))
+											else if($_tag_frag_r['link_href'] && $_tag_frag_r['link_href_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js'])
 												$_tag_frag_r['exclude'] = TRUE;
 
-											else if($this->regex_css_exclusions && $_tag_frag_r['style_css'] && preg_match($this->regex_css_exclusions, $_tag_frag_r['style_open_tag'].$_tag_frag_r['style_css']))
+											else if($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
 												$_tag_frag_r['exclude'] = TRUE;
 										}
 								}
@@ -588,25 +589,29 @@ namespace websharks\html_compressor
 									if($_script_src || $_script_js) // One or the other is fine.
 										{
 											$js_tag_frags[] = array(
-												'all'                => $_tag_frag['all'],
+												'all'                 => $_tag_frag['all'],
 
-												'if_open_tag'        => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
-												'if_closing_tag'     => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
+												'if_open_tag'         => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
+												'if_closing_tag'      => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
 
-												'script_open_tag'    => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
-												'script_src'         => $_script_src, // This could also be empty.
-												'script_js'          => $_script_js, // This could also be empty.
-												'script_async'       => $_script_async, // This could also be empty.
-												'script_closing_tag' => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
+												'script_open_tag'     => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
+												'script_src_external' => ($_script_src) ? $this->is_url_external($_script_src) : FALSE,
+												'script_src'          => $_script_src, // This could also be empty.
+												'script_js'           => $_script_js, // This could also be empty.
+												'script_async'        => $_script_async, // This could also be empty.
+												'script_closing_tag'  => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
 
-												'exclude'            => FALSE // Default value.
+												'exclude'             => FALSE // Default value.
 											);
 											$_tag_frag_r    = & $js_tag_frags[count($js_tag_frags) - 1];
 
 											if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'] || $_tag_frag_r['script_async'])
 												$_tag_frag_r['exclude'] = TRUE;
 
-											else if($this->regex_js_exclusions && $_tag_frag_r['script_open_tag'] && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_open_tag'].$_tag_frag_r['script_js']))
+											else if($_tag_frag_r['script_src'] && $_tag_frag_r['script_src_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js'])
+												$_tag_frag_r['exclude'] = TRUE;
+
+											else if($this->regex_js_exclusions && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js']))
 												$_tag_frag_r['exclude'] = TRUE;
 										}
 								}
@@ -2028,6 +2033,26 @@ namespace websharks\html_compressor
 					if($scheme !== '//') $scheme = $this->n_url_scheme($scheme).'://';
 
 					return preg_replace('/^(?:[a-z0-9]+\:)?\/\//i', $this->esc_refs($scheme), $url);
+				}
+
+			/**
+			 * Checks if a given URL is local or external to the current host.
+			 *
+			 * @note Care should be taken when calling upon this method. We need to be 100% sure
+			 *    we are NOT calling this against a nested remote/relative URL, URI, query or fragment.
+			 *    This method assumes the URL being analyzed is from the HTML source code.
+			 *
+			 * @param string $url_uri_query_fragment A full URL; or a partial URI;
+			 *    or only a query string, or only a fragment. Any of these can be checked here.
+			 *
+			 * @return boolean TRUE if external; else FALSE.
+			 */
+			protected function is_url_external($url_uri_query_fragment)
+				{
+					if(strpos($url_uri_query_fragment, '//') === FALSE)
+						return FALSE; // Relative.
+
+					return (stripos($url_uri_query_fragment, '//'.$this->current_url_host()) === FALSE);
 				}
 
 			/**

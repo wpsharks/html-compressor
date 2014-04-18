@@ -270,6 +270,10 @@ e.g. `new \websharks\html_compressor\core($options);`
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the JS compress-combine routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
+- (boolean)`compress_combine_remote_css_js` TRUE by default. If you prefer NOT to combine CSS/JS files from remote resource locations
+ please set this to a FALSE value. By default, the options: `compress_combine_head_body_css`, `compress_combine_head_js`, `compress_combine_footer_js` will recursively combine all resources (including those from remote locations).
+ If you set this to a FALSE value, all remote (externally hosted resources; e.g. those from CDNs or other remote URLs) will be excluded automatically to prevent remote off-site connections from taking place.
+
 - (boolean)`compress_inline_js_code` TRUE by default. If you prefer NOT to compress inline JS code (i.e. minify the contents of inline `<script>` tags),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the inline JS compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
