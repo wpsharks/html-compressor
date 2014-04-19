@@ -300,6 +300,10 @@ e.g. `new \websharks\html_compressor\core($options);`
 
 ----
 
+## Codex (Source Code Documentation)
+
+See: <http://websharks.github.io/HTML-Compressor/codex/>
+
 ## License
 
 Copyright: © 2014 [WebSharks, Inc.](http://www.websharks-inc.com/) (coded in the USA)
