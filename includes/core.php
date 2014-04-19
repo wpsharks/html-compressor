@@ -1,82 +1,149 @@
 <?php
+/**
+ * HTML Compressor (core class file).
+ *
+ * @since 140417 Initial release.
+ * @package websharks\html_compressor
+ * @author JasWSInc <https://github.com/JasWSInc>
+ * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
+ * @license GNU General Public License, version 2
+ */
 namespace websharks\html_compressor
 	{
 		/**
-		 * HTML Compressor.
+		 * HTML Compressor (core class).
+		 *
+		 * @package websharks\html_compressor
+		 * @author JasWSInc <https://github.com/JasWSInc>
+		 *
+		 * @property-read string $version Read-only access to version string.
+		 * @property-read array  $options Read-only access to current options.
 		 */
-		class core # Core class.
+		class core // Heart of the HTML Compressor.
 		{
 			/**
-			 * @var array An array of class options.
-			 * @by-constructor Set dynamically by class constructor.
+			 * Current version string.
+			 *
+			 * @since 140418 Version indicates release date.
+			 *
+			 * @var string Dated version string: `YYMMDD`.
+			 */
+			protected $version = '140418';
+
+			/**
+			 * An array of class options.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array Set dynamically by class constructor.
 			 */
 			protected $options = array();
 
 			/**
-			 * @var string Compatible with PHP's `strtotime()` function.
+			 * Compatible with PHP's `strtotime()` function.
+			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note This indicates how long cache files can live.
+			 *
+			 * @var string Set dynamically by class constructor.
 			 */
 			protected $cache_expiration_time = '14 days';
 
 			/**
-			 * @var string Regex vendor CSS prefixes.
-			 * @by-constructor Set dynamically by class constructor.
+			 * Regex vendor CSS prefixes.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Set dynamically by class constructor.
 			 */
 			protected $regex_vendor_css_prefixes = '';
 
 			/**
-			 * @var array Default set of CSS exclusions.
-			 * @note These are used if no option value is supplied.
+			 * Default set of CSS exclusions.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array These are used if no option value is supplied.
 			 */
 			protected $default_vendor_css_prefixes = array('moz', 'webkit', 'khtml', 'ms', 'o');
 
 			/**
-			 * @var string Regex CSS exclusions.
-			 * @by-constructor Set dynamically by class constructor.
+			 * Regex CSS exclusions.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Set dynamically by class constructor.
 			 */
 			protected $regex_css_exclusions = '';
 
 			/**
-			 * @var array Default set of CSS exclusions.
-			 * @note These are used if no option value is supplied.
+			 * Default set of CSS exclusions.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array These are used if no option value is supplied.
 			 */
 			protected $default_css_exclusions = array();
 
 			/**
-			 * @var string Regex JS exclusions.
-			 * @by-constructor Set dynamically by class constructor.
+			 * Regex JS exclusions.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Set dynamically by class constructor.
 			 */
 			protected $regex_js_exclusions = '';
 
 			/**
-			 * @var array Default set of JS exclusions.
-			 * @note These are used if no option value is supplied.
+			 * Default set of JS exclusions.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array These are used if no option value is supplied.
 			 */
 			protected $default_js_exclusions = array('.php?');
 
 			/**
-			 * @var string Current base HREF value.
-			 * @note Set by various routines that work together.
+			 * Current base HREF value.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Set by various routines that work together.
 			 */
 			protected $current_base = '';
 
 			/**
-			 * @var array Static cache array for this class.
-			 * @note Used by various routines for optimization.
+			 * Static cache array for this class.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array Used by various routines for optimization.
 			 */
 			protected static $cache = array();
 
 			/**
-			 * @var array Data cache for this class instance.
-			 * @note Used by various routines for optimization.
+			 * Data cache for this class instance.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var array Used by various routines for optimization.
 			 */
 			protected $icache = array();
 
 			/**
 			 * Class Constructor.
 			 *
+			 * Full instructions and all `$options` are listed in the
+			 *    [README.md](http://github.com/WebSharks/HTML-Compressor) file.
+			 *    See: <http://github.com/WebSharks/HTML-Compressor>
+			 *
+			 * @since 140417 Initial release.
+			 * @api Constructor is available for public use.
+			 *
 			 * @param array $options Optional array of instance options.
-			 *    Check the README.md file for a list of all possible option keys.
+			 *    Check the [README.md](http://github.com/WebSharks/HTML-Compressor) file
+			 *    for a list of all possible option keys. See: <http://github.com/WebSharks/HTML-Compressor>
 			 */
 			public function __construct(array $options = array())
 				{
@@ -109,15 +176,23 @@ namespace websharks\html_compressor
 					else if($this->default_js_exclusions) // Else we will use the default set of CSS exclusions.
 						$this->regex_js_exclusions = '/'.implode('|', $this->preg_quote_deep($this->default_js_exclusions, '/')).'/i';
 
-					require_once dirname(__FILE__).'/js-minifier.php';
+					require_once dirname(__FILE__).'/externals/js-minifier.php';
 				}
 
 			/**
 			 * Handles compression. The heart of this class.
 			 *
+			 * Full instructions and all `$options` are listed in the
+			 *    [README.md](http://github.com/WebSharks/HTML-Compressor) file.
+			 *    See: <http://github.com/WebSharks/HTML-Compressor>
+			 *
+			 * @since 140417 Initial release.
+			 * @api This method is available for public use.
+			 *
 			 * @param string $input The input passed into this routine.
 			 *
-			 * @return string Possibly compressed output.
+			 * @return string Compressed HTML code (if at all possible). Note that `$input` must be HTML code.
+			 *    i.e. It must contain a closing `</html>` tag; otherwise no compression will occur.
 			 */
 			public function compress($input)
 				{
@@ -152,7 +227,31 @@ namespace websharks\html_compressor
 				}
 
 			/**
+			 * Magic method for access to read-only properties.
+			 *
+			 * @since 140418 Initial release.
+			 *
+			 * @param string $property Propery by name.
+			 *
+			 * @return mixed Property value.
+			 * @internal For internal magic use only.
+			 *
+			 * @throws \exception If `$property` does not exist for any reason.
+			 */
+			public function __get($property)
+				{
+					$property = (string)$property;
+
+					if(property_exists($this, $property))
+						return $this->{$property};
+
+					throw new \exception(sprintf('Undefined property: `%1$s`.', $property));
+				}
+
+			/**
 			 * Handles possible compression of head/body CSS.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $html Input HTML code.
 			 *
@@ -196,6 +295,8 @@ namespace websharks\html_compressor
 			/**
 			 * Handles possible compression of head JS.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $html Input HTML code.
 			 *
 			 * @return string HTML code, after possible JS compression.
@@ -237,6 +338,8 @@ namespace websharks\html_compressor
 			/**
 			 * Handles possible compression of footer JS.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $html Input HTML code.
 			 *
 			 * @return string HTML code, after possible JS compression.
@@ -277,11 +380,15 @@ namespace websharks\html_compressor
 			/**
 			 * Compiles CSS tag fragments into CSS parts with compression.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $css_tag_frags CSS tag fragments.
 			 *
 			 * @return array Array of CSS parts, else an empty array on failure.
 			 *
 			 * @throws \exception If unable to cache CSS parts.
+			 *
+			 * @todo Optimize this further to reduce the size of the cache.
 			 */
 			protected function compile_css_tag_frags_into_parts(array $css_tag_frags)
 				{
@@ -387,11 +494,15 @@ namespace websharks\html_compressor
 			/**
 			 * Compiles JS tag fragments into JS parts with compression.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $js_tag_frags JS tag fragments.
 			 *
 			 * @return array Array of JS parts, else an empty array on failure.
 			 *
 			 * @throws \exception If unable to cache JS parts.
+			 *
+			 * @todo Optimize this further to reduce the size of the cache.
 			 */
 			protected function compile_js_tag_frags_into_parts(array $js_tag_frags)
 				{
@@ -491,6 +602,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses and returns an array of CSS tag fragments.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $html_frag An HTML tag fragment array.
 			 *
 			 * @return array An array of CSS tag fragments (ready to be converted into CSS parts).
@@ -561,6 +674,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses and return an array of JS tag fragments.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $html_frag An HTML tag fragment array.
 			 *
 			 * @return array An array of JS tag fragments (ready to be converted into JS parts).
@@ -624,6 +739,8 @@ namespace websharks\html_compressor
 			/**
 			 * Construct a checksum for an array of tag fragments.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note This routine purposely excludes any "exclusions" from the checksum.
 			 *    All that's important here is an exclusion's position in the array,
 			 *    not its fragmentation; it's excluded anyway.
@@ -644,6 +761,8 @@ namespace websharks\html_compressor
 			/**
 			 * Strip existing charset rules from CSS code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $css CSS code.
 			 *
 			 * @return string CSS after having stripped away existing charset rules.
@@ -660,7 +779,9 @@ namespace websharks\html_compressor
 				}
 
 			/**
-			 * Strip existing charsets and add a
+			 * Strip existing charsets and add a UTF-8 `@charset` rule.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $css CSS code.
 			 *
@@ -679,6 +800,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Moves special CSS `@rules` to the top.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string  $css CSS code.
 			 * @param integer $___recursion Internal use only.
@@ -720,8 +843,10 @@ namespace websharks\html_compressor
 			/**
 			 * Wrap CSS code with the specified `@media` rule.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note All `@import` rules should have already been 100% resolved
-			 *    with ``resolve_resolved_css_imports()`` BEFORE running this routine.
+			 *    with `resolve_resolved_css_imports()` BEFORE running this routine.
 			 *
 			 * @param string  $css CSS code.
 			 * @param string  $media Media rule/declaration.
@@ -751,6 +876,8 @@ namespace websharks\html_compressor
 			/**
 			 * Resolves `@import` rules in CSS code recursively.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string  $css CSS code.
 			 * @param boolean $___recursion Internal use only.
 			 *
@@ -776,6 +903,8 @@ namespace websharks\html_compressor
 			/**
 			 * Callback handler for resolving @ import rules.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $m An array of regex matches.
 			 *
 			 * @return string CSS after import resolution, else an empty string.
@@ -794,6 +923,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Resolve relative URLs in CSS code.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $css CSS code.
 			 * @param string $base Optional. Base URL to calculate from.
@@ -820,6 +951,8 @@ namespace websharks\html_compressor
 			/**
 			 * Callback handler for CSS relative URL resolutions.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $m An array of regex matches.
 			 *
 			 * @return string CSS `@import` rule with relative URL resolved.
@@ -831,6 +964,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Callback handler for CSS relative URL resolutions.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param array $m An array of regex matches.
 			 *
@@ -846,6 +981,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Get a CSS link href value from a tag fragment.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param array $tag_frag A CSS tag fragment.
 			 *
@@ -863,6 +1000,8 @@ namespace websharks\html_compressor
 			/**
 			 * Get a CSS link media rule from a tag fragment.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $tag_frag A CSS tag fragment.
 			 *
 			 * @return string The link media value if possible (defaulting to `all`); else an empty string.
@@ -878,6 +1017,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Get a CSS style media rule from a tag fragment.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param array $tag_frag A CSS tag fragment.
 			 *
@@ -895,6 +1036,8 @@ namespace websharks\html_compressor
 			/**
 			 * Get style CSS from a CSS tag fragment.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $tag_frag A CSS tag fragment.
 			 *
 			 * @return string The style CSS code (if possible); else an empty string.
@@ -910,6 +1053,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Get script JS src value from a JS tag fragment.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param array $tag_frag A JS tag fragment.
 			 *
@@ -927,6 +1072,8 @@ namespace websharks\html_compressor
 			/**
 			 * Get script JS async|defer value from a JS tag fragment.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $tag_frag A JS tag fragment.
 			 *
 			 * @return string The script JS async|defer value (if possible); else an empty string.
@@ -943,6 +1090,8 @@ namespace websharks\html_compressor
 			/**
 			 * Get script JS from a JS tag fragment.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $tag_frag A JS tag fragment.
 			 *
 			 * @return string The script JS code (if possible); else an empty string.
@@ -958,6 +1107,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Build an HTML fragment from HTML source code.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $html Raw HTML code.
 			 *
@@ -977,6 +1128,8 @@ namespace websharks\html_compressor
 			/**
 			 * Build a head fragment from HTML source code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $html Raw HTML code.
 			 *
 			 * @return array A head fragment (if possible); else an empty array.
@@ -995,6 +1148,8 @@ namespace websharks\html_compressor
 			/**
 			 * Build a footer scripts fragment from HTML source code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $html Raw HTML code.
 			 *
 			 * @return array A footer scripts fragment (if possible); else an empty array.
@@ -1012,6 +1167,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Cleans up self-closing HTML tag lines.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $html Self-closing HTML tag lines.
 			 *
@@ -1034,6 +1191,8 @@ namespace websharks\html_compressor
 			/**
 			 * Maybe compress HTML code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $html Raw HTML code.
 			 *
 			 * @return string Possibly compressed HTML code.
@@ -1055,6 +1214,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Compresses HTML markup (as quickly as possible).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $html Any HTML markup (no empty strings please).
 			 *
@@ -1117,6 +1278,8 @@ namespace websharks\html_compressor
 			/**
 			 * Maybe compress CSS code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $css Raw CSS code.
 			 *
 			 * @return string CSS code (possibly compressed).
@@ -1142,7 +1305,9 @@ namespace websharks\html_compressor
 			/**
 			 * Compresses CSS code (as quickly as possible).
 			 *
-			 * @param string $css Any CSS code (excluding ``<style></style>`` tags please).
+			 * @since 140417 Initial release.
+			 *
+			 * @param string $css Any CSS code (excluding `<style></style>` tags please).
 			 *
 			 * @return string Compressed CSS code. This removes CSS comments, extra whitespace, and it compresses HEX color codes whenever possible.
 			 *    In addition, this will also remove any unnecessary `;` line terminators to further optimize the overall file size.
@@ -1177,6 +1342,8 @@ namespace websharks\html_compressor
 			/**
 			 * Compresses HEX color codes.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array $m Regular expression matches.
 			 *
 			 * @return string Full match with compressed HEX color code.
@@ -1200,6 +1367,8 @@ namespace websharks\html_compressor
 			/**
 			 * Maybe compress JS code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $js Raw JS code.
 			 *
 			 * @return string JS code (possibly compressed).
@@ -1221,6 +1390,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Maybe compress inline JS code within the HTML source.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $html Raw HTML code.
 			 *
@@ -1275,6 +1446,8 @@ namespace websharks\html_compressor
 			/**
 			 * Helper function; compress inline JS code.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $js Raw JS code.
 			 *
 			 * @return string JS code (possibly minified).
@@ -1297,7 +1470,9 @@ namespace websharks\html_compressor
 			 */
 
 			/**
-			 * Compiles a new array of all ``$key`` elements (deeply).
+			 * Compiles a new array of all `$key` elements (deeply).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @note This is a recursive scan running deeply into multiple dimensions of arrays.
 			 *
@@ -1314,14 +1489,14 @@ namespace websharks\html_compressor
 			 *    In fact, in some cases, this could return data you did NOT want/expect, so please be cautious.
 			 *
 			 * @param integer              $search_dimensions The number of dimensions to search. Defaults to `-1` (infinite).
-			 *    If ``$preserve_keys`` is TRUE, consider setting this to a value of `1`.
+			 *    If `$preserve_keys` is TRUE, consider setting this to a value of `1`.
 			 *
 			 * @param integer              $___current_dimension For internal use only; used in recursion.
 			 *
 			 * @return array The array of compiled key elements, else an empty array, if no key elements were found.
 			 *    By default, the return array will be indexed numerically (e.g. keys are NOT preserved here).
-			 *    If an associative array is preferred, please set ``$preserve_keys`` to a TRUE value,
-			 *       and please consider setting ``$search_dimensions`` to `1`.
+			 *    If an associative array is preferred, please set `$preserve_keys` to a TRUE value,
+			 *       and please consider setting `$search_dimensions` to `1`.
 			 */
 			protected function compile_key_elements_deep(array $array, $keys, $preserve_keys = FALSE, $search_dimensions = -1, $___current_dimension = 1)
 				{
@@ -1349,6 +1524,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Removes all numeric array keys (deeply).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @note This is a recursive scan running deeply into multiple dimensions of arrays.
 			 *
@@ -1380,17 +1557,19 @@ namespace websharks\html_compressor
 			 */
 
 			/**
-			 * Escapes regex special chars deeply (i.e. ``preg_quote()`` deeply).
+			 * Escapes regex special chars deeply (i.e. `preg_quote()` deeply).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @note This is a recursive scan running deeply into multiple dimensions of arrays/objects.
 			 * @note This routine will usually NOT include private, protected or static properties of an object class.
 			 *    However, private/protected properties *will* be included, if the current scope allows access to these private/protected properties.
-			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by ``foreach()``.
+			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by `foreach()`.
 			 *
 			 * @param mixed   $value Any value can be converted into a quoted string.
 			 *    Actually, objects can't, but this recurses into objects.
 			 *
-			 * @param string  $delimiter Same as PHP's ``preg_quote()``.
+			 * @param string  $delimiter Same as PHP's `preg_quote()`.
 			 *
 			 * @param boolean $___recursion Internal use only.
 			 *
@@ -1412,10 +1591,12 @@ namespace websharks\html_compressor
 			/**
 			 * String replace (ONE time), and deeply into arrays/objects.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note This is a recursive scan running deeply into multiple dimensions of arrays/objects.
 			 * @note This routine will usually NOT include private, protected or static properties of an object class.
 			 *    However, private/protected properties *will* be included, if the current scope allows access to these private/protected properties.
-			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by ``foreach()``.
+			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by `foreach()`.
 			 *
 			 * @param string|array $needle String, or an array of strings, to search for.
 			 *
@@ -1447,12 +1628,12 @@ namespace websharks\html_compressor
 					$value = (string)$value; // Force string value.
 
 					if($case_insensitive) // Case insensitive scenario?
-						$strpos = 'stripos'; // Use ``stripos()``.
+						$strpos = 'stripos'; // Use `stripos()`.
 					else $strpos = 'strpos'; // Default.
 
 					if(is_array($needle)) // Array of needles?
 						{
-							if(is_array($replace)) // Optimized for ``$replace`` array.
+							if(is_array($replace)) // Optimized for `$replace` array.
 								{
 									foreach($needle as $_key => $_needle)
 										if(($_strpos = $strpos($value, ($_needle = (string)$_needle))) !== FALSE)
@@ -1465,7 +1646,7 @@ namespace websharks\html_compressor
 
 									return $value; // String value.
 								}
-							else // Optimized for ``$replace`` string.
+							else // Optimized for `$replace` string.
 								{
 									$replace = (string)$replace;
 
@@ -1503,6 +1684,8 @@ namespace websharks\html_compressor
 			/**
 			 * String replace (ONE time).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string|array $needle String, or an array of strings, to search for.
 			 *
 			 * @param string|array $replace String, or an array of strings, to use as replacements.
@@ -1524,10 +1707,12 @@ namespace websharks\html_compressor
 			/**
 			 * Escapes regex backreference chars deeply (i.e. `\\$` and `\\\\`).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note This is a recursive scan running deeply into multiple dimensions of arrays/objects.
 			 * @note This routine will usually NOT include private, protected or static properties of an object class.
 			 *    However, private/protected properties *will* be included, if the current scope allows access to these private/protected properties.
-			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by ``foreach()``.
+			 *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by `foreach()`.
 			 *
 			 * @param mixed   $value Any value can be converted into an escaped string.
 			 *    Actually, objects can't, but this recurses into objects.
@@ -1557,6 +1742,8 @@ namespace websharks\html_compressor
 			/**
 			 * Escapes regex backreference chars (i.e. `\\$` and `\\\\`).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string  $string A string value.
 			 * @param integer $times Number of escapes. Defaults to `1`.
 			 *
@@ -1574,17 +1761,29 @@ namespace websharks\html_compressor
 			 */
 
 			/**
-			 * @var string Public type.
+			 * Public directory type.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Indicates a public directory type.
+			 * @internal This is for internal use only.
 			 */
 			const dir_public_type = 'public';
 
 			/**
-			 * @var string Private type.
+			 * Private directory type.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Indicates a private directory type.
+			 * @internal This is for internal use only.
 			 */
 			const dir_private_type = 'private';
 
 			/**
 			 * Get (and possibly create) the cache dir.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string  $type One of `$this::dir_public_type` or `$this::dir_private_type`.
 			 * @param string  $checksum Optional. If supplied, we'll build a nested sub-directory based on the checksum.
@@ -1644,6 +1843,8 @@ namespace websharks\html_compressor
 			/**
 			 * Get (and possibly create) the cache dir URL.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string  $type One of `$this::public_type` or `$this::private_type`.
 			 * @param string  $checksum Optional. If supplied, we'll build a nested sub-directory based on the checksum.
 			 * @param boolean $base_only Defaults to a FALSE value. If TRUE, return only the base directory.
@@ -1700,6 +1901,8 @@ namespace websharks\html_compressor
 			/**
 			 * Cache cleanup routine.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @note This routine is always host-specific.
 			 *    i.e. We cleanup cache files for the current host only.
 			 *
@@ -1727,6 +1930,8 @@ namespace websharks\html_compressor
 			/**
 			 * Regex directory iterator.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $dir Path to a directory.
 			 * @param string $regex Regular expression.
 			 *
@@ -1747,14 +1952,16 @@ namespace websharks\html_compressor
 			/**
 			 * Normalizes directory/file separators.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string  $dir_file Directory/file path.
 			 *
 			 * @param boolean $allow_trailing_slash Defaults to FALSE.
-			 *    If TRUE; and ``$dir_file`` contains a trailing slash; we'll leave it there.
+			 *    If TRUE; and `$dir_file` contains a trailing slash; we'll leave it there.
 			 *
 			 * @return string Normalized directory/file path.
 			 */
-			protected static function n_dir_seps($dir_file, $allow_trailing_slash = FALSE)
+			protected function n_dir_seps($dir_file, $allow_trailing_slash = FALSE)
 				{
 					if(($dir_file = (string)$dir_file) === '')
 						return $dir_file; // Nothing to do.
@@ -1777,7 +1984,11 @@ namespace websharks\html_compressor
 				}
 
 			/**
-			 * @var string Apache `.htaccess` access denial snippet.
+			 * Apache `.htaccess` access denial snippet.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
 			 */
 			protected $dir_htaccess_deny = "<IfModule authz_core_module>\n\tRequire all denied\n</IfModule>\n<IfModule !authz_core_module>\n\tdeny from all\n</IfModule>";
 
@@ -1788,47 +1999,89 @@ namespace websharks\html_compressor
 			 */
 
 			/**
-			 * @var integer Indicates scheme component in a URL.
+			 * Indicates scheme component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_scheme = 1;
 
 			/**
-			 * @var integer Indicates user component in a URL.
+			 * Indicates user component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_user = 2;
 
 			/**
-			 * @var integer Indicates pass component in a URL.
+			 * Indicates pass component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_pass = 4;
 
 			/**
-			 * @var integer Indicates host component in a URL.
+			 * Indicates host component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_host = 8;
 
 			/**
-			 * @var integer Indicates port component in a URL.
+			 * Indicates port component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_port = 16;
 
 			/**
-			 * @var integer Indicates path component in a URL.
+			 * Indicates path component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_path = 32;
 
 			/**
-			 * @var integer Indicates query component in a URL.
+			 * Indicates query component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_query = 64;
 
 			/**
-			 * @var integer Indicates fragment component in a URL.
+			 * Indicates fragment component in a URL.
+			 *
+			 * @since 140417 Initial release.
+			 *
+			 * @var integer Part of a bitmask.
+			 * @internal Internal use only.
 			 */
 			const url_fragment = 128;
 
 			/**
 			 * Is the current request over SSL?
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @return boolean TRUE if over SSL; else FALSE.
 			 */
@@ -1855,6 +2108,8 @@ namespace websharks\html_compressor
 			/**
 			 * Gets the current scheme (via environment variables).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return string The current scheme, else an exception is thrown on failure.
 			 *
 			 * @throws \exception If unable to determine the current scheme.
@@ -1875,6 +2130,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Gets the current host name (via environment variables).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @return string The current host name, else an exception is thrown on failure.
 			 *
@@ -1897,6 +2154,8 @@ namespace websharks\html_compressor
 			/**
 			 * Gets the current URI (via environment variables).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return string The current URI, else an exception is thrown on failure.
 			 *
 			 * @throws \exception If unable to determine the current URI.
@@ -1918,6 +2177,8 @@ namespace websharks\html_compressor
 			/**
 			 * URL to current request.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return string The current URL.
 			 */
 			protected function current_url()
@@ -1934,6 +2195,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Normalizes a URL scheme.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $scheme An input URL scheme.
 			 *
@@ -1953,6 +2216,8 @@ namespace websharks\html_compressor
 			/**
 			 * Normalizes a URL host name.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $host An input URL host name.
 			 *
 			 * @return string A normalized URL host name (always lowercase).
@@ -1967,6 +2232,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Converts all ampersand entities in a URL (or a URI/query/fragment only); to just `&`.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string $url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be normalized here.
@@ -1987,11 +2254,13 @@ namespace websharks\html_compressor
 			/**
 			 * Normalizes a URL path from a URL (or a URI/query/fragment only).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string  $url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be normalized here.
 			 *
 			 * @param boolean $allow_trailing_slash Defaults to a FALSE value.
-			 *    If TRUE, and ``$url_uri_query_fragment`` contains a trailing slash; we'll leave it there.
+			 *    If TRUE, and `$url_uri_query_fragment` contains a trailing slash; we'll leave it there.
 			 *
 			 * @return string Normalized URL (or a URI/query/fragment only).
 			 */
@@ -2012,13 +2281,15 @@ namespace websharks\html_compressor
 			/**
 			 * Sets a particular scheme.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $url A full URL.
 			 *
 			 * @param string $scheme Optional. The scheme to use (i.e. `//`, `https`, `http`).
 			 *    Use `//` to use a cross-protocol compatible scheme.
 			 *    Defaults to the current scheme.
 			 *
-			 * @return string The full URL w/ ``$scheme``.
+			 * @return string The full URL w/ `$scheme`.
 			 */
 			protected function set_url_scheme($url, $scheme = '')
 				{
@@ -2037,6 +2308,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Checks if a given URL is local or external to the current host.
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @note Care should be taken when calling upon this method. We need to be 100% sure
 			 *    we are NOT calling this against a nested remote/relative URL, URI, query or fragment.
@@ -2058,6 +2331,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses a URL (or a URI/query/fragment only) into an array.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string       $url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be parsed here.
 			 *
@@ -2065,18 +2340,18 @@ namespace websharks\html_compressor
 			 *    This is bad `name=value` (interpreted as path). This is good `?name=value` (query string).
 			 *    This is bad `anchor` (interpreted as path). This is good `#fragment` (fragment).
 			 *
-			 * @param null|integer $component Same as PHP's ``parse_url()`` component.
-			 *    Defaults to NULL; which defaults to an internal value of `-1` before we pass to PHP's ``parse_url()``.
+			 * @param null|integer $component Same as PHP's `parse_url()` component.
+			 *    Defaults to NULL; which defaults to an internal value of `-1` before we pass to PHP's `parse_url()`.
 			 *
 			 * @param null|integer $normalize A bitmask. Defaults to NULL (indicating a default bitmask).
 			 *    Defaults include: {@link self::url_scheme}, {@link self::url_host}, {@link self::url_path}.
 			 *    However, we DO allow a trailing slash (even if path is being normalized by this parameter).
 			 *
-			 * @return array|string|integer|null If a component is requested, returns a string component (or an integer in the case of ``PHP_URL_PORT``).
+			 * @return array|string|integer|null If a component is requested, returns a string component (or an integer in the case of `PHP_URL_PORT`).
 			 *    If a specific component is NOT requested, this returns a full array, of all component values.
 			 *    Else, this returns NULL on any type of failure (even if a component was requested).
 			 *
-			 * @note Arrays returned by this method, will include a value for each component (a bit different from PHP's ``parse_url()`` function).
+			 * @note Arrays returned by this method, will include a value for each component (a bit different from PHP's `parse_url()` function).
 			 *    We start with an array of defaults (i.e. all empty strings, and `0` for the port number).
 			 *    Components found in the URL are then merged into these default values.
 			 *    The array is also sorted by key (e.g. alphabetized).
@@ -2091,7 +2366,7 @@ namespace websharks\html_compressor
 					if(strpos($url_uri_query_fragment, '//') === 0) // Cross-protocol compatible?
 						{
 							$url_uri_query_fragment = $this->current_url_scheme().':'.$url_uri_query_fragment; // So URL is parsed properly.
-							// Works around a bug in ``parse_url()`` prior to PHP v5.4.7. See: <http://php.net/manual/en/function.parse-url.php>.
+							// Works around a bug in `parse_url()` prior to PHP v5.4.7. See: <http://php.net/manual/en/function.parse-url.php>.
 							$x_protocol_scheme = TRUE; // Flag this, so we can remove scheme below.
 						}
 					else $x_protocol_scheme = FALSE; // No scheme; or scheme is NOT cross-protocol compatible.
@@ -2180,6 +2455,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses a URL (or a URI/query/fragment only) into an array.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return array|string|integer|null {@inheritdoc}
 			 *
 			 * @throws \exception If unable to parse.
@@ -2198,14 +2475,16 @@ namespace websharks\html_compressor
 			/**
 			 * Unparses a URL (putting it all back together again).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param array        $parsed An array with at least one URL component.
 			 *
 			 * @param null|integer $normalize A bitmask. Defaults to NULL (indicating a default bitmask).
 			 *    Defaults include: {@link self::url_scheme}, {@link self::url_host}, {@link self::url_path}.
 			 *    However, we DO allow a trailing slash (even if path is being normalized by this parameter).
 			 *
-			 * @return string A full or partial URL, based on components provided in the ``$parsed`` array.
-			 *    It IS possible to receive an empty string, when/if ``$parsed`` does NOT contain any portion of a URL.
+			 * @return string A full or partial URL, based on components provided in the `$parsed` array.
+			 *    It IS possible to receive an empty string, when/if `$parsed` does NOT contain any portion of a URL.
 			 */
 			protected function unparse_url(array $parsed, $normalize = NULL)
 				{
@@ -2266,6 +2545,8 @@ namespace websharks\html_compressor
 			/**
 			 * Unparses a URL (putting it all back together again).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return string {@inheritdoc}
 			 *
 			 * @throws \exception If unable to unparse.
@@ -2283,6 +2564,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Parses URI parts from a URL (or a URI/query/fragment only).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string       $url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be parsed here.
@@ -2308,6 +2591,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses URI parts from a URL (or a URI/query/fragment only).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return array|null {@inheritdoc}
 			 *
 			 * @throws \exception If unable to parse.
@@ -2325,6 +2610,8 @@ namespace websharks\html_compressor
 
 			/**
 			 * Parses a URI from a URL (or a URI/query/fragment only).
+			 *
+			 * @since 140417 Initial release.
 			 *
 			 * @param string       $url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be parsed here.
@@ -2351,6 +2638,8 @@ namespace websharks\html_compressor
 			/**
 			 * Parses a URI from a URL (or a URI/query/fragment only).
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @return string|null {@inheritdoc}
 			 *
 			 * @throws \exception If unable to parse.
@@ -2369,6 +2658,8 @@ namespace websharks\html_compressor
 			/**
 			 * Resolves a relative URL into a full URL from a base.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string $relative_url_uri_query_fragment A full URL; or a partial URI;
 			 *    or only a query string, or only a fragment. Any of these can be parsed here.
 			 *
@@ -2377,16 +2668,16 @@ namespace websharks\html_compressor
 			 *
 			 * @return string A full URL; else an exception will be thrown.
 			 *
-			 * @throws \exception If unable to parse ``$relative_url_uri_query_fragment``.
-			 * @throws \exception If there is no ``$base``, and we're unable to detect current location.
-			 * @throws \exception If unable to parse ``$base`` (or if ``$base`` has no host name).
+			 * @throws \exception If unable to parse `$relative_url_uri_query_fragment`.
+			 * @throws \exception If there is no `$base`, and we're unable to detect current location.
+			 * @throws \exception If unable to parse `$base` (or if `$base` has no host name).
 			 */
 			protected function resolve_relative_url($relative_url_uri_query_fragment, $base_url = '')
 				{
 					$relative_url_uri_query_fragment = (string)$relative_url_uri_query_fragment;
 					$base_url                        = (string)$base_url;
 
-					if(!$base_url) // No base URL? The ``$base`` is optional (defaults to current URL).
+					if(!$base_url) // No base URL? The `$base` is optional (defaults to current URL).
 						$base_url = $this->current_url(); // Auto-detects current URL/location.
 
 					$relative_parts         = $this->must_parse_url($relative_url_uri_query_fragment, NULL, 0);
@@ -2430,6 +2721,8 @@ namespace websharks\html_compressor
 			/**
 			 * cURL for remote HTTP communication.
 			 *
+			 * @since 140417 Initial release.
+			 *
 			 * @param string       $url A URL to connect to.
 			 * @param string|array $body Optional request body.
 			 * @param integer      $max_con_secs Defaults to `20` seconds.
@@ -2441,7 +2734,7 @@ namespace websharks\html_compressor
 			 *
 			 * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
 			 */
-			protected static function curl($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
+			protected function curl($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
 				{
 					$custom_request_method = '';
 					$url                   = (string)$url;
