@@ -149,30 +149,44 @@ namespace websharks\html_compressor
 				{
 					$this->options = $options; // Instance options.
 
+					# Cache Expiration Time
+
 					if(!empty($this->options['cache_expiration_time']))
 						$this->cache_expiration_time = (string)$this->options['cache_expiration_time'];
+
+					# Vendor-Specific CSS Prefixes
 
 					if(isset($this->options['vendor_css_prefixes'])) // Override built-in defaults?
 						$this->regex_vendor_css_prefixes = (!$this->options['vendor_css_prefixes']) ? '' // None.
 							: implode('|', $this->preg_quote_deep((array)$this->options['vendor_css_prefixes'], '/'));
+
 					else if(isset($this->options['regex_vendor_css_prefixes'])) // Regex?
 						$this->regex_vendor_css_prefixes = (string)$this->options['regex_vendor_css_prefixes'];
+
 					else if($this->default_vendor_css_prefixes) // Else we will use the default set of CSS vendor prefixes.
 						$this->regex_vendor_css_prefixes = implode('|', $this->preg_quote_deep($this->default_vendor_css_prefixes, '/'));
+
+					# CSS Exclusions (If Applicable)
 
 					if(isset($this->options['css_exclusions'])) // Override built-in defaults?
 						$this->regex_css_exclusions = (!$this->options['css_exclusions']) ? '' // None.
 							: '/'.implode('|', $this->preg_quote_deep((array)$this->options['css_exclusions'], '/')).'/i';
+
 					else if(isset($this->options['regex_css_exclusions'])) // Regex?
 						$this->regex_css_exclusions = (string)$this->options['regex_css_exclusions'];
+
 					else if($this->default_css_exclusions) // Else we will use the default set of CSS exclusions.
 						$this->regex_css_exclusions = '/'.implode('|', $this->preg_quote_deep($this->default_css_exclusions, '/')).'/i';
+
+					# JavaScript Exclusions (If Applicable)
 
 					if(isset($this->options['js_exclusions'])) // Override built-in defaults?
 						$this->regex_js_exclusions = (!$this->options['js_exclusions']) ? '' // None.
 							: '/'.implode('|', $this->preg_quote_deep((array)$this->options['js_exclusions'], '/')).'/i';
+
 					else if(isset($this->options['regex_js_exclusions'])) // Regex?
 						$this->regex_js_exclusions = (string)$this->options['regex_js_exclusions'];
+
 					else if($this->default_js_exclusions) // Else we will use the default set of CSS exclusions.
 						$this->regex_js_exclusions = '/'.implode('|', $this->preg_quote_deep($this->default_js_exclusions, '/')).'/i';
 
@@ -1331,7 +1345,7 @@ namespace websharks\html_compressor
 							                           'unnecessary_;s'  => '/;\}/'
 							);
 							$static['with']    = array('', '', ' ', '$1', '}');
-							$static['colors']  = '/(?P<context>\:#| #)(?P<hex>[a-z0-9]{6})/i';
+							$static['colors']  = '/(?P<context>[:,\h]+#)(?P<hex>[a-z0-9]{6})/i';
 						}
 					$css = preg_replace($static['replace'], $static['with'], $css);
 					$css = preg_replace_callback($static['colors'], array($this, '_maybe_compress_css_color'), $css);
