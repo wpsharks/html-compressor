@@ -11,9 +11,6 @@
  * @note Loads the core class from the PHAR file; if using the PHAR.
  *    Otherwise, the core class is loaded from the source `includes` directory.
  */
-namespace websharks\html_compressor
-	{
-		if(!empty($GLOBALS['is_phar_html_compressor']))
-			require_once $GLOBALS['is_phar_html_compressor'].'/includes/core.php';
-		else require_once dirname(__FILE__).'/includes/core.php';
-	}
+if(!empty($GLOBALS['is_phar_html_compressor']))
+	require_once $GLOBALS['is_phar_html_compressor'].'/includes/core.php';
+else require_once dirname(__FILE__).'/includes/core.php';
