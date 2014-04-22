@@ -1311,7 +1311,7 @@ namespace websharks\html_compressor
 					$css   = preg_replace($regex, '/', $css); // To absolute paths.
 
 					if(($compressed_css = $this->compress_css($css)))
-						return '/*HC*/'.$compressed_css;
+						return $compressed_css;
 
 					return $css;
 				}
@@ -1397,7 +1397,7 @@ namespace websharks\html_compressor
 							return $js; // Nothing to do here.
 
 					if(($compressed_js = js_minifier::compress($js)))
-						return '/*HC*/'.$compressed_js;
+						return $compressed_js;
 
 					return $js;
 				}
@@ -1472,7 +1472,7 @@ namespace websharks\html_compressor
 						return $js; // Nothing to do.
 
 					if(($compressed_js = js_minifier::compress($js)))
-						return '/*HC*//*<![CDATA[*/'.$compressed_js.'/*]]>*/';
+						return '/*<![CDATA[*/'.$compressed_js.'/*]]>*/';
 
 					return $js;
 				}
