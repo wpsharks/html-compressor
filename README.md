@@ -190,21 +190,39 @@ e.g. `new \websharks\html_compressor\core($options);`
 #### Current List of All Possible Options
 
 ##### The following options allow you to exclude certain CSS/JS files and/or inline snippets.
- *These options only apply if compression is enabled for CSS/JS files.*
+
+ *NOTE: these options only apply if compression is enabled for CSS/JS files.*
 
 - (array)`css_exclusions` Defaults to `array()`. If you have some CSS files (or inline styles) that should NOT be included by compression routines,
  please specify an array of search tokens to exclude. Search tokens are compared to external CSS file `href` values (i.e. URLs or paths).
  Search tokens are also compared to the contents of any inline `<style></style>` tags.
 
-- (array)`js_exclusions` Defaults to `array('.php?')`. If you have some JS files (or inline scripts) that should NOT be included by compression routines,
+- (array)`js_exclusions` Defaults to `array()`. If you have some JS files (or inline scripts) that should NOT be included by compression routines,
  please specify an array of search tokens to exclude. Search tokens are compared to external JS file `src` values (i.e. URLs or paths).
  Search tokens are also compared to the contents of any inline `<script></script>` tags in cases where compression is possible.
 
-*NOTE: Search tokens should be string literals. The HTML Compressor class currently does NOT support wildcards or regex in search tokens.
- If you need to use regex patterns instead of search tokens, please use a `regex_` prefix when you define the option key; e.g. `'regex_js_exclusions' => '/\.php\?/'`. This works for `regex_css_exclusions` too of course.*
+  *NOTE: Search tokens should be string literals. The HTML Compressor currently does NOT support wildcards or regex in search tokens.
+ If you need to use regex patterns instead of search tokens, please use a `regex_` prefix when you define the option key; e.g. `'regex_js_exclusions' => '/\special\-script\.js/i'`. This works for `regex_css_exclusions` too.*
+
+----
+
+- (boolean)`disable_built_in_css_exclusions` Defaults to `FALSE`. There are a few built-in exclusion patterns that are updated (improved) with each new release of the HTML Compressor. It is recommended that you leave these enabled at all times.
+ However, if you prefer to turn them off (i.e. to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
+ Built-in exclusions deal with things that should almost always be excluded; for any site. If you'd like to see the list of built-in patterns
+ you can read the `$built_in_regex_css_exclusion_patterns` class property. It's an array of regular expressions that are compared to external CSS file
+ `href` values (i.e. URLs or paths); and they are also compared to the contents of any inline `<style></style>` tags.
+
+- (boolean)`disable_built_in_js_exclusions` Defaults to `FALSE`. There are a few built-in exclusion patterns that are updated (improved) with each new release of the HTML Compressor. It is recommended that you leave these enabled at all times.
+ However, if you prefer to turn them off (i.e. to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
+ Built-in exclusions deal with things that should almost always be excluded; for any site. If you'd like to see the list of built-in patterns
+ you can read the `$built_in_regex_js_exclusion_patterns` class property. It's an array of regular expressions that are compared to external JS file
+ `src` values (i.e. URLs or paths); and they are also compared to the contents of any inline `<script></script>` tags.
+
+----
 
 ##### The following options can be used to setup custom cache directories/URLs.
- *Under most circumstances, the built-in default values will do just fine.*
+
+*NOTE: under most circumstances, the built-in default values will do just fine.*
 
 - (string)`cache_expiration_time` Defaults to a value of `14 days`. You can use anything compatible with PHP's `strtotime()` function.
  NOTE: This expiration time is mostly irrelevant, because the HTML Compressor uses an internal checksum, and it also checks `filemtime()` before
@@ -239,8 +257,11 @@ e.g. `new \websharks\html_compressor\core($options);`
  over time; i.e. at semi-random intervals and also based on your `cache_expiration_time`. If you would prefer to cleanup
  the cache on your own, you can set this to a FALSE value.
 
+----
+
 ##### The following options can be used to specify the current URL.
- *Note that it is normally NOT necessary to supply any of these values.*
+
+*NOTE: it is normally NOT necessary to supply any of these values.*
 
 - (string)`current_url_scheme` When this class is running as a web application, we can detect this value automatically.
  That said, if you intend to run this class outside of a web server environment you will need to tell the compressor
@@ -257,8 +278,11 @@ e.g. `new \websharks\html_compressor\core($options);`
  what the current URI (i.e. path and query string) would be if the file you are compressing was being served as a web page.
  This should be set to something like `/path/to/page/?one=1&two=2`.
 
+----
+
 ##### The following options control compression behavior.
- *Note that compression routines are applied in the same order as these options are listed below.*
+
+*NOTE: compression routines are applied in the same order as these options are listed below.*
 
 - (boolean)`compress_combine_head_body_css` TRUE by default. If you prefer NOT to combine CSS files into a single HTTP connection,
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the CSS compress-combine routines.
@@ -291,6 +315,8 @@ e.g. `new \websharks\html_compressor\core($options);`
 - (boolean)`compress_html_code` TRUE by default. If you prefer NOT to compress HTML markup (i.e. the removal of extra whitespace, etc),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the HTML compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
+
+----
 
 ##### Other misc. options. These don't really fall into any specific category yet.
 
