@@ -122,7 +122,7 @@ namespace websharks\html_compressor
 			 *
 			 * @var array These are used if no option value is supplied to override them.
 			 */
-			protected $default_js_exclusions = array();
+			protected $default_js_exclusions = array('.php?');
 
 			/**
 			 * Built-in JS exclusions (regex).
@@ -142,7 +142,7 @@ namespace websharks\html_compressor
 			 *    To disable these built-in JS exclusions pass the option `disable_built_in_js_exclusions` as TRUE.
 			 * @note These get converted to a regex pattern by the class constructor. Reference {@link $built_in_regex_js_exclusions}.
 			 */
-			protected $built_in_regex_js_exclusion_patterns = array('\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(', '\.php\?');
+			protected $built_in_regex_js_exclusion_patterns = array('\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(');
 
 			/**
 			 * Current base HREF value.
