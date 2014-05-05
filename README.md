@@ -1,10 +1,17 @@
-## HTML-Compressor (Beta)
+# HTML-Compressor (Beta)
 
-<img src="assets/html-compressor-logo.png" width="400px" align="right" />
+<img src="assets/html-compressor-logo.png" width="350px" align="right" />
 
-HTML Compressor. This class automatically combines and compresses CSS/JS/HTML code.
+Automatically combines and compresses CSS/JS/HTML code. So simple!
 
-**NOTE** *The Quick Cache plugin for WordPress is currently considering the HTML Compressor as a Pro add-on to be released in a future version of [Quick Cache Pro](https://github.com/WebSharks/Quick-Cache).*
+```
+<?php
+require_once 'html-compressor.phar';
+$html_compressor = new \websharks\html_compressor\core();
+ob_start(array($html_compressor, 'compress'));
+```
+
+----
 
 ## Why did we create the HTML Compressor?
 
