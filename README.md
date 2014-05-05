@@ -1,8 +1,8 @@
 # HTML-Compressor (Beta)
 
-<img src="assets/html-compressor-logo.png" width="350px" align="right" />
+<img src="assets/html-compressor-logo.png" width="300px" align="right" />
 
-Automatically combines and compresses CSS/JS/HTML code. So simple!
+Automatically combines & compresses CSS/JS/HTML code.
 
 ```
 <?php
