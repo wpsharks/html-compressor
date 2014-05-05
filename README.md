@@ -4,7 +4,7 @@
 
 Automatically combines & compresses CSS/JS/HTML code.
 
-```
+```php
 <?php
 require_once 'html-compressor.phar';
 $html_compressor = new \websharks\html_compressor\core();
@@ -104,7 +104,7 @@ All of these compression options are enabled by default, but you can modify this
 ### 1. HTML Compressor as an Output Buffer
 *This code snippet should be processed BEFORE any other output occurs.*
 
-```
+```php
 <?php
 require_once 'html-compressor.phar';
 $html_compressor = new \websharks\html_compressor\core();
@@ -120,7 +120,7 @@ ob_start(array($html_compressor, 'compress'));
 ### 2. HTML Compressor as an Output Buffer (w/ Options)
 *This just demonstrates how to specify an array of options.*
 
-```
+```php
 <?php
 require_once 'html-compressor.phar';
 $html_compressor_options = array(
@@ -152,7 +152,7 @@ ob_start(array($html_compressor, 'compress'));
 ### 3. HTML Compressor on raw HTML Code
 *This demonstrates how to run the compressor against arbitrary HTML code.*
 
-```
+```php
 <?php
 require_once 'html-compressor.phar';
 $html_compressor_options = array(
