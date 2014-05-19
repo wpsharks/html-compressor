@@ -2850,6 +2850,8 @@ namespace websharks\html_compressor
 			$url                   = (string)$url;
 			$max_con_secs          = (integer)$max_con_secs;
 			$max_stream_secs       = (integer)$max_stream_secs;
+			if(!is_array($headers)) $headers = array();
+			$cookie_file = (string)$cookie_file;
 
 			$custom_request_regex = // e.g.`PUT::http://www.example.com/`
 				'/^(?P<custom_request_method>(?:GET|POST|PUT|DELETE))\:{2}(?P<url>.+)/i';
@@ -2865,6 +2867,43 @@ namespace websharks\html_compressor
 			else $body = (string)$body;
 
 			if(!$url) return ''; // Nothing to do here.
+
+			$output    = ''; // Initialize.
+			$http_code = 0; // Initialize.
+
+			/* ---------------------------------------------------------- */
+
+			wordpress_transport: // WordPress transport layer.
+
+			if(!defined('WPINC') || !class_exists('\\WP_Http') // Within WordPress?
+			   || $cookie_file || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
+			) goto curl_transport; // WP_Http unavailable; or unable to handle the request method type.
+
+			foreach($headers as $_key => $_value)
+				if(!is_string($_key) && strpos($_value, ':') > 0)
+				{
+					list($_header, $_header_value) = explode(':', $_value, 2);
+					$headers[$_header] = trim($_header_value);
+					unset($headers[$_key]);
+				}
+			unset($_key, $_value, $_header, $_header_value);
+
+			if($custom_request_method === 'POST' || ($body && $custom_request_method !== 'GET'))
+				$wp_remote_request = wp_remote_post($url, array('headers' => $headers, 'body' => $body, 'timeout' => $max_con_secs));
+			else $wp_remote_request = wp_remote_get($url, array('headers' => $headers, 'timeout' => $max_con_secs));
+
+			if(!is_wp_error($wp_remote_request))
+			{
+				$output    = trim((string)wp_remote_retrieve_body($wp_remote_request));
+				$http_code = (integer)wp_remote_retrieve_response_code($wp_remote_request);
+				if($fail_on_error && $http_code >= 400)
+					$output = ''; // Fail silently.
+			}
+			goto finale; // All done here, jump to finale.
+
+			/* ---------------------------------------------------------- */
+
+			curl_transport: // cURL transport layer (default hanlder).
 
 			$can_follow = (!ini_get('safe_mode') && !ini_get('open_basedir'));
 
@@ -2899,8 +2938,14 @@ namespace websharks\html_compressor
 			$curl = curl_init();
 			curl_setopt_array($curl, $curl_opts);
 			$output    = trim((string)curl_exec($curl));
-			$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+			$http_code = (integer)curl_getinfo($curl, CURLINFO_HTTP_CODE);
 			curl_close($curl);
+
+			goto finale; // All done here, jump to finale.
+
+			/* ---------------------------------------------------------- */
+
+			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time))
 				$this->remote_connection_times[] = // Benchmark data.
