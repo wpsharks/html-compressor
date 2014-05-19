@@ -2875,7 +2875,7 @@ namespace websharks\html_compressor
 
 			wordpress_transport: // WordPress transport layer.
 
-			if(!defined('WPINC') || !class_exists('\\WP_Http') // Within WordPress?
+			if(!defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init')
 			   || $cookie_file || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
 			) goto curl_transport; // WP_Http unavailable; or unable to handle the request method type.
 
