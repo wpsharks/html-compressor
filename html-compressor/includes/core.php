@@ -522,6 +522,8 @@ namespace websharks\html_compressor
 								else if(!empty($css_parts[$css_part]['code']) && stripos($css_parts[$css_part]['code'], '@import') !== FALSE)
 									$css_part++; // Starts new part; existing code contains an @import.
 
+								$css_parts[$css_part]['media'] = $_css_tag_frag['media'];
+
 								if(!empty($css_parts[$css_part]['code']))
 									$css_parts[$css_part]['code'] .= "\n\n".$_css_code;
 								else $css_parts[$css_part]['code'] = $_css_code;
@@ -542,6 +544,8 @@ namespace websharks\html_compressor
 						else if(!empty($css_parts[$css_part]['code']) && stripos($css_parts[$css_part]['code'], '@import') !== FALSE)
 							$css_part++; // Starts new part; existing code contains an @import.
 
+						$css_parts[$css_part]['media'] = $_css_tag_frag['media'];
+
 						if(!empty($css_parts[$css_part]['code']))
 							$css_parts[$css_part]['code'] .= "\n\n".$_css_code;
 						else $css_parts[$css_part]['code'] = $_css_code;
@@ -555,6 +559,10 @@ namespace websharks\html_compressor
 			{
 				if(!empty($css_parts[$css_part]['code']))
 				{
+					$_css_media = 'all';
+					if(!empty($css_parts[$css_part]['media']))
+						$_css_media = $css_parts[$css_part]['media'];
+
 					$_css_code    = $css_parts[$css_part]['code'];
 					$_css_code    = $this->move_special_css_at_rules_to_top($_css_code);
 					$_css_code    = $this->strip_prepend_css_charset_utf8($_css_code);
@@ -567,12 +575,12 @@ namespace websharks\html_compressor
 					if(!file_put_contents($_css_code_path, $_css_code)) // Cache compressed CSS code.
 						throw new \exception(sprintf('Unable to cache CSS code file: `%1$s`.', $_css_code_path));
 
-					$css_parts[$css_part]['tag'] = '<link type="text/css" rel="stylesheet" href="'.htmlspecialchars($_css_code_url, ENT_QUOTES).'" media="all" />';
+					$css_parts[$css_part]['tag'] = '<link type="text/css" rel="stylesheet" href="'.htmlspecialchars($_css_code_url, ENT_QUOTES).'" media="'.htmlspecialchars($_css_media, ENT_QUOTES).'" />';
 
 					unset($css_parts[$css_part]['code']); // Ditch this; no need to cache this code too.
 				}
 			}
-			unset($_css_code, $_css_code_cs, $_css_code_path, $_css_code_url);
+			unset($_css_media, $_css_code, $_css_code_cs, $_css_code_path, $_css_code_url);
 
 			if(!file_put_contents($cache_parts_file_path, serialize($css_parts)))
 				throw new \exception(sprintf('Unable to cache CSS parts into: `%1$s`.', $cache_parts_file_path));
