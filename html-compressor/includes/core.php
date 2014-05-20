@@ -488,8 +488,9 @@ namespace websharks\html_compressor
 				if(is_array($cached_parts = unserialize(file_get_contents($cache_parts_file_path))))
 					return $cached_parts;
 
-			$css_part  = 0; // Initialize.
-			$css_parts = array(); // Initialize.
+			$css_part                 = 0; // Initialize.
+			$css_parts                = array(); // Initialize.
+			$_last_css_tag_frag_media = 'all'; // Initialize.
 
 			foreach($css_tag_frags as $_css_tag_frag_pos => $_css_tag_frag)
 			{
@@ -512,10 +513,15 @@ namespace websharks\html_compressor
 						{
 							$_css_code = $this->resolve_css_relatives($_css_code, $_css_tag_frag['link_href']);
 							$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
-							$_css_code = $this->wrap_with_css_media_rule($_css_code, $_css_tag_frag['media'], FALSE);
 
 							if($_css_code) // Now, DO we have something here?
 							{
+								if($_css_tag_frag['media'] !== $_last_css_tag_frag_media)
+									$css_part++; // Starts new part; different `@media` spec here.
+
+								else if(!empty($css_parts[$css_part]['code']) && stripos($css_parts[$css_part]['code'], '@import') !== FALSE)
+									$css_part++; // Starts new part; existing code contains an @import.
+
 								if(!empty($css_parts[$css_part]['code']))
 									$css_parts[$css_part]['code'] .= "\n\n".$_css_code;
 								else $css_parts[$css_part]['code'] = $_css_code;
@@ -527,17 +533,23 @@ namespace websharks\html_compressor
 					$_css_code = $_css_tag_frag['style_css'];
 					$_css_code = $this->resolve_css_relatives($_css_code);
 					$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
-					$_css_code = $this->wrap_with_css_media_rule($_css_code, $_css_tag_frag['media'], FALSE);
 
 					if($_css_code) // Now, DO we have something here?
 					{
+						if($_css_tag_frag['media'] !== $_last_css_tag_frag_media)
+							$css_part++; // Starts new part; different `@media` spec here.
+
+						else if(!empty($css_parts[$css_part]['code']) && stripos($css_parts[$css_part]['code'], '@import') !== FALSE)
+							$css_part++; // Starts new part; existing code contains an @import.
+
 						if(!empty($css_parts[$css_part]['code']))
 							$css_parts[$css_part]['code'] .= "\n\n".$_css_code;
 						else $css_parts[$css_part]['code'] = $_css_code;
 					}
 				}
+				$_last_css_tag_frag_media = $_css_tag_frag['media'];
 			}
-			unset($_css_tag_frag_pos, $_css_tag_frag, $_css_code);
+			unset($_last_css_tag_frag_media, $_css_tag_frag_pos, $_css_tag_frag, $_css_code);
 
 			foreach(array_keys($css_parts = array_values($css_parts)) as $css_part)
 			{
