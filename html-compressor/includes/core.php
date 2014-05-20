@@ -252,8 +252,6 @@ namespace websharks\html_compressor
 
 			# Require Additional Libs; i.e. Dependencies
 
-			if(!class_exists('\\Less_Parser'))
-				require_once dirname(__FILE__).'/externals/less-parser/less.php';
 			require_once dirname(__FILE__).'/externals/js-minifier.php';
 		}
 
