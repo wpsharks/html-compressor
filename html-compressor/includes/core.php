@@ -946,6 +946,9 @@ namespace websharks\html_compressor
 			$css = preg_replace_callback($import_media_without_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
 			$css = preg_replace_callback($import_media_with_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
 
+			/*
+			 * @TODO preg_match_all ?
+			 */
 			if(preg_match($import_media_without_url_regex, $css, $m) && (empty($m['media']) || $m['media'] === $this->current_css_media))
 				return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
 
