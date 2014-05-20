@@ -2875,7 +2875,12 @@ namespace websharks\html_compressor
 
 			wordpress_transport: // WordPress transport layer.
 
-			if(!defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init')
+			/*
+			 * This is currently disabled because it runs in the shutdown phase
+			 * when integrated with Quick Cache. Meaning, objects may have already been destructed by the time this runs.
+			 * Until a good reliable solution is found, this will remain disabled via `0 === 0`.
+			 */
+			if(0 === 0 || !defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init')
 			   || $cookie_file || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
 			) goto curl_transport; // WP_Http unavailable; or unable to handle the request method type.
 
