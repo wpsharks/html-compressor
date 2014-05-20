@@ -163,6 +163,15 @@ namespace websharks\html_compressor
 		protected $current_base = '';
 
 		/**
+		 * Current CSS `@media` value.
+		 *
+		 * @since 140519 Improving CSS `@media` query support.
+		 *
+		 * @var string Set by various routines that work together.
+		 */
+		protected $current_css_media = '';
+
+		/**
 		 * Static cache array for this class.
 		 *
 		 * @since 140417 Initial release.
@@ -504,7 +513,7 @@ namespace websharks\html_compressor
 						if(($_css_code = $this->curl($_css_tag_frag['link_href'])))
 						{
 							$_css_code = $this->resolve_css_relatives($_css_code, $_css_tag_frag['link_href']);
-							$_css_code = $this->resolve_resolved_css_imports($_css_code);
+							$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
 							$_css_code = $this->wrap_with_css_media_rule($_css_code, $_css_tag_frag['media'], FALSE);
 
 							if($_css_code) // Now, DO we have something here?
@@ -519,7 +528,7 @@ namespace websharks\html_compressor
 				{
 					$_css_code = $_css_tag_frag['style_css'];
 					$_css_code = $this->resolve_css_relatives($_css_code);
-					$_css_code = $this->resolve_resolved_css_imports($_css_code);
+					$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
 					$_css_code = $this->wrap_with_css_media_rule($_css_code, $_css_tag_frag['media'], FALSE);
 
 					if($_css_code) // Now, DO we have something here?
@@ -539,8 +548,7 @@ namespace websharks\html_compressor
 					$_css_code    = $css_parts[$css_part]['code'];
 					$_css_code    = $this->move_special_css_at_rules_to_top($_css_code);
 					$_css_code    = $this->strip_prepend_css_charset_utf8($_css_code);
-					$_css_code_cs = md5($_css_code); // Do this before compilation.
-					$_css_code    = $this->maybe_compile_css($_css_code, $_css_code_cs);
+					$_css_code_cs = md5($_css_code); // Do this before compression.
 					$_css_code    = $this->maybe_compress_css_code($_css_code);
 
 					$_css_code_path = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_path);
@@ -694,7 +702,7 @@ namespace websharks\html_compressor
 			{
 				foreach($_tag_frags as $_tag_frag)
 				{
-					$_link_href = $_style_css = $_media = '';
+					$_link_href = $_style_css = $_media = 'all';
 
 					if(($_link_href = $this->get_link_css_href($_tag_frag)))
 						$_media = $this->get_link_css_media($_tag_frag);
@@ -718,7 +726,7 @@ namespace websharks\html_compressor
 							'style_css'             => $_style_css, // This could also be empty.
 							'style_closing_tag'     => isset($_tag_frag['style_closing_tag']) ? $_tag_frag['style_closing_tag'] : '',
 
-							'media'                 => $_media, // Defaults to `all`.
+							'media'                 => ($_media) ? $_media : 'all', // Defaults to `all`.
 
 							'exclude'               => FALSE // Default value.
 						);
@@ -916,52 +924,23 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * Wrap CSS code with the specified `@media` rule.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @note All `@import` rules should have already been 100% resolved
-		 *    with `resolve_resolved_css_imports()` BEFORE running this routine.
-		 *
-		 * @param string  $css CSS code.
-		 * @param string  $media Media rule/declaration.
-		 * @param boolean $move_at_rules Optional; defaults a TRUE value.
-		 *    Only disable if this is handled elsewhere.
-		 *
-		 * @return string CSS code wrapped w/ the specified `@media` rule.
-		 *
-		 * @see <https://developer.mozilla.org/en-US/docs/Web/CSS/@charset>
-		 * @see <http://stackoverflow.com/questions/11746581/nesting-media-rules-in-css>
-		 */
-		protected function wrap_with_css_media_rule($css, $media, $move_at_rules = TRUE)
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
-
-			if(!($media = (string)$media))
-				return $css; // Nothing to do.
-
-			$css = '@media '.$media.' {'."\n".$css."\n".'}';
-			if($move_at_rules) // Disable only if handled elsewhere.
-				$css = $this->move_special_css_at_rules_to_top($css);
-
-			return $css;
-		}
-
-		/**
 		 * Resolves `@import` rules in CSS code recursively.
 		 *
 		 * @since 140417 Initial release.
 		 *
 		 * @param string  $css CSS code.
+		 * @param string  $media Current media specification.
 		 * @param boolean $___recursion Internal use only.
 		 *
 		 * @return string CSS code after all `@import` rules have been resolved recursively.
 		 */
-		protected function resolve_resolved_css_imports($css, $___recursion = FALSE)
+		protected function resolve_resolved_css_imports($css, $media, $___recursion = FALSE)
 		{
 			if(!($css = (string)$css))
 				return $css; // Nothing to do.
+
+			$media = $this->current_css_media = (string)$media;
+			if(!$media) $media = $this->current_css_media = 'all';
 
 			$import_media_without_url_regex = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*(["\'])(?P<url>.+?)\\1(?P<media>[^;]*?);/i';
 			$import_media_with_url_regex    = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s+url\s*\(\s*(["\']?)(?P<url>.+?)\\1\s*\)(?P<media>[^;]*?);/i';
@@ -969,8 +948,11 @@ namespace websharks\html_compressor
 			$css = preg_replace_callback($import_media_without_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
 			$css = preg_replace_callback($import_media_with_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
 
-			if(preg_match($import_media_without_url_regex, $css) || preg_match($import_media_with_url_regex, $css))
-				return $this->resolve_resolved_css_imports($css, TRUE); // Recursive.
+			if(preg_match($import_media_without_url_regex, $css, $m) && (empty($m['media']) || $m['media'] === $this->current_css_media))
+				return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
+
+			if(preg_match($import_media_with_url_regex, $css, $m) && (empty($m['media']) || $m['media'] === $this->current_css_media))
+				return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
 
 			return $css;
 		}
@@ -986,12 +968,14 @@ namespace websharks\html_compressor
 		 */
 		protected function _resolve_resolved_css_imports_cb(array $m)
 		{
-			if(empty($m['url']) || !($css = $this->curl($m['url'])))
+			if(empty($m['url']))
 				return ''; // Nothing to resolve.
 
-			$css   = $this->resolve_css_relatives($css, $m['url']);
-			$media = (!empty($m['media']) && ($m['media'] = trim($m['media']))) ? $m['media'] : 'all';
-			$css   = $this->wrap_with_css_media_rule($css, $media, FALSE);
+			if(!empty($m['media']) && $m['media'] !== $this->current_css_media)
+				return $m[0]; // Not possible; different media.
+
+			if(($css = $this->curl($m['url'])))
+				$css = $this->resolve_css_relatives($css, $m['url']);
 
 			return $css;
 		}
@@ -1079,15 +1063,15 @@ namespace websharks\html_compressor
 		 *
 		 * @param array $tag_frag A CSS tag fragment.
 		 *
-		 * @return string The link media value if possible (defaulting to `all`); else an empty string.
+		 * @return string The link media value if possible; else a default value of `all`.
 		 */
 		protected function get_link_css_media(array $tag_frag)
 		{
 			if(!empty($tag_frag['link_self_closing_tag']) && preg_match('/type\s*\=\s*(["\'])text\/css\\1|rel\s*=\s*(["\'])stylesheet\\2/i', $tag_frag['link_self_closing_tag']))
-				if((preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $media) && ($link_css_media = trim($media['value']))) || ($link_css_media = 'all'))
+				if(preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $media) && ($link_css_media = trim($media['value'])))
 					return $link_css_media;
 
-			return '';
+			return 'all';
 		}
 
 		/**
@@ -1097,15 +1081,15 @@ namespace websharks\html_compressor
 		 *
 		 * @param array $tag_frag A CSS tag fragment.
 		 *
-		 * @return string The style media value if possible (defaulting to `all`); else an empty string.
+		 * @return string The style media value if possible; else a default value of `all`.
 		 */
 		protected function get_style_css_media(array $tag_frag)
 		{
 			if(!empty($tag_frag['style_open_tag']) && !empty($tag_frag['style_closing_tag']) && preg_match('/\<style\s*\>|type\s*\=\s*(["\'])text\/css\\1/i', $tag_frag['style_open_tag']))
-				if((preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $media) && ($style_css_media = trim($media['value']))) || ($style_css_media = 'all'))
+				if(preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $media) && ($style_css_media = trim($media['value'])))
 					return $style_css_media;
 
-			return '';
+			return 'all';
 		}
 
 		/**
@@ -1347,39 +1331,8 @@ namespace websharks\html_compressor
 		/********************************************************************************************************/
 
 		/*
-		 * CSS Compilation/Compression Utilities
+		 * CSS Compression Utilities
 		 */
-
-		protected function maybe_compile_css($css, $reference = '')
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
-			$reference = (string)$reference;
-
-			if(isset($this->options['compile_css_code']))
-				if(!$this->options['compile_css_code'])
-					return $css; // Nothing to do here.
-
-			if(!isset(static::$cache[__FUNCTION__]))
-				static::$cache[__FUNCTION__] = new \Less_Parser();
-			/** @var \Less_Parser $parser */
-			$parser = static::$cache[__FUNCTION__];
-
-			$orig_css = $css; // Original CSS.
-			try // Attempt to compile CSS as LESS.
-				// Resolves issues with nested @media queries.
-			{
-				$parser->parse($css);
-				$css = $parser->getCss();
-			}
-			catch(\exception $exception) // Revert to original CSS.
-			{
-				$css = $orig_css; // We'll also trigger a notice in this case.
-				trigger_error(sprintf('CSS compilation failure.'. // Including a reference.
-				                      ' Reference: `%1$s`.', htmlspecialchars($reference)), E_USER_NOTICE);
-			}
-			return $css;
-		}
 
 		/**
 		 * Maybe compress CSS code.
