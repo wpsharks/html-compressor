@@ -145,49 +145,13 @@ namespace websharks\html_compressor
 		protected $built_in_regex_js_exclusion_patterns = array('\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(');
 
 		/**
-		 * CSS tag frag generation times.
+		 * Array of benchmark times.
 		 *
 		 * @since 140521 Adding additional benchmarks.
 		 *
-		 * @var array Filled by CSS tag frag methods.
+		 * @var array Filled by various methods.
 		 */
-		protected $css_tag_frag_times = array();
-
-		/**
-		 * CSS part generation times.
-		 *
-		 * @since 140521 Adding additional benchmarks.
-		 *
-		 * @var array Filled by CSS part file methods.
-		 */
-		protected $css_part_times = array();
-
-		/**
-		 * JS tag frag generation times.
-		 *
-		 * @since 140521 Adding additional benchmarks.
-		 *
-		 * @var array Filled by JS tag frag methods.
-		 */
-		protected $js_tag_frag_times = array();
-
-		/**
-		 * JS part generation times.
-		 *
-		 * @since 140521 Adding additional benchmarks.
-		 *
-		 * @var array Filled by JS part file methods.
-		 */
-		protected $js_part_times = array();
-
-		/**
-		 * Remote connection times.
-		 *
-		 * @since 140519 Adding additional benchmarks.
-		 *
-		 * @var array Filled by the cURL (and related) methods.
-		 */
-		protected $remote_connection_times = array();
+		protected $benchmark_times = array();
 
 		/**
 		 * Current base HREF value.
@@ -324,6 +288,9 @@ namespace websharks\html_compressor
 			$html = $this->maybe_compress_inline_js_code($html);
 			$html = $this->maybe_compress_html_code($html);
 
+			if(!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs'])
+				if(mt_rand(1, 20) === 1) $this->cleanup_cache_dirs();
+
 			if($benchmark && !empty($time))
 			{
 				$product_title = 'HTML Compressor';
@@ -331,13 +298,11 @@ namespace websharks\html_compressor
 					$product_title = (string)$this->options['product_title'];
 				$time = number_format(microtime(TRUE) - $time, 5, '.', '');
 
-				foreach($this->remote_connection_times as $_remote_connection)
-					$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds fetching `%3$s`. -->', htmlspecialchars($product_title), htmlspecialchars($_remote_connection['time']), htmlspecialchars($_remote_connection['url']));
-				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (total). -->', htmlspecialchars($product_title), htmlspecialchars($time));
+				foreach($this->benchmark_times as $_benchmark_time)
+					$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
+				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (overall). -->', htmlspecialchars($product_title), htmlspecialchars($time));
+				unset($_benchmark_time); // Housekeeping.
 			}
-			if(!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs'])
-				if(mt_rand(1, 20) === 1) $this->cleanup_cache_dirs();
-
 			return $html;
 		}
 
@@ -374,12 +339,17 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_combine_head_body_css($html)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
 
 			if(isset($this->options['compress_combine_head_body_css']))
 				if(!$this->options['compress_combine_head_body_css'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($html_frag = $this->get_html_frag($html)) && ($head_frag = $this->get_head_frag($html)))
 				if(($css_tag_frags = $this->get_css_tag_frags($html_frag)) && ($css_parts = $this->compile_css_tag_frags_into_parts($css_tag_frags)))
@@ -404,7 +374,17 @@ namespace websharks\html_compressor
 					$compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_css_tags, $head_frag['closing_tag']);
 					$html                  = $this->replace_once('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
 				}
-			return ($html) ? trim($html) : $html; // With possible compression having been applied here.
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing/combining head/body CSS in checksum: `%1$s`', md5($html)));
+
+			return $html; // With possible compression having been applied here.
 		}
 
 		/**
@@ -418,12 +398,17 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_combine_head_js($html)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
 
 			if(isset($this->options['compress_combine_head_js']))
 				if(!$this->options['compress_combine_head_js'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($head_frag = $this->get_head_frag($html)) /* No need to get the HTML frag here; we're operating on the `<head>` only. */)
 				if(($js_tag_frags = $this->get_js_tag_frags($head_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
@@ -447,7 +432,17 @@ namespace websharks\html_compressor
 					$compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_js_tags, $head_frag['closing_tag']);
 					$html                  = $this->replace_once('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
 				}
-			return ($html) ? trim($html) : $html; // With possible compression having been applied here.
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing/combining head JS in checksum: `%1$s`', md5($html)));
+
+			return $html; // With possible compression having been applied here.
 		}
 
 		/**
@@ -461,12 +456,17 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_combine_footer_js($html)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
 
 			if(isset($this->options['compress_combine_footer_js']))
 				if(!$this->options['compress_combine_footer_js'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($footer_scripts_frag = $this->get_footer_scripts_frag($html)) /* e.g. <!-- footer-scripts --><!-- footer-scripts --> */)
 				if(($js_tag_frags = $this->get_js_tag_frags($footer_scripts_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
@@ -489,7 +489,17 @@ namespace websharks\html_compressor
 					$compressed_footer_script_parts = array($footer_scripts_frag['open_tag'], $cleaned_footer_scripts, $compressed_js_tags, $footer_scripts_frag['closing_tag']);
 					$html                           = $this->replace_once('%%htmlc-footer-scripts%%', implode("\n", $compressed_footer_script_parts), $html);
 				}
-			return ($html) ? trim($html) : $html; // With possible compression having been applied here.
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing/combining footer JS in checksum: `%1$s`', md5($html)));
+
+			return $html; // With possible compression having been applied here.
 		}
 
 		/**
@@ -631,9 +641,10 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $css_parts_checksum)
-				$this->css_part_times[] = // Benchmark data.
-					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'css_parts_checksum' => $css_parts_checksum);
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('building parts based on CSS tag frags in checksum: `%1$s`', $css_parts_checksum));
 
 			return $css_parts;
 		}
@@ -751,9 +762,10 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $js_parts_checksum)
-				$this->js_part_times[] = // Benchmark data.
-					array('time'              => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'js_parts_checksum' => $js_parts_checksum);
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('building parts based on JS tag frags in checksum: `%1$s`', $js_parts_checksum));
 
 			return $js_parts;
 		}
@@ -838,9 +850,10 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $html_frag)
-				$this->css_tag_frag_times[] = // Benchmark data.
-					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'html_frag_checksum' => md5(serialize($html_frag)));
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compiling CSS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
 
 			return $css_tag_frags;
 		}
@@ -918,9 +931,10 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $html_frag)
-				$this->css_tag_frag_times[] = // Benchmark data.
-					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'html_frag_checksum' => md5(serialize($html_frag)));
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compiling JS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
 
 			return $js_tag_frags;
 		}
@@ -1368,15 +1382,30 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_html_code($html)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
 
 			if(isset($this->options['compress_html_code']))
 				if(!$this->options['compress_html_code'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($compressed_html = $this->compress_html($html)))
-				return $compressed_html;
+				$html = $compressed_html;
+
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing HTML w/ checksum: `%1$s`', md5($html)));
 
 			return $html;
 		}
@@ -1455,18 +1484,33 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_css_code($css)
 		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$css = (string)$css; // Force string value.
 
 			if(isset($this->options['compress_css_code']))
 				if(!$this->options['compress_css_code'])
-					return $css; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$css || !empty($disabled)) goto finale; // Nothing to do.
 
 			$regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->current_url_host(), '/').'\//i';
 			$css   = preg_replace($regex, '/', $css); // To absolute paths.
 
 			if(($compressed_css = $this->compress_css($css)))
-				return $compressed_css;
+				$css = $compressed_css;
+
+			finale: // Target point; finale/return value.
+
+			if($css) $css = trim($css);
+
+			if($benchmark && !empty($time) && $css && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing CSS w/ checksum: `%1$s`', md5($css)));
 
 			return $css;
 		}
@@ -1505,7 +1549,7 @@ namespace websharks\html_compressor
 			$css = preg_replace($static['replace'], $static['with'], $css);
 			$css = preg_replace_callback($static['colors'], array($this, '_maybe_compress_css_color'), $css);
 
-			return trim($css);
+			return ($css) ? trim($css) : $css;
 		}
 
 		/**
@@ -1544,15 +1588,30 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_js_code($js)
 		{
-			if(!($js = (string)$js))
-				return $js; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$js = (string)$js; // Force string value.
 
 			if(isset($this->options['compress_js_code']))
 				if(!$this->options['compress_js_code'])
-					return $js; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$js || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($compressed_js = js_minifier::compress($js)))
-				return $compressed_js;
+				$js = $compressed_js;
+
+			finale: // Target point; finale/return value.
+
+			if($js) $js = trim($js);
+
+			if($benchmark && !empty($time) && $js && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing JS w/ checksum: `%1$s`', md5($js)));
 
 			return $js;
 		}
@@ -1568,16 +1627,21 @@ namespace websharks\html_compressor
 		 */
 		protected function maybe_compress_inline_js_code($html)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
 
 			if(isset($this->options['compress_js_code']))
 				if(!$this->options['compress_js_code'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
 
 			if(isset($this->options['compress_inline_js_code']))
 				if(!$this->options['compress_inline_js_code'])
-					return $html; // Nothing to do here.
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
 
 			if(($_html_frag = $this->get_html_frag($html)) && ($_js_tag_frags = $this->get_js_tag_frags($_html_frag, TRUE)))
 			{
@@ -1609,7 +1673,17 @@ namespace websharks\html_compressor
 			}
 			unset($_html_frag, $_js_tag_frags, $_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
 
-			return ($html) ? trim($html) : $html; // After possible inline JS compression.
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing inline JS in checksum: `%1$s`', md5($html)));
+
+			return $html; // After possible inline JS compression.
 		}
 
 		/**
@@ -2079,6 +2153,10 @@ namespace websharks\html_compressor
 		 */
 		protected function cleanup_cache_dirs()
 		{
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
 			$public_cache_dir  = $this->cache_dir($this::dir_public_type);
 			$private_cache_dir = $this->cache_dir($this::dir_private_type);
 			$min_mtime         = strtotime('-'.$this->cache_expiration_time);
@@ -2094,6 +2172,12 @@ namespace websharks\html_compressor
 					if($_dir_file->isWritable()) unlink($_dir_file->getPathname());
 
 			unset($_dir_file); // Housekeeping.
+
+			if($benchmark && !empty($time))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => 'cleaning up the public/private cache directories');
 		}
 
 		/**
@@ -3016,9 +3100,10 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $url)
-				$this->remote_connection_times[] = // Benchmark data.
-					array('time' => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'url'  => $url);
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('fetching remote resource: `%1$s`', $url));
 
 			return ($return_array) ? array('code' => $http_code, 'body' => $output) : $output;
 		}
