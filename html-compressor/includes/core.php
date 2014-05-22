@@ -630,7 +630,7 @@ namespace websharks\html_compressor
 
 			finale: // Target point; finale/return value.
 
-			if($benchmark && !empty($time))
+			if($benchmark && !empty($time) && $css_parts_checksum)
 				$this->css_part_times[] = // Benchmark data.
 					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'css_parts_checksum' => $css_parts_checksum);
@@ -750,7 +750,7 @@ namespace websharks\html_compressor
 
 			finale: // Target point; finale/return value.
 
-			if($benchmark && !empty($time))
+			if($benchmark && !empty($time) && $js_parts_checksum)
 				$this->js_part_times[] = // Benchmark data.
 					array('time'              => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'js_parts_checksum' => $js_parts_checksum);
@@ -837,7 +837,7 @@ namespace websharks\html_compressor
 
 			finale: // Target point; finale/return value.
 
-			if($benchmark && !empty($time))
+			if($benchmark && !empty($time) && $html_frag)
 				$this->css_tag_frag_times[] = // Benchmark data.
 					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'html_frag_checksum' => md5(serialize($html_frag)));
@@ -917,7 +917,7 @@ namespace websharks\html_compressor
 
 			finale: // Target point; finale/return value.
 
-			if($benchmark && !empty($time))
+			if($benchmark && !empty($time) && $html_frag)
 				$this->css_tag_frag_times[] = // Benchmark data.
 					array('time'               => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'html_frag_checksum' => md5(serialize($html_frag)));
@@ -2909,6 +2909,9 @@ namespace websharks\html_compressor
 			             && $this->options['benchmark'] === 'details';
 			if($benchmark) $time = microtime(TRUE);
 
+			$output    = ''; // Initialize.
+			$http_code = 0; // Initialize.
+
 			$custom_request_method = '';
 			$url                   = (string)$url;
 			$max_con_secs          = (integer)$max_con_secs;
@@ -2929,10 +2932,7 @@ namespace websharks\html_compressor
 				$body = http_build_query($body, '', '&');
 			else $body = (string)$body;
 
-			if(!$url) return ''; // Nothing to do here.
-
-			$output    = ''; // Initialize.
-			$http_code = 0; // Initialize.
+			if(!$url) goto finale; // Nothing to do here.
 
 			/* ---------------------------------------------------------- */
 
@@ -3015,9 +3015,10 @@ namespace websharks\html_compressor
 
 			finale: // Target point; finale/return value.
 
-			if($benchmark && !empty($time))
+			if($benchmark && !empty($time) && $url)
 				$this->remote_connection_times[] = // Benchmark data.
-					array('time' => number_format(microtime(TRUE) - $time, 5, '.', ''), 'url' => $url);
+					array('time' => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'url'  => $url);
 
 			return ($return_array) ? array('code' => $http_code, 'body' => $output) : $output;
 		}
