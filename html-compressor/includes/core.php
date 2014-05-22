@@ -298,8 +298,9 @@ namespace websharks\html_compressor
 					$product_title = (string)$this->options['product_title'];
 				$time = number_format(microtime(TRUE) - $time, 5, '.', '');
 
+				if($this->benchmark_times) $html .= "\n";
 				foreach($this->benchmark_times as $_benchmark_time)
-					$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
+					$html .= "\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
 				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (overall). -->', htmlspecialchars($product_title), htmlspecialchars($time));
 				unset($_benchmark_time); // Housekeeping.
 			}
