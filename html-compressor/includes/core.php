@@ -841,7 +841,7 @@ namespace websharks\html_compressor
 						else if($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
 							$_tag_frag_r['exclude'] = TRUE;
 
-						else if($this->built_in_regex_js_exclusions && preg_match($this->built_in_regex_js_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
+						else if($this->built_in_regex_css_exclusions && preg_match($this->built_in_regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
 							$_tag_frag_r['exclude'] = TRUE;
 					}
 				}
