@@ -1525,6 +1525,9 @@ namespace websharks\html_compressor
 		 *
 		 * @return string Compressed CSS code. This removes CSS comments, extra whitespace, and it compresses HEX color codes whenever possible.
 		 *    In addition, this will also remove any unnecessary `;` line terminators to further optimize the overall file size.
+		 *
+		 * @TODO There are some additional optimizations we could do when it comes to shorthand CSS.
+		 *    e.g. margin: 0 auto 0 auto; could be converted to margin: 0 auto;
 		 */
 		protected function compress_css($css)
 		{
@@ -1535,7 +1538,7 @@ namespace websharks\html_compressor
 
 			if(!isset($static['replace'], $static['with'], $static['colors']))
 			{
-				$static['replace'] = array('[', ']', '{', '}', '!=', '|=', '^=', '$=', '*=', '~=', '=', '+', '~', ':', ';', ',', '>');
+				$static['replace'] = array('{', '}', '!=', '|=', '^=', '$=', '*=', '~=', '=', '+', '~', ':', ';', ',', '>');
 				$static['replace'] = implode('|', $this->preg_quote_deep($static['replace'], '/'));
 
 				$static['replace'] = array('comments'        => '/\/\*.*?\*\//s',
