@@ -142,7 +142,7 @@ namespace websharks\html_compressor
 		 *    To disable these built-in JS exclusions pass the option `disable_built_in_js_exclusions` as TRUE.
 		 * @note These get converted to a regex pattern by the class constructor. Reference {@link $built_in_regex_js_exclusions}.
 		 */
-		protected $built_in_regex_js_exclusion_patterns = array('\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(');
+		protected $built_in_regex_js_exclusion_patterns = array('\.js#.', '\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(');
 
 		/**
 		 * Array of benchmark times.
