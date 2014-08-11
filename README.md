@@ -2,7 +2,7 @@
 
 <img src="assets/html-compressor-logo.png" width="300px" align="right" />
 
-Automatically combines & compresses CSS/JS/HTML code.
+Combines & compresses CSS/JS/HTML code.
 
 ```php
 <?php
