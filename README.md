@@ -15,8 +15,6 @@ ob_start(array($html_compressor, 'compress'));
 
 This project is now on Floobits too! [Watch us code](https://floobits.com/jaswsinc/html-compressor/redirect) in real-time :-) <a href="https://floobits.com/jaswsinc/html-compressor/redirect"><img alt="Floobits status" width="100" height="40" src="https://floobits.com/jaswsinc/html-compressor.png" align="right" /></a>
 
-----
-
 ## Why did we create the HTML Compressor?
 
 The HTML Compressor class was developed because all of us here at WebSharks™ are growing tired of seeing WordPress installations out-in-the-wild that are running many different plugins; where each plugin may add a new set of CSS/JS files. This creates a slow-loading site, even if a page caching plugin is active.
