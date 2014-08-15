@@ -28,7 +28,7 @@ namespace websharks\html_compressor
 		 *
 		 * @var string Dated version string: `YYMMDD`.
 		 */
-		protected $version = '140712';
+		protected $version = '140815';
 
 		/**
 		 * An array of class options.
