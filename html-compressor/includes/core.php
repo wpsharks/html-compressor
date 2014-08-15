@@ -532,6 +532,7 @@ namespace websharks\html_compressor
 
 			$cache_parts_file      = $css_parts_checksum.'-compressor-parts.css-cache';
 			$cache_parts_file_path = $private_cache_dir.'/'.$cache_parts_file;
+			$cache_parts_file_path_tmp = $cache_parts_file_path.'.'.uniqid('', TRUE).'.tmp'; // Cache file creation is atomic; e.g. tmp file w/ rename.
 
 			$cache_part_file      = '%%code-checksum%%-compressor-part.css';
 			$cache_part_file_path = $public_cache_dir.'/'.$cache_part_file;
@@ -624,9 +625,10 @@ namespace websharks\html_compressor
 					$_css_code    = $this->maybe_compress_css_code($_css_code);
 
 					$_css_code_path = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_path);
+					$_css_code_path_tmp = $_css_code_path.'.'.uniqid('', TRUE).'.tmp'; // Cache file creation is atomic; e.g. tmp file w/ rename.
 					$_css_code_url  = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_url);
 
-					if(!file_put_contents($_css_code_path, $_css_code)) // Cache compressed CSS code.
+					if(!file_put_contents($_css_code_path_tmp, $_css_code) && rename($_css_code_path_tmp, $_css_code_path)) // Cache compressed CSS code.
 						throw new \exception(sprintf('Unable to cache CSS code file: `%1$s`.', $_css_code_path));
 
 					$css_parts[$_css_part]['tag'] = '<link type="text/css" rel="stylesheet" href="'.htmlspecialchars($_css_code_url, ENT_QUOTES).'" media="'.htmlspecialchars($_css_media, ENT_QUOTES).'" />';
@@ -636,7 +638,7 @@ namespace websharks\html_compressor
 			}
 			unset($_css_part, $_css_media, $_css_code, $_css_code_cs, $_css_code_path, $_css_code_url);
 
-			if(!file_put_contents($cache_parts_file_path, serialize($css_parts)))
+			if(!file_put_contents($cache_parts_file_path_tmp, serialize($css_parts)) && rename($cache_parts_file_path_tmp, $cache_parts_file_path))
 				throw new \exception(sprintf('Unable to cache CSS parts into: `%1$s`.', $cache_parts_file_path));
 
 			finale: // Target point; finale/return value.
@@ -679,6 +681,7 @@ namespace websharks\html_compressor
 
 			$cache_parts_file      = $js_parts_checksum.'-compressor-parts.js-cache';
 			$cache_parts_file_path = $private_cache_dir.'/'.$cache_parts_file;
+			$cache_parts_file_path_tmp = $cache_parts_file_path.'.'.uniqid('', TRUE).'.tmp'; // Cache file creation is atomic; e.g. tmp file w/ rename.
 
 			$cache_part_file      = '%%code-checksum%%-compressor-part.js';
 			$cache_part_file_path = $public_cache_dir.'/'.$cache_part_file;
@@ -745,9 +748,10 @@ namespace websharks\html_compressor
 					$_js_code    = $this->maybe_compress_js_code($_js_code);
 
 					$_js_code_path = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_path);
+					$_js_code_path_tmp = $_js_code_path.'.'.uniqid('', TRUE).'.tmp'; // Cache file creation is atomic; e.g. tmp file w/ rename.
 					$_js_code_url  = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_url);
 
-					if(!file_put_contents($_js_code_path, $_js_code))
+					if(!file_put_contents($_js_code_path_tmp, $_js_code) && rename($_js_code_path_tmp, $_js_code_path))
 						throw new \exception(sprintf('Unable to cache JS code file: `%1$s`.', $_js_code_path));
 
 					$js_parts[$_js_part]['tag'] = '<script type="text/javascript" src="'.htmlspecialchars($_js_code_url, ENT_QUOTES).'"></script>';
@@ -757,7 +761,7 @@ namespace websharks\html_compressor
 			}
 			unset($_js_part, $_js_code, $_js_code_cs, $_js_code_path, $_js_code_url);
 
-			if(!file_put_contents($cache_parts_file_path, serialize($js_parts)))
+			if(!file_put_contents($cache_parts_file_path_tmp, serialize($js_parts)) && rename($cache_parts_file_path_tmp, $cache_parts_file_path))
 				throw new \exception(sprintf('Unable to cache JS parts into: `%1$s`.', $cache_parts_file_path));
 
 			finale: // Target point; finale/return value.
