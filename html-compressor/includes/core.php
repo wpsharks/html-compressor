@@ -565,7 +565,7 @@ namespace websharks\html_compressor
 				else if($_css_tag_frag['link_href'])
 				{
 					if(($_css_tag_frag['link_href'] = $this->resolve_relative_url($_css_tag_frag['link_href'])))
-						if(($_css_code = $this->curl($_css_tag_frag['link_href'])))
+						if(($_css_code = $this->remote($_css_tag_frag['link_href'])))
 						{
 							$_css_code = $this->resolve_css_relatives($_css_code, $_css_tag_frag['link_href']);
 							$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
@@ -715,7 +715,7 @@ namespace websharks\html_compressor
 				else if($_js_tag_frag['script_src'])
 				{
 					if(($_js_tag_frag['script_src'] = $this->resolve_relative_url($_js_tag_frag['script_src'])))
-						if(($_js_code = $this->curl($_js_tag_frag['script_src'])))
+						if(($_js_code = $this->remote($_js_tag_frag['script_src'])))
 						{
 							$_js_code = rtrim($_js_code, ';').';';
 
@@ -1107,7 +1107,7 @@ namespace websharks\html_compressor
 			if(!empty($m['media']) && $m['media'] !== $this->current_css_media)
 				return $m[0]; // Not possible; different media.
 
-			if(($css = $this->curl($m['url'])))
+			if(($css = $this->remote($m['url'])))
 				$css = $this->resolve_css_relatives($css, $m['url']);
 
 			return $css;
@@ -2984,7 +2984,7 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * cURL for remote HTTP communication.
+		 * Remote HTTP communication.
 		 *
 		 * @since 140417 Initial release.
 		 *
@@ -2998,15 +2998,21 @@ namespace websharks\html_compressor
 		 * @param boolean      $return_array Defaults to a value of FALSE; response body returned only.
 		 *
 		 * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
+		 *
+		 * @throws \exception If unable to find a workable HTTP transport layer.
+		 *    Supported transports include: `wordpress`, `curl`, and `fopen`.
 		 */
-		protected function curl($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
+		protected function remote($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(),
+		                          $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
 		{
+			$can_follow = !filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) && !ini_get('open_basedir');
+
 			$benchmark = !empty($this->options['benchmark'])
 			             && $this->options['benchmark'] === 'details';
 			if($benchmark) $time = microtime(TRUE);
 
-			$output    = ''; // Initialize.
-			$http_code = 0; // Initialize.
+			$response_body = ''; // Initialize.
+			$response_code = 0; // Initialize.
 
 			$custom_request_method = '';
 			$url                   = (string)$url;
@@ -3017,6 +3023,7 @@ namespace websharks\html_compressor
 
 			$custom_request_regex = // e.g.`PUT::http://www.example.com/`
 				'/^(?P<custom_request_method>(?:GET|POST|PUT|DELETE))\:{2}(?P<url>.+)/i';
+
 			if(preg_match($custom_request_regex, $url, $_url_parts))
 			{
 				$url                   = $_url_parts['url']; // URL after `::`.
@@ -3035,41 +3042,45 @@ namespace websharks\html_compressor
 			wordpress_transport: // WordPress transport layer.
 
 			/*
-			 * This is currently disabled because it runs in the shutdown phase
-			 * when integrated with Quick Cache. Meaning, objects may have already been destructed by the time this runs.
+			 * This is currently disabled because it runs in the shutdown phase.
+			 * Meaning, objects may have already been destructed by the time this runs.
 			 * Until a good reliable solution is found, this will remain disabled via `0 === 0`.
 			 */
-			if(0 === 0 || !defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init')
-			   || $cookie_file || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
+			if(0 === 0 || !defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init') || $cookie_file
+			   || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
 			) goto curl_transport; // WP_Http unavailable; or unable to handle the request method type.
 
-			foreach($headers as $_key => $_value)
-				if(!is_string($_key) && strpos($_value, ':') > 0)
-				{
-					list($_header, $_header_value) = explode(':', $_value, 2);
-					$headers[$_header] = trim($_header_value);
-					unset($headers[$_key]);
-				}
-			unset($_key, $_value, $_header, $_header_value);
+			$assoc_headers = array(); // Initialize associative headers.
+			foreach($headers as $_key => $_value) if(strpos($_value, ':') > 0)
+			{
+				list($_header, $_header_value) = explode(':', $_value, 2);
+				$assoc_headers[trim($_header)] = trim($_header_value);
+			}
+			unset($_key, $_value, $_header, $_header_value); // Housekeeping.
 
 			if($custom_request_method === 'POST' || ($body && $custom_request_method !== 'GET'))
-				$wp_remote_request = wp_remote_post($url, array('headers' => $headers, 'body' => $body, 'timeout' => $max_con_secs));
-			else $wp_remote_request = wp_remote_get($url, array('headers' => $headers, 'timeout' => $max_con_secs));
+				$wp_remote_request = wp_remote_post($url, array('headers' => $assoc_headers, 'body' => $body, 'timeout' => $max_con_secs, 'redirection' => 5));
+			else $wp_remote_request = wp_remote_get($url, array('headers' => $assoc_headers, 'timeout' => $max_con_secs, 'redirection' => 5));
 
-			if(!is_wp_error($wp_remote_request))
-			{
-				$output    = trim((string)wp_remote_retrieve_body($wp_remote_request));
-				$http_code = (integer)wp_remote_retrieve_response_code($wp_remote_request);
-				if($fail_on_error && $http_code >= 400)
-					$output = ''; // Fail silently.
-			}
+			if(is_wp_error($wp_remote_request)) // If this returns a \WP_Error we fail silently.
+				goto finale; // Nothing we can do in this case; this error could be attributed to one many issues.
+
+			$response_code = (integer)wp_remote_retrieve_response_code($wp_remote_request);
+			$response_body = trim((string)wp_remote_retrieve_body($wp_remote_request));
+
+			if($fail_on_error && $response_code >= 400)
+				$response_body = ''; // Fail silently.
+
 			goto finale; // All done here, jump to finale.
 
 			/* ---------------------------------------------------------- */
 
-			curl_transport: // cURL transport layer (default hanlder).
+			curl_transport: // cURL transport layer (recommended).
 
-			$can_follow = (!ini_get('safe_mode') && !ini_get('open_basedir'));
+			if(!extension_loaded('curl') || !is_callable('curl_version')
+			   || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
+			                                          && $curl_version['features'] & CURL_VERSION_SSL))
+			) goto fopen_transport; // cURL will not work in this case.
 
 			$curl_opts = array(
 				CURLOPT_URL            => $url,
@@ -3099,11 +3110,70 @@ namespace websharks\html_compressor
 			if($cookie_file) // Support cookies? e.g. we have a cookie jar available?
 				$curl_opts += array(CURLOPT_COOKIEJAR => $cookie_file, CURLOPT_COOKIEFILE => $cookie_file);
 
-			$curl = curl_init();
-			curl_setopt_array($curl, $curl_opts);
-			$output    = trim((string)curl_exec($curl));
-			$http_code = (integer)curl_getinfo($curl, CURLINFO_HTTP_CODE);
-			curl_close($curl);
+			if(!($curl = curl_init()) || !curl_setopt_array($curl, $curl_opts))
+				throw new \exception(sprintf('Failed to initialize cURL for remote connection to: `%1$s`.', $url).
+				                     sprintf(' The following cURL options were necessary: `%1$s`.', print_r($curl_opts, TRUE)));
+
+			$response_body = trim((string)curl_exec($curl));
+			$response_code = (integer)curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+			curl_close($curl); // Close the resource handle now.
+
+			if($fail_on_error && $response_code >= 400)
+				$response_body = ''; // Fail silently.
+
+			goto finale; // All done here, jump to finale.
+
+			/* ---------------------------------------------------------- */
+
+			fopen_transport: // Depends on `allow_url_fopen` in `php.ini`.
+
+			if(!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN) || $cookie_file
+			   || (stripos($url, 'https:') === 0 && !in_array('ssl', stream_get_transports(), TRUE))
+			) throw new \exception('Unable to find a workable transport layer for remote HTTP communication.'.
+			                       ' Please install the cURL & OpenSSL extensions for PHP.');
+
+			$stream_options = array( // See: <http://php.net/manual/en/context.http.php>
+			                         'http' => array(
+				                         'method'          => ($custom_request_method
+					                         ? $custom_request_method // Custom.
+					                         : ($body ? 'POST' : 'GET')),
+
+				                         'header'          => $headers,
+				                         'content'         => $body,
+
+				                         'ignore_errors'   => $fail_on_error,
+				                         'timeout'         => $max_stream_secs,
+
+				                         'follow_location' => $can_follow,
+				                         'max_redirects'   => $can_follow ? 5 : 0
+			                         ));
+			if(!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', FALSE, $stream_context)))
+			{
+				$response_code = 404; // Connection failure.
+				$response_body = ''; // Connection failure; empty.
+				goto finale; // All done here, jump to finale.
+			}
+			$response_body    = trim((string)stream_get_contents($stream));
+			$stream_meta_data = stream_get_meta_data($stream);
+
+			if(!empty($stream_meta_data['timed_out'])) // Based on `$max_stream_secs`.
+			{
+				$response_code = 408; // Request timeout.
+				$response_body = ''; // Connection timed out; ignore.
+			}
+			else if(!empty($stream_meta_data['wrapper_data']) && is_array($stream_meta_data['wrapper_data']))
+				foreach(array_reverse($stream_meta_data['wrapper_data']) as $_response_header /* Looking for the last one. */)
+					if(is_string($_response_header) && stripos($_response_header, 'HTTP/') === 0 && strpos($_response_header, ' '))
+					{
+						list(, $response_code) = explode(' ', $_response_header, 3);
+						$response_code = (integer)trim($response_code);
+						break; // Got the last status code.
+					}
+			fclose($stream); // Close the resource handle now.
+
+			if($fail_on_error && $response_code >= 400)
+				$response_body = ''; // Fail silently.
 
 			goto finale; // All done here, jump to finale.
 
@@ -3117,7 +3187,7 @@ namespace websharks\html_compressor
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('fetching remote resource: `%1$s`', $url));
 
-			return ($return_array) ? array('code' => $http_code, 'body' => $output) : $output;
+			return ($return_array) ? array('code' => $response_code, 'body' => $response_body) : $response_body;
 		}
 	}
 }
