@@ -565,7 +565,7 @@ namespace websharks\html_compressor
 				else if($_css_tag_frag['link_href'])
 				{
 					if(($_css_tag_frag['link_href'] = $this->resolve_relative_url($_css_tag_frag['link_href'])))
-						if(($_css_code = $this->curl($_css_tag_frag['link_href'])))
+						if(($_css_code = $this->remote($_css_tag_frag['link_href'])))
 						{
 							$_css_code = $this->resolve_css_relatives($_css_code, $_css_tag_frag['link_href']);
 							$_css_code = $this->resolve_resolved_css_imports($_css_code, $_css_tag_frag['media']);
@@ -715,7 +715,7 @@ namespace websharks\html_compressor
 				else if($_js_tag_frag['script_src'])
 				{
 					if(($_js_tag_frag['script_src'] = $this->resolve_relative_url($_js_tag_frag['script_src'])))
-						if(($_js_code = $this->curl($_js_tag_frag['script_src'])))
+						if(($_js_code = $this->remote($_js_tag_frag['script_src'])))
 						{
 							$_js_code = rtrim($_js_code, ';').';';
 
@@ -1107,7 +1107,7 @@ namespace websharks\html_compressor
 			if(!empty($m['media']) && $m['media'] !== $this->current_css_media)
 				return $m[0]; // Not possible; different media.
 
-			if(($css = $this->curl($m['url'])))
+			if(($css = $this->remote($m['url'])))
 				$css = $this->resolve_css_relatives($css, $m['url']);
 
 			return $css;
@@ -2984,7 +2984,7 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * cURL for remote HTTP communication.
+		 * Remote HTTP communication.
 		 *
 		 * @since 140417 Initial release.
 		 *
@@ -2998,8 +2998,10 @@ namespace websharks\html_compressor
 		 * @param boolean      $return_array Defaults to a value of FALSE; response body returned only.
 		 *
 		 * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
+		 *
+		 * @throws \exception If unable to find a workable HTTP transport layer.
 		 */
-		protected function curl($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
+		protected function remote($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
 		{
 			$benchmark = !empty($this->options['benchmark'])
 			             && $this->options['benchmark'] === 'details';
@@ -3017,6 +3019,7 @@ namespace websharks\html_compressor
 
 			$custom_request_regex = // e.g.`PUT::http://www.example.com/`
 				'/^(?P<custom_request_method>(?:GET|POST|PUT|DELETE))\:{2}(?P<url>.+)/i';
+
 			if(preg_match($custom_request_regex, $url, $_url_parts))
 			{
 				$url                   = $_url_parts['url']; // URL after `::`.
@@ -3035,8 +3038,8 @@ namespace websharks\html_compressor
 			wordpress_transport: // WordPress transport layer.
 
 			/*
-			 * This is currently disabled because it runs in the shutdown phase
-			 * when integrated with Quick Cache. Meaning, objects may have already been destructed by the time this runs.
+			 * This is currently disabled because it runs in the shutdown phase.
+			 * Meaning, objects may have already been destructed by the time this runs.
 			 * Until a good reliable solution is found, this will remain disabled via `0 === 0`.
 			 */
 			if(0 === 0 || !defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init')
@@ -3067,7 +3070,12 @@ namespace websharks\html_compressor
 
 			/* ---------------------------------------------------------- */
 
-			curl_transport: // cURL transport layer (default hanlder).
+			curl_transport: // cURL transport layer (recommended).
+
+			if(!extension_loaded('curl') || !is_callable('curl_version')
+			   || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
+			                                          && $curl_version['features'] & CURL_VERSION_SSL))
+			) goto fopen_transport; // cURL will not work in this case.
 
 			$can_follow = (!ini_get('safe_mode') && !ini_get('open_basedir'));
 
@@ -3105,6 +3113,26 @@ namespace websharks\html_compressor
 			$http_code = (integer)curl_getinfo($curl, CURLINFO_HTTP_CODE);
 			curl_close($curl);
 
+			goto finale; // All done here, jump to finale.
+
+			/* ---------------------------------------------------------- */
+
+			fopen_transport: // Depends on `allow_url_fopen` in `php.ini`.
+
+			if(!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)
+			   || $cookie_file || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
+			) throw new \exception('Unable to find a workable transport layer for remote HTTP communication.'.
+			                       ' Please install the cURL & OpenSSL extensions for PHP.');
+
+			$opts = array( // See: <http://php.net/manual/en/context.http.php>
+			               'http' => array(
+				               'method'          => 'GET',
+				               'timeout'         => $max_stream_secs,
+				               'follow_location' => TRUE, 'max_redirects' => 5,
+				               'header'          => 'Accept-language: en'."\r\n".
+				                                    'Cookie: foo=bar'."\r\n"
+			               )
+			);
 			goto finale; // All done here, jump to finale.
 
 			/* ---------------------------------------------------------- */
