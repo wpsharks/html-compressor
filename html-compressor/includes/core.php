@@ -1550,16 +1550,17 @@ namespace websharks\html_compressor
 
 			if(!isset($static['replace'], $static['with'], $static['colors']))
 			{
-				$static['replace'] = array('{', '}', '!=', '|=', '^=', '$=', '*=', '~=', '=', '+', '~', ':', ';', ',', '>');
-				$static['replace'] = implode('|', $this->preg_quote_deep($static['replace'], '/'));
+				$de_spacifiables = array('{', '}', '!=', '|=', '^=', '$=', '*=', '~=', '=', '~', ':', ';', ',', '>');
+				$de_spacifiables = implode('|', $this->preg_quote_deep($de_spacifiables, '/'));
 
-				$static['replace'] = array('comments'        => '/\/\*.*?\*\//s',
-				                           'line_breaks'     => "/[\r\n\t]+/",
-				                           'extra_spaces'    => '/ +/',
-				                           'de_spacifiables' => '/ *('.$static['replace'].') */',
-				                           'unnecessary_;s'  => '/;\}/'
+				$static['replace'] = array(
+					'comments'        => '/\/\*.*?\*\//s',
+					'line_breaks'     => '/['."\r\n\t".']+/',
+					'extra_spaces'    => '/ +/',
+					'de_spacifiables' => '/ *('.$de_spacifiables.') */',
+					'unnecessary_;s'  => '/;\}/'
 				);
-				$static['with']    = array('', '', ' ', '$1', '}');
+				$static['with']    = array('', '', ' ', '${1}', '}');
 				$static['colors']  = '/(?P<context>[:,\h]+#)(?P<hex>[a-z0-9]{6})/i';
 			}
 			$css = preg_replace($static['replace'], $static['with'], $css);
