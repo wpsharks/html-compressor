@@ -281,7 +281,7 @@ namespace websharks\html_compressor
 			$benchmark = !empty($this->options['benchmark']);
 			if($benchmark) $time = microtime(TRUE);
 
-			$html = & $input; // Let's call this HTML now.
+			$html = &$input; // Let's call this HTML now.
 			$html = $this->maybe_compress_combine_head_body_css($html);
 			$html = $this->maybe_compress_combine_head_js($html);
 			$html = $this->maybe_compress_combine_footer_js($html);
@@ -788,6 +788,8 @@ namespace websharks\html_compressor
 		 *
 		 * @return array An array of CSS tag fragments (ready to be converted into CSS parts).
 		 *    Else an empty array (i.e. no CSS tag fragments in the HTML fragment array).
+		 *
+		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
 		 */
 		protected function get_css_tag_frags(array $html_frag)
 		{
@@ -800,10 +802,10 @@ namespace websharks\html_compressor
 			if(!$html_frag) goto finale;
 
 			$regex = '/(?P<all>'. // Entire match.
-			         '(?P<if_open_tag>\<\!\-\-\[if\s*[^\]]*?\]\>\s*)?'.
-			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^\>]*?)?\>)'.
+			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
+			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^\>]*?)?\>)'. // Or a <style></style> tag.
 			         '|(?P<style_open_tag>\<style(?:\s+[^\>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
-			         '(?P<if_closing_tag>\s*\<\!\[endif\]\-\-\>)?'.
+			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
 			         ')/is'; // Dot matches line breaks.
 
 			if(!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER))
@@ -838,7 +840,7 @@ namespace websharks\html_compressor
 
 							'exclude'               => FALSE // Default value.
 						);
-						$_tag_frag_r     = & $css_tag_frags[count($css_tag_frags) - 1];
+						$_tag_frag_r     = &$css_tag_frags[count($css_tag_frags) - 1];
 
 						if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'])
 							$_tag_frag_r['exclude'] = TRUE;
@@ -876,6 +878,8 @@ namespace websharks\html_compressor
 		 *
 		 * @return array An array of JS tag fragments (ready to be converted into JS parts).
 		 *    Else an empty array (i.e. no JS tag fragments in the HTML fragment array).
+		 *
+		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
 		 */
 		protected function get_js_tag_frags(array $html_frag)
 		{
@@ -888,9 +892,9 @@ namespace websharks\html_compressor
 			if(!$html_frag) goto finale;
 
 			$regex = '/(?P<all>'. // Entire match.
-			         '(?P<if_open_tag>\<\!\-\-\[if\s*[^\]]*?\]\>\s*)?'.
+			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
 			         '(?P<script_open_tag>\<script(?:\s+[^\>]*?)?\>)(?P<script_js>.*?)(?P<script_closing_tag>\<\/script\>)'.
-			         '(?P<if_closing_tag>\s*\<\!\[endif\]\-\-\>)?'.
+			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
 			         ')/is'; // Dot matches line breaks.
 
 			if(!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER))
@@ -919,7 +923,7 @@ namespace websharks\html_compressor
 
 							'exclude'             => FALSE // Default value.
 						);
-						$_tag_frag_r    = & $js_tag_frags[count($js_tag_frags) - 1];
+						$_tag_frag_r    = &$js_tag_frags[count($js_tag_frags) - 1];
 
 						if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'] || $_tag_frag_r['script_async'])
 							$_tag_frag_r['exclude'] = TRUE;
@@ -1440,14 +1444,14 @@ namespace websharks\html_compressor
 			if(!isset($static['preservations'], $static['compressions'], $static['compress_with']))
 			{
 				$static['preservations'] = array(
-					'special_tags'            => '\<(pre|code|script|style|textarea)(?:\s+[^\>]*?)?\>.*?\<\/\\2>',
-					'ie_conditional_comments' => '\<\!\-\-\[if\s*[^\]]*\]\>.*?\<\!\[endif\]\-\-\>',
+					'special_tags'            => '\<(pre|code|script|style|textarea)(?:\s+[^>]*?)?\>.*?\<\/\\2>',
+					'ie_conditional_comments' => '\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>.*?\<\![^[>]*?\[endif\][^>]*?\>',
 					'special_attributes'      => '\s(?:style|on[a-z]+)\s*\=\s*(["\']).*?\\3'
 				);
 				$static['preservations'] = // Implode for regex capture.
 					'/(?P<preservation>'.implode('|', $static['preservations']).')/is';
 
-				$static['compressions']['remove_html_comments']  = '/\<\!\-\-.*?\-\-\>/s';
+				$static['compressions']['remove_html_comments']  = '/\<\![^>]*?\>/';
 				$static['compress_with']['remove_html_comments'] = '';
 
 				$static['compressions']['remove_extra_whitespace']  = '/\s+/';
