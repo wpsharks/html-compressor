@@ -1451,7 +1451,7 @@ namespace websharks\html_compressor
 				$static['preservations'] = // Implode for regex capture.
 					'/(?P<preservation>'.implode('|', $static['preservations']).')/is';
 
-				$static['compressions']['remove_html_comments']  = '/\<\![^>]*?\>/';
+				$static['compressions']['remove_html_comments']  = '/\<\!(?!DOCTYPE)[^>]*?\>/i';
 				$static['compress_with']['remove_html_comments'] = '';
 
 				$static['compressions']['remove_extra_whitespace']  = '/\s+/';
