@@ -790,6 +790,7 @@ namespace websharks\html_compressor
 		 *    Else an empty array (i.e. no CSS tag fragments in the HTML fragment array).
 		 *
 		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
+		 * @see http://stackoverflow.com/a/12102131
 		 */
 		protected function get_css_tag_frags(array $html_frag)
 		{
@@ -880,6 +881,7 @@ namespace websharks\html_compressor
 		 *    Else an empty array (i.e. no JS tag fragments in the HTML fragment array).
 		 *
 		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
+		 * @see http://stackoverflow.com/a/12102131
 		 */
 		protected function get_js_tag_frags(array $html_frag)
 		{
@@ -1433,6 +1435,8 @@ namespace websharks\html_compressor
 		 * @return string Compressed HTML markup. With all comments and extra whitespace removed as quickly as possible.
 		 *    This preserves portions of HTML that depend on whitespace. Like `pre/code/script/style/textarea` tags.
 		 *    It also preserves conditional comments and JavaScript `on(click|blur|etc)` attributes.
+		 *
+		 * @see http://stackoverflow.com/a/12102131
 		 */
 		protected function compress_html($html)
 		{
@@ -1451,7 +1455,7 @@ namespace websharks\html_compressor
 				$static['preservations'] = // Implode for regex capture.
 					'/(?P<preservation>'.implode('|', $static['preservations']).')/is';
 
-				$static['compressions']['remove_html_comments']  = '/\<\!(?!DOCTYPE)[^>]*?\>/i';
+				$static['compressions']['remove_html_comments']  = '/\<\!\-{2}.*?\-{2}\>/is';
 				$static['compress_with']['remove_html_comments'] = '';
 
 				$static['compressions']['remove_extra_whitespace']  = '/\s+/';
