@@ -414,6 +414,7 @@ namespace websharks\html_compressor
 			if(($head_frag = $this->get_head_frag($html)) /* No need to get the HTML frag here; we're operating on the `<head>` only. */)
 				if(($js_tag_frags = $this->get_js_tag_frags($head_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
 				{
+					print_r($js_tag_frags);
 					$js_tag_frags_all_compiled = $this->compile_key_elements_deep($js_tag_frags, 'all');
 					$html                      = $this->replace_once($head_frag['all'], '%%htmlc-head%%', $html);
 					$cleaned_head_contents     = $this->replace_once($js_tag_frags_all_compiled, '', $head_frag['contents']);
@@ -804,8 +805,8 @@ namespace websharks\html_compressor
 
 			$regex = '/(?P<all>'. // Entire match.
 			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
-			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^\>]*?)?\>)'. // Or a <style></style> tag.
-			         '|(?P<style_open_tag>\<style(?:\s+[^\>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
+			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^>]*?)?\>)'. // Or a <style></style> tag.
+			         '|(?P<style_open_tag>\<style(?:\s+[^>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
 			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
 			         ')/is'; // Dot matches line breaks.
 
@@ -895,7 +896,7 @@ namespace websharks\html_compressor
 
 			$regex = '/(?P<all>'. // Entire match.
 			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
-			         '(?P<script_open_tag>\<script(?:\s+[^\>]*?)?\>)(?P<script_js>.*?)(?P<script_closing_tag>\<\/script\>)'.
+			         '(?P<script_open_tag>\<script(?:\s+[^>]*?)?\>)(?P<script_js>.*?)(?P<script_closing_tag>\<\/script\>)'.
 			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
 			         ')/is'; // Dot matches line breaks.
 
