@@ -15,6 +15,10 @@ ob_start(array($html_compressor, 'compress'));
 
 This project is now on Floobits too! [Watch us code](https://floobits.com/jaswsinc/html-compressor/redirect) in real-time :-) <a href="https://floobits.com/jaswsinc/html-compressor/redirect"><img alt="Floobits status" width="100" height="40" src="https://floobits.com/jaswsinc/html-compressor.png" align="right" /></a>
 
+## Where do I get the PHAR file?
+
+A PHAR binary is made available for each official release. See: [releases](https://github.com/websharks/html-compressor/releases).
+
 ## Why did we create the HTML Compressor?
 
 The HTML Compressor class was developed because all of us here at WebSharks™ are growing tired of seeing WordPress installations out-in-the-wild that are running many different plugins; where each plugin may add a new set of CSS/JS files. This creates a slow-loading site, even if a page caching plugin is active.
@@ -117,7 +121,7 @@ ob_start(array($html_compressor, 'compress'));
 
 **IMPORTANT NOTE:** One thing to keep in mind is that the WebSharks™ HTML Compressor works best when it's integrated together with a page caching plugin like Quick Cache for WordPress; or another page caching plugin that you might prefer. **Why use a page caching plugin?** The HTML Compressor can be used on any site powered by PHP; but ideally you would cache the optimized HTML that it outputs, thereby removing the need for the HTML Compressor to analzye every single request. Of course, you *can* analyze every single request if you want to *(and the HTML Compressor has a cache of it's own to help keep things sane)*, but it's always better to store (cache) the compressed HTML output by this class. This will reduce server load and make your site even faster.
 
-**FAQ:** Is `html-compressor.phar` the only file that I need? Yes. The other files that you see in the GitHub repo are already compressed into the PHAR file. The only file you need is the `html-compressor.phar`.
+**FAQ:** Is `html-compressor.phar` the only file that I need? Yes. The other files that you see in the GitHub repo are already compressed into the PHAR file. The only file you need is the `html-compressor.phar`. A PHAR binary is made available for each official release. See: [releases](https://github.com/websharks/html-compressor/releases).
 
 ### 2. HTML Compressor as an Output Buffer (w/ Options)
 *This just demonstrates how to specify an array of options.*
