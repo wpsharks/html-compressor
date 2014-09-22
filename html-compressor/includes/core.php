@@ -34,7 +34,7 @@ namespace websharks\html_compressor
 		 *
 		 * @var string Dated version string: `YYMMDD`.
 		 */
-		protected $version = '140901';
+		protected $version = '140922';
 
 		/**
 		 * An array of class options.
@@ -664,7 +664,7 @@ namespace websharks\html_compressor
 		/**
 		 * Test a tag fragment to see if it's CSS.
 		 *
-		 * @since 140921 Improving tag tests.
+		 * @since 140922 Improving tag tests.
 		 *
 		 * @param array $tag_frag A tag fragment.
 		 *
@@ -701,7 +701,7 @@ namespace websharks\html_compressor
 		/**
 		 * Test a tag fragment to see if it's CSS.
 		 *
-		 * @since 140921 Improving tag tests.
+		 * @since 140922 Improving tag tests.
 		 *
 		 * @param array $tag_frag A tag fragment.
 		 *
@@ -1353,7 +1353,7 @@ namespace websharks\html_compressor
 		/**
 		 * Test a script tag fragment to see if it's JavaScript.
 		 *
-		 * @since 140921 Initial release.
+		 * @since 140922 Improving attribute tests.
 		 *
 		 * @param array $tag_frag A JS tag fragment.
 		 *
