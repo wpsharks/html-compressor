@@ -21,6 +21,12 @@ namespace websharks\html_compressor
 	 */
 	class core // Heart of the HTML Compressor.
 	{
+		/********************************************************************************************************/
+
+		/*
+		 * Private Properties
+		 */
+
 		/**
 		 * Current version string.
 		 *
@@ -178,7 +184,7 @@ namespace websharks\html_compressor
 		 *
 		 * @var array Used by various routines for optimization.
 		 */
-		protected static $cache = array();
+		protected static $static = array();
 
 		/**
 		 * Data cache for this class instance.
@@ -187,7 +193,13 @@ namespace websharks\html_compressor
 		 *
 		 * @var array Used by various routines for optimization.
 		 */
-		protected $icache = array();
+		protected $cache = array();
+
+		/********************************************************************************************************/
+
+		/*
+		 * Constructor (Accepts Options)
+		 */
 
 		/**
 		 * Class Constructor.
@@ -255,6 +267,12 @@ namespace websharks\html_compressor
 			require_once dirname(__FILE__).'/externals/js-minifier.php';
 		}
 
+		/********************************************************************************************************/
+
+		/*
+		 * Public API Methods
+		 */
+
 		/**
 		 * Handles compression. The heart of this class.
 		 *
@@ -307,6 +325,12 @@ namespace websharks\html_compressor
 			return $html;
 		}
 
+		/********************************************************************************************************/
+
+		/*
+		 * Other API/Magic Methods
+		 */
+
 		/**
 		 * Magic method for access to read-only properties.
 		 *
@@ -328,6 +352,13 @@ namespace websharks\html_compressor
 
 			throw new \exception(sprintf('Undefined property: `%1$s`.', $property));
 		}
+
+		/********************************************************************************************************/
+
+		/*
+		 * CSS-Related Methods
+		 * ~ See also: CSS Compression Utilities
+		 */
 
 		/**
 		 * Handles possible compression of head/body CSS.
@@ -384,122 +415,6 @@ namespace websharks\html_compressor
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing/combining head/body CSS in checksum: `%1$s`', md5($html)));
-
-			return $html; // With possible compression having been applied here.
-		}
-
-		/**
-		 * Handles possible compression of head JS.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string $html Input HTML code.
-		 *
-		 * @return string HTML code, after possible JS compression.
-		 */
-		protected function maybe_compress_combine_head_js($html)
-		{
-			$benchmark = !empty($this->options['benchmark'])
-			             && $this->options['benchmark'] === 'details';
-			if($benchmark) $time = microtime(TRUE);
-
-			$html = (string)$html; // Force string value.
-
-			if(isset($this->options['compress_combine_head_js']))
-				if(!$this->options['compress_combine_head_js'])
-					$disabled = TRUE; // Disabled flag.
-
-			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
-
-			if(($head_frag = $this->get_head_frag($html)) /* No need to get the HTML frag here; we're operating on the `<head>` only. */)
-				if(($js_tag_frags = $this->get_js_tag_frags($head_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
-				{
-					print_r($js_tag_frags);
-					$js_tag_frags_all_compiled = $this->compile_key_elements_deep($js_tag_frags, 'all');
-					$html                      = $this->replace_once($head_frag['all'], '%%htmlc-head%%', $html);
-					$cleaned_head_contents     = $this->replace_once($js_tag_frags_all_compiled, '', $head_frag['contents']);
-					$cleaned_head_contents     = $this->cleanup_self_closing_html_tag_lines($cleaned_head_contents);
-
-					$compressed_js_tags = array(); // Initialize.
-
-					foreach($js_parts as $_js_part)
-					{
-						if(isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all']))
-							$compressed_js_tags[] = $js_tag_frags[$_js_part['exclude_frag']]['all'];
-						else $compressed_js_tags[] = $_js_part['tag'];
-					}
-					unset($_js_part); // Housekeeping.
-
-					$compressed_js_tags    = implode("\n", $compressed_js_tags);
-					$compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_js_tags, $head_frag['closing_tag']);
-					$html                  = $this->replace_once('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
-				}
-			finale: // Target point; finale/return value.
-
-			if($html) $html = trim($html);
-
-			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
-					array('function' => __FUNCTION__, // Function marker.
-					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'task'     => sprintf('compressing/combining head JS in checksum: `%1$s`', md5($html)));
-
-			return $html; // With possible compression having been applied here.
-		}
-
-		/**
-		 * Handles possible compression of footer JS.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string $html Input HTML code.
-		 *
-		 * @return string HTML code, after possible JS compression.
-		 */
-		protected function maybe_compress_combine_footer_js($html)
-		{
-			$benchmark = !empty($this->options['benchmark'])
-			             && $this->options['benchmark'] === 'details';
-			if($benchmark) $time = microtime(TRUE);
-
-			$html = (string)$html; // Force string value.
-
-			if(isset($this->options['compress_combine_footer_js']))
-				if(!$this->options['compress_combine_footer_js'])
-					$disabled = TRUE; // Disabled flag.
-
-			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
-
-			if(($footer_scripts_frag = $this->get_footer_scripts_frag($html)) /* e.g. <!-- footer-scripts --><!-- footer-scripts --> */)
-				if(($js_tag_frags = $this->get_js_tag_frags($footer_scripts_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
-				{
-					$js_tag_frags_all_compiled = $this->compile_key_elements_deep($js_tag_frags, 'all');
-					$html                      = $this->replace_once($footer_scripts_frag['all'], '%%htmlc-footer-scripts%%', $html);
-					$cleaned_footer_scripts    = $this->replace_once($js_tag_frags_all_compiled, '', $footer_scripts_frag['contents']);
-
-					$compressed_js_tags = array(); // Initialize.
-
-					foreach($js_parts as $_js_part)
-					{
-						if(isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all']))
-							$compressed_js_tags[] = $js_tag_frags[$_js_part['exclude_frag']]['all'];
-						else $compressed_js_tags[] = $_js_part['tag'];
-					}
-					unset($_js_part); // Housekeeping.
-
-					$compressed_js_tags             = implode("\n", $compressed_js_tags);
-					$compressed_footer_script_parts = array($footer_scripts_frag['open_tag'], $cleaned_footer_scripts, $compressed_js_tags, $footer_scripts_frag['closing_tag']);
-					$html                           = $this->replace_once('%%htmlc-footer-scripts%%', implode("\n", $compressed_footer_script_parts), $html);
-				}
-			finale: // Target point; finale/return value.
-
-			if($html) $html = trim($html);
-
-			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
-					array('function' => __FUNCTION__, // Function marker.
-					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'task'     => sprintf('compressing/combining footer JS in checksum: `%1$s`', md5($html)));
 
 			return $html; // With possible compression having been applied here.
 		}
@@ -656,6 +571,576 @@ namespace websharks\html_compressor
 		}
 
 		/**
+		 * Parses and returns an array of CSS tag fragments.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array $html_frag An HTML tag fragment array.
+		 *
+		 * @return array An array of CSS tag fragments (ready to be converted into CSS parts).
+		 *    Else an empty array (i.e. no CSS tag fragments in the HTML fragment array).
+		 *
+		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
+		 * @see http://stackoverflow.com/a/12102131
+		 */
+		protected function get_css_tag_frags(array $html_frag)
+		{
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$css_tag_frags = array(); // Initialize.
+
+			if(!$html_frag) goto finale;
+
+			$regex = '/(?P<all>'. // Entire match.
+			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
+			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^>]*?)?\>)'. // Or a <style></style> tag.
+			         '|(?P<style_open_tag>\<style(?:\s+[^>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
+			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
+			         ')/is'; // Dot matches line breaks.
+
+			if(!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER))
+			{
+				foreach($_tag_frags as $_tag_frag)
+				{
+					$_link_href = $_style_css = $_media = ''; // Initialize.
+
+					if(($_link_href = $this->get_link_css_href($_tag_frag, TRUE)))
+						$_media = $this->get_link_css_media($_tag_frag, FALSE);
+
+					else if(($_style_css = $this->get_style_css($_tag_frag, TRUE)))
+						$_media = $this->get_style_css_media($_tag_frag, FALSE);
+
+					if($_link_href || $_style_css) // One or the other is fine.
+					{
+						$css_tag_frags[] = array(
+							'all'                   => $_tag_frag['all'],
+
+							'if_open_tag'           => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
+							'if_closing_tag'        => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
+
+							'link_self_closing_tag' => isset($_tag_frag['link_self_closing_tag']) ? $_tag_frag['link_self_closing_tag'] : '',
+							'link_href_external'    => ($_link_href) ? $this->is_url_external($_link_href) : FALSE,
+							'link_href'             => $_link_href, // This could also be empty.
+
+							'style_open_tag'        => isset($_tag_frag['style_open_tag']) ? $_tag_frag['style_open_tag'] : '',
+							'style_css'             => $_style_css, // This could also be empty.
+							'style_closing_tag'     => isset($_tag_frag['style_closing_tag']) ? $_tag_frag['style_closing_tag'] : '',
+
+							'media'                 => $_media ? $_media : 'all', // Default value.
+
+							'exclude'               => FALSE // Default value.
+						);
+						$_tag_frag_r     = &$css_tag_frags[count($css_tag_frags) - 1];
+
+						if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'])
+							$_tag_frag_r['exclude'] = TRUE;
+
+						else if($_tag_frag_r['link_href'] && $_tag_frag_r['link_href_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js'])
+							$_tag_frag_r['exclude'] = TRUE;
+
+						else if($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
+							$_tag_frag_r['exclude'] = TRUE;
+
+						else if($this->built_in_regex_css_exclusions && preg_match($this->built_in_regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
+							$_tag_frag_r['exclude'] = TRUE;
+					}
+				}
+			}
+			unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_link_href, $_style_css, $_media);
+
+			finale: // Target point; finale/return value.
+
+			if($benchmark && !empty($time) && $html_frag)
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compiling CSS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
+
+			return $css_tag_frags;
+		}
+
+		/**
+		 * Test a tag fragment to see if it's CSS.
+		 *
+		 * @since 140921 Improving tag tests.
+		 *
+		 * @param array $tag_frag A tag fragment.
+		 *
+		 * @return boolean TRUE if it contains CSS.
+		 */
+		protected function is_link_tag_frag_css(array $tag_frag)
+		{
+			if(empty($tag_frag['link_self_closing_tag']))
+				return FALSE; // Nope; missing tag.
+
+			$type = $rel = ''; // Initialize.
+
+			if(stripos($tag_frag['link_self_closing_tag'], 'type') !== 0)
+				if(preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m))
+					$type = $_m['value'];
+
+			unset($_m); // Just a little housekeeping.
+
+			if(stripos($tag_frag['link_self_closing_tag'], 'rel') !== 0)
+				if(preg_match('/\srel\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m))
+					$rel = $_m['value'];
+
+			unset($_m); // Just a little housekeeping.
+
+			if($type && stripos($type, 'css') === FALSE)
+				return FALSE; // Not CSS.
+
+			if($rel && stripos($rel, 'stylesheet') === FALSE)
+				return FALSE; // Not CSS.
+
+			return TRUE; // Yes, this is CSS.
+		}
+
+		/**
+		 * Test a tag fragment to see if it's CSS.
+		 *
+		 * @since 140921 Improving tag tests.
+		 *
+		 * @param array $tag_frag A tag fragment.
+		 *
+		 * @return boolean TRUE if it contains CSS.
+		 */
+		protected function is_style_tag_frag_css(array $tag_frag)
+		{
+			if(empty($tag_frag['style_open_tag']) || empty($tag_frag['style_closing_tag']))
+				return FALSE; // Nope; missing open|closing tag.
+
+			$type = ''; // Initialize.
+
+			if(stripos($tag_frag['script_open_tag'], 'type') !== 0)
+				if(preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m))
+					$type = $_m['value'];
+
+			unset($_m); // Just a little housekeeping.
+
+			if($type && stripos($type, 'css') === FALSE)
+				return FALSE; // Not CSS.
+
+			return TRUE; // Yes, this is CSS.
+		}
+
+		/**
+		 * Get a CSS link href value from a tag fragment.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array   $tag_frag A CSS tag fragment.
+		 * @param boolean $test_for_css Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's CSS.
+		 *
+		 * @return string The link href value if possible; else an empty string.
+		 */
+		protected function get_link_css_href(array $tag_frag, $test_for_css = TRUE)
+		{
+			if($test_for_css && !$this->is_link_tag_frag_css($tag_frag))
+				return ''; // This tag does not contain CSS.
+
+			if(preg_match('/\shref\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m))
+				return trim($this->n_url_amps($_m['value']));
+
+			unset($_m); // Just a little housekeeping.
+
+			return ''; // Unable to find an `href` attribute value.
+		}
+
+		/**
+		 * Get a CSS link media rule from a tag fragment.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array   $tag_frag A CSS tag fragment.
+		 * @param boolean $test_for_css Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's CSS.
+		 *
+		 * @return string The link media value if possible; else an empty string.
+		 */
+		protected function get_link_css_media(array $tag_frag, $test_for_css = TRUE)
+		{
+			if($test_for_css && !$this->is_link_tag_frag_css($tag_frag))
+				return ''; // This tag does not contain CSS.
+
+			if(preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m))
+				return trim(strtolower($_m['value']));
+
+			unset($_m); // Just a little housekeeping.
+
+			return ''; // Unable to find a `media` attribute value.
+		}
+
+		/**
+		 * Get a CSS style media rule from a tag fragment.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array   $tag_frag A CSS tag fragment.
+		 * @param boolean $test_for_css Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's CSS.
+		 *
+		 * @return string The style media value if possible; else an empty string.
+		 */
+		protected function get_style_css_media(array $tag_frag, $test_for_css = TRUE)
+		{
+			if($test_for_css && !$this->is_style_tag_frag_css($tag_frag))
+				return ''; // This tag does not contain CSS.
+
+			if(preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $_m))
+				return trim(strtolower($_m['value']));
+
+			unset($_m); // Just a little housekeeping.
+
+			return ''; // Unable to find a `media` attribute value.
+		}
+
+		/**
+		 * Get style CSS from a CSS tag fragment.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array   $tag_frag A CSS tag fragment.
+		 * @param boolean $test_for_css Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's CSS.
+		 *
+		 * @return string The style CSS code (if possible); else an empty string.
+		 */
+		protected function get_style_css(array $tag_frag, $test_for_css = TRUE)
+		{
+			if(empty($tag_frag['style_css'])) // An obvious issue.
+				return ''; // Not possible; no CSS code.
+
+			if($test_for_css && !$this->is_style_tag_frag_css($tag_frag))
+				return ''; // This tag does not contain CSS.
+
+			return trim($tag_frag['style_css']); // CSS code.
+		}
+
+		/**
+		 * Strip existing charset rules from CSS code.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $css CSS code.
+		 *
+		 * @return string CSS after having stripped away existing charset rules.
+		 */
+		protected function strip_existing_css_charsets($css)
+		{
+			if(!($css = (string)$css))
+				return $css; // Nothing to do.
+
+			$css = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/i', '', $css);
+			if($css) $css = trim($css);
+
+			return $css;
+		}
+
+		/**
+		 * Strip existing charsets and add a UTF-8 `@charset` rule.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $css CSS code.
+		 *
+		 * @return string CSS code (possibly with a prepended UTF-8 charset rule).
+		 */
+		protected function strip_prepend_css_charset_utf8($css)
+		{
+			if(!($css = (string)$css))
+				return $css; // Nothing to do.
+
+			$css = $this->strip_existing_css_charsets($css);
+			if($css) $css = '@charset "UTF-8";'."\n".$css;
+
+			return $css;
+		}
+
+		/**
+		 * Moves special CSS `@rules` to the top.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string  $css CSS code.
+		 * @param integer $___recursion Internal use only.
+		 *
+		 * @return string CSS code after having moved special `@rules` to the top.
+		 *
+		 * @see <https://developer.mozilla.org/en-US/docs/Web/CSS/@charset>
+		 * @see <http://stackoverflow.com/questions/11746581/nesting-media-rules-in-css>
+		 */
+		protected function move_special_css_at_rules_to_top($css, $___recursion = 0)
+		{
+			if(!($css = (string)$css))
+				return $css; // Nothing to do.
+
+			$max_recursions = 2; // `preg_match_all()` calls.
+			if($___recursion >= $max_recursions) return $css; // All done.
+
+			if(stripos($css, 'charset') === FALSE && stripos($css, 'import') === FALSE)
+				return $css; // Save some time. Nothing to do here.
+
+			if(preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
+			   || preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
+			) // Searched in a specific order. Recursion dictates a precise order based on what we find in these regex patterns.
+			{
+				$top_rules = array(); // Initialize.
+				foreach($rules as $_rule) $top_rules[] = $_rule['rule'];
+				unset($_rule); // Just a little housekeeping.
+
+				$css = $this->replace_once($top_rules, '', $css);
+				$css = $this->move_special_css_at_rules_to_top($css, $___recursion + 1);
+				$css = implode("\n\n", $top_rules)."\n\n".$css;
+			}
+			return $css; // With special `@rules` to the top.
+		}
+
+		/**
+		 * Resolves `@import` rules in CSS code recursively.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string  $css CSS code.
+		 * @param string  $media Current media specification.
+		 * @param boolean $___recursion Internal use only.
+		 *
+		 * @return string CSS code after all `@import` rules have been resolved recursively.
+		 */
+		protected function resolve_resolved_css_imports($css, $media, $___recursion = FALSE)
+		{
+			if(!($css = (string)$css))
+				return $css; // Nothing to do.
+
+			$media = $this->current_css_media = (string)$media;
+			if(!$media) $media = $this->current_css_media = 'all';
+
+			$import_media_without_url_regex = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*(["\'])(?P<url>.+?)\\1(?P<media>[^;]*?);/i';
+			$import_media_with_url_regex    = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s+url\s*\(\s*(["\']?)(?P<url>.+?)\\1\s*\)(?P<media>[^;]*?);/i';
+
+			$css = preg_replace_callback($import_media_without_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
+			$css = preg_replace_callback($import_media_with_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
+
+			if(preg_match_all($import_media_without_url_regex, $css, $_m))
+				foreach($_m['media'] as $_media) if(!$_media || $_media === $this->current_css_media)
+					return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
+			unset($_m, $_media); // Housekeeping.
+
+			if(preg_match_all($import_media_with_url_regex, $css, $_m))
+				foreach($_m['media'] as $_media) if(!$_media || $_media === $this->current_css_media)
+					return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
+			unset($_m, $_media); // Housekeeping.
+
+			return $css;
+		}
+
+		/**
+		 * Callback handler for resolving @ import rules.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array $m An array of regex matches.
+		 *
+		 * @return string CSS after import resolution, else an empty string.
+		 */
+		protected function _resolve_resolved_css_imports_cb(array $m)
+		{
+			if(empty($m['url']))
+				return ''; // Nothing to resolve.
+
+			if(!empty($m['media']) && $m['media'] !== $this->current_css_media)
+				return $m[0]; // Not possible; different media.
+
+			if(($css = $this->remote($m['url'])))
+				$css = $this->resolve_css_relatives($css, $m['url']);
+
+			return $css;
+		}
+
+		/**
+		 * Resolve relative URLs in CSS code.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $css CSS code.
+		 * @param string $base Optional. Base URL to calculate from.
+		 *    Defaults to the current HTTP location for the browser.
+		 *
+		 * @return string CSS code after having all URLs resolved.
+		 */
+		protected function resolve_css_relatives($css, $base = '')
+		{
+			if(!($css = (string)$css))
+				return $css; // Nothing to do.
+
+			$this->current_base = $base; // Make this available to callback handlers (possible empty string here).
+
+			$import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/i';
+			$any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/i';
+
+			$css = preg_replace_callback($import_without_url_regex, array($this, '_resolve_css_relatives_import_cb'), $css);
+			$css = preg_replace_callback($any_url_regex, array($this, '_resolve_css_relatives_url_cb'), $css);
+
+			return $css;
+		}
+
+		/**
+		 * Callback handler for CSS relative URL resolutions.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array $m An array of regex matches.
+		 *
+		 * @return string CSS `@import` rule with relative URL resolved.
+		 */
+		protected function _resolve_css_relatives_import_cb(array $m)
+		{
+			return $m['import'].$m['open_encap'].$this->resolve_relative_url($m['url'], $this->current_base).$m['close_encap'];
+		}
+
+		/**
+		 * Callback handler for CSS relative URL resolutions.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param array $m An array of regex matches.
+		 *
+		 * @return string CSS `url()` resource with relative URL resolved.
+		 */
+		protected function _resolve_css_relatives_url_cb(array $m)
+		{
+			if(stripos($m['url'], 'data:') === 0)
+				return $m[0]; // Don't resolve `data:` URIs.
+
+			return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolve_relative_url($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
+		}
+
+		/********************************************************************************************************/
+
+		/*
+		 * JS-Related Methods
+		 * ~ See also: JS Compression Utilities
+		 */
+
+		/**
+		 * Handles possible compression of head JS.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $html Input HTML code.
+		 *
+		 * @return string HTML code, after possible JS compression.
+		 */
+		protected function maybe_compress_combine_head_js($html)
+		{
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
+
+			if(isset($this->options['compress_combine_head_js']))
+				if(!$this->options['compress_combine_head_js'])
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
+
+			if(($head_frag = $this->get_head_frag($html)) /* No need to get the HTML frag here; we're operating on the `<head>` only. */)
+				if(($js_tag_frags = $this->get_js_tag_frags($head_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
+				{
+					$js_tag_frags_all_compiled = $this->compile_key_elements_deep($js_tag_frags, 'all');
+					$html                      = $this->replace_once($head_frag['all'], '%%htmlc-head%%', $html);
+					$cleaned_head_contents     = $this->replace_once($js_tag_frags_all_compiled, '', $head_frag['contents']);
+					$cleaned_head_contents     = $this->cleanup_self_closing_html_tag_lines($cleaned_head_contents);
+
+					$compressed_js_tags = array(); // Initialize.
+
+					foreach($js_parts as $_js_part)
+					{
+						if(isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all']))
+							$compressed_js_tags[] = $js_tag_frags[$_js_part['exclude_frag']]['all'];
+						else $compressed_js_tags[] = $_js_part['tag'];
+					}
+					unset($_js_part); // Housekeeping.
+
+					$compressed_js_tags    = implode("\n", $compressed_js_tags);
+					$compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_js_tags, $head_frag['closing_tag']);
+					$html                  = $this->replace_once('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
+				}
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing/combining head JS in checksum: `%1$s`', md5($html)));
+
+			return $html; // With possible compression having been applied here.
+		}
+
+		/**
+		 * Handles possible compression of footer JS.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $html Input HTML code.
+		 *
+		 * @return string HTML code, after possible JS compression.
+		 */
+		protected function maybe_compress_combine_footer_js($html)
+		{
+			$benchmark = !empty($this->options['benchmark'])
+			             && $this->options['benchmark'] === 'details';
+			if($benchmark) $time = microtime(TRUE);
+
+			$html = (string)$html; // Force string value.
+
+			if(isset($this->options['compress_combine_footer_js']))
+				if(!$this->options['compress_combine_footer_js'])
+					$disabled = TRUE; // Disabled flag.
+
+			if(!$html || !empty($disabled)) goto finale; // Nothing to do.
+
+			if(($footer_scripts_frag = $this->get_footer_scripts_frag($html)) /* e.g. <!-- footer-scripts --><!-- footer-scripts --> */)
+				if(($js_tag_frags = $this->get_js_tag_frags($footer_scripts_frag)) && ($js_parts = $this->compile_js_tag_frags_into_parts($js_tag_frags)))
+				{
+					$js_tag_frags_all_compiled = $this->compile_key_elements_deep($js_tag_frags, 'all');
+					$html                      = $this->replace_once($footer_scripts_frag['all'], '%%htmlc-footer-scripts%%', $html);
+					$cleaned_footer_scripts    = $this->replace_once($js_tag_frags_all_compiled, '', $footer_scripts_frag['contents']);
+
+					$compressed_js_tags = array(); // Initialize.
+
+					foreach($js_parts as $_js_part)
+					{
+						if(isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all']))
+							$compressed_js_tags[] = $js_tag_frags[$_js_part['exclude_frag']]['all'];
+						else $compressed_js_tags[] = $_js_part['tag'];
+					}
+					unset($_js_part); // Housekeeping.
+
+					$compressed_js_tags             = implode("\n", $compressed_js_tags);
+					$compressed_footer_script_parts = array($footer_scripts_frag['open_tag'], $cleaned_footer_scripts, $compressed_js_tags, $footer_scripts_frag['closing_tag']);
+					$html                           = $this->replace_once('%%htmlc-footer-scripts%%', implode("\n", $compressed_footer_script_parts), $html);
+				}
+			finale: // Target point; finale/return value.
+
+			if($html) $html = trim($html);
+
+			if($benchmark && !empty($time) && $html && empty($disabled))
+				$this->benchmark_times[] = // Benchmark data.
+					array('function' => __FUNCTION__, // Function marker.
+					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
+					      'task'     => sprintf('compressing/combining footer JS in checksum: `%1$s`', md5($html)));
+
+			return $html; // With possible compression having been applied here.
+		}
+
+		/**
 		 * Compiles JS tag fragments into JS parts with compression.
 		 *
 		 * @since 140417 Initial release.
@@ -781,97 +1266,6 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * Parses and returns an array of CSS tag fragments.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $html_frag An HTML tag fragment array.
-		 *
-		 * @return array An array of CSS tag fragments (ready to be converted into CSS parts).
-		 *    Else an empty array (i.e. no CSS tag fragments in the HTML fragment array).
-		 *
-		 * @see http://css-tricks.com/how-to-create-an-ie-only-stylesheet/
-		 * @see http://stackoverflow.com/a/12102131
-		 */
-		protected function get_css_tag_frags(array $html_frag)
-		{
-			$benchmark = !empty($this->options['benchmark'])
-			             && $this->options['benchmark'] === 'details';
-			if($benchmark) $time = microtime(TRUE);
-
-			$css_tag_frags = array(); // Initialize.
-
-			if(!$html_frag) goto finale;
-
-			$regex = '/(?P<all>'. // Entire match.
-			         '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
-			         '(?:(?P<link_self_closing_tag>\<link(?:\s+[^>]*?)?\>)'. // Or a <style></style> tag.
-			         '|(?P<style_open_tag>\<style(?:\s+[^>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
-			         '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
-			         ')/is'; // Dot matches line breaks.
-
-			if(!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER))
-			{
-				foreach($_tag_frags as $_tag_frag)
-				{
-					$_link_href = $_style_css = $_media = 'all';
-
-					if(($_link_href = $this->get_link_css_href($_tag_frag)))
-						$_media = $this->get_link_css_media($_tag_frag);
-
-					else if(($_style_css = $this->get_style_css($_tag_frag)))
-						$_media = $this->get_style_css_media($_tag_frag);
-
-					if($_link_href || $_style_css) // One or the other is fine.
-					{
-						$css_tag_frags[] = array(
-							'all'                   => $_tag_frag['all'],
-
-							'if_open_tag'           => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
-							'if_closing_tag'        => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
-
-							'link_self_closing_tag' => isset($_tag_frag['link_self_closing_tag']) ? $_tag_frag['link_self_closing_tag'] : '',
-							'link_href_external'    => ($_link_href) ? $this->is_url_external($_link_href) : FALSE,
-							'link_href'             => $_link_href, // This could also be empty.
-
-							'style_open_tag'        => isset($_tag_frag['style_open_tag']) ? $_tag_frag['style_open_tag'] : '',
-							'style_css'             => $_style_css, // This could also be empty.
-							'style_closing_tag'     => isset($_tag_frag['style_closing_tag']) ? $_tag_frag['style_closing_tag'] : '',
-
-							'media'                 => ($_media) ? $_media : 'all', // Defaults to `all`.
-
-							'exclude'               => FALSE // Default value.
-						);
-						$_tag_frag_r     = &$css_tag_frags[count($css_tag_frags) - 1];
-
-						if($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'])
-							$_tag_frag_r['exclude'] = TRUE;
-
-						else if($_tag_frag_r['link_href'] && $_tag_frag_r['link_href_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js'])
-							$_tag_frag_r['exclude'] = TRUE;
-
-						else if($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
-							$_tag_frag_r['exclude'] = TRUE;
-
-						else if($this->built_in_regex_css_exclusions && preg_match($this->built_in_regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css']))
-							$_tag_frag_r['exclude'] = TRUE;
-					}
-				}
-			}
-			unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_link_href, $_style_css, $_media);
-
-			finale: // Target point; finale/return value.
-
-			if($benchmark && !empty($time) && $html_frag)
-				$this->benchmark_times[] = // Benchmark data.
-					array('function' => __FUNCTION__, // Function marker.
-					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'task'     => sprintf('compiling CSS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
-
-			return $css_tag_frags;
-		}
-
-		/**
 		 * Parses and return an array of JS tag fragments.
 		 *
 		 * @since 140417 Initial release.
@@ -904,10 +1298,11 @@ namespace websharks\html_compressor
 			{
 				foreach($_tag_frags as $_tag_frag)
 				{
-					$_script_src = $_script_js = $_script_async = '';
+					$_script_src = $_script_js = $_script_async = ''; // Initialize.
 
-					if(($_script_src = $this->get_script_js_src($_tag_frag)) || ($_script_js = $this->get_script_js($_tag_frag)))
-						$_script_async = $this->get_script_js_async($_tag_frag);
+					if($this->is_script_tag_frag_js($_tag_frag)) // Check this first (for optimization).
+						if(($_script_src = $this->get_script_js_src($_tag_frag, FALSE)) || ($_script_js = $this->get_script_js($_tag_frag, FALSE)))
+							$_script_async = $this->get_script_js_async($_tag_frag, FALSE);
 
 					if($_script_src || $_script_js) // One or the other is fine.
 					{
@@ -956,298 +1351,40 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * Construct a checksum for an array of tag fragments.
+		 * Test a script tag fragment to see if it's JavaScript.
 		 *
-		 * @since 140417 Initial release.
+		 * @since 140921 Initial release.
 		 *
-		 * @note This routine purposely excludes any "exclusions" from the checksum.
-		 *    All that's important here is an exclusion's position in the array,
-		 *    not its fragmentation; it's excluded anyway.
+		 * @param array $tag_frag A JS tag fragment.
 		 *
-		 * @param array $tag_frags Array of tag fragments.
-		 *
-		 * @return string MD5 checksum.
+		 * @return boolean TRUE if it contains JavaScript.
 		 */
-		protected function get_tag_frags_checksum(array $tag_frags)
+		protected function is_script_tag_frag_js(array $tag_frag)
 		{
-			foreach($tag_frags as &$_frag) // Exclude exclusions.
-				$_frag = ($_frag['exclude']) ? array('exclude' => TRUE) : $_frag;
-			unset($_frag); // A little housekeeping.
+			if(empty($tag_frag['script_open_tag']) || empty($tag_frag['script_closing_tag']))
+				return FALSE; // Nope; missing open|closing tag.
 
-			return md5(serialize($tag_frags));
-		}
+			$type = $language = ''; // Initialize.
 
-		/**
-		 * Strip existing charset rules from CSS code.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string $css CSS code.
-		 *
-		 * @return string CSS after having stripped away existing charset rules.
-		 */
-		protected function strip_existing_css_charsets($css)
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
+			if(stripos($tag_frag['script_open_tag'], 'type') !== 0)
+				if(preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m))
+					$type = $_m['value'];
 
-			$css = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/i', '', $css);
-			if($css) $css = trim($css);
+			unset($_m); // Just a little housekeeping.
 
-			return $css;
-		}
+			if(stripos($tag_frag['script_open_tag'], 'language') !== 0)
+				if(preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m))
+					$language = $_m['value'];
 
-		/**
-		 * Strip existing charsets and add a UTF-8 `@charset` rule.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string $css CSS code.
-		 *
-		 * @return string CSS code (possibly with a prepended UTF-8 charset rule).
-		 */
-		protected function strip_prepend_css_charset_utf8($css)
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
+			unset($_m); // Just a little housekeeping.
 
-			$css = $this->strip_existing_css_charsets($css);
-			if($css) $css = '@charset "UTF-8";'."\n".$css;
+			if($type && stripos($type, 'javascript') === FALSE)
+				return FALSE; // Not JavaScript.
 
-			return $css;
-		}
+			if($language && stripos($language, 'javascript') === FALSE)
+				return FALSE; // Not JavaScript.
 
-		/**
-		 * Moves special CSS `@rules` to the top.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string  $css CSS code.
-		 * @param integer $___recursion Internal use only.
-		 *
-		 * @return string CSS code after having moved special `@rules` to the top.
-		 *
-		 * @see <https://developer.mozilla.org/en-US/docs/Web/CSS/@charset>
-		 * @see <http://stackoverflow.com/questions/11746581/nesting-media-rules-in-css>
-		 */
-		protected function move_special_css_at_rules_to_top($css, $___recursion = 0)
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
-
-			$max_recursions = 2; // `preg_match_all()` calls.
-			if($___recursion >= $max_recursions)
-				return $css; // All done here.
-
-			if(stripos($css, 'charset') === FALSE && stripos($css, 'import') === FALSE)
-				return $css; // Save some time. Nothing to do here.
-
-			if(preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
-			   || preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
-			) // Searched in a specific order. Recursion dictates a precise order based on what we find in these regex patterns.
-			{
-				$top_rules = array(); // Initialize.
-
-				foreach($rules as $_rule)
-					$top_rules[] = $_rule['rule'];
-				unset($_rule); // Housekeeping.
-
-				$css = $this->replace_once($top_rules, '', $css);
-				$css = $this->move_special_css_at_rules_to_top($css, $___recursion + 1);
-				$css = implode("\n\n", $top_rules)."\n\n".$css;
-			}
-			return $css;
-		}
-
-		/**
-		 * Resolves `@import` rules in CSS code recursively.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string  $css CSS code.
-		 * @param string  $media Current media specification.
-		 * @param boolean $___recursion Internal use only.
-		 *
-		 * @return string CSS code after all `@import` rules have been resolved recursively.
-		 */
-		protected function resolve_resolved_css_imports($css, $media, $___recursion = FALSE)
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
-
-			$media = $this->current_css_media = (string)$media;
-			if(!$media) $media = $this->current_css_media = 'all';
-
-			$import_media_without_url_regex = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*(["\'])(?P<url>.+?)\\1(?P<media>[^;]*?);/i';
-			$import_media_with_url_regex    = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s+url\s*\(\s*(["\']?)(?P<url>.+?)\\1\s*\)(?P<media>[^;]*?);/i';
-
-			$css = preg_replace_callback($import_media_without_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
-			$css = preg_replace_callback($import_media_with_url_regex, array($this, '_resolve_resolved_css_imports_cb'), $css);
-
-			if(preg_match_all($import_media_without_url_regex, $css, $_m))
-				foreach($_m['media'] as $_media) if(!$_media || $_media === $this->current_css_media)
-					return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
-			unset($_m, $_media); // Housekeeping.
-
-			if(preg_match_all($import_media_with_url_regex, $css, $_m))
-				foreach($_m['media'] as $_media) if(!$_media || $_media === $this->current_css_media)
-					return $this->resolve_resolved_css_imports($css, $this->current_css_media, TRUE); // Recursive.
-			unset($_m, $_media); // Housekeeping.
-
-			return $css;
-		}
-
-		/**
-		 * Callback handler for resolving @ import rules.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $m An array of regex matches.
-		 *
-		 * @return string CSS after import resolution, else an empty string.
-		 */
-		protected function _resolve_resolved_css_imports_cb(array $m)
-		{
-			if(empty($m['url']))
-				return ''; // Nothing to resolve.
-
-			if(!empty($m['media']) && $m['media'] !== $this->current_css_media)
-				return $m[0]; // Not possible; different media.
-
-			if(($css = $this->remote($m['url'])))
-				$css = $this->resolve_css_relatives($css, $m['url']);
-
-			return $css;
-		}
-
-		/**
-		 * Resolve relative URLs in CSS code.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param string $css CSS code.
-		 * @param string $base Optional. Base URL to calculate from.
-		 *    Defaults to the current HTTP location for the browser.
-		 *
-		 * @return string CSS code after having all URLs resolved.
-		 */
-		protected function resolve_css_relatives($css, $base = '')
-		{
-			if(!($css = (string)$css))
-				return $css; // Nothing to do.
-
-			$this->current_base = $base; // Make this available to callback handlers (possible empty string here).
-
-			$import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/i';
-			$any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/i';
-
-			$css = preg_replace_callback($import_without_url_regex, array($this, '_resolve_css_relatives_import_cb'), $css);
-			$css = preg_replace_callback($any_url_regex, array($this, '_resolve_css_relatives_url_cb'), $css);
-
-			return $css;
-		}
-
-		/**
-		 * Callback handler for CSS relative URL resolutions.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $m An array of regex matches.
-		 *
-		 * @return string CSS `@import` rule with relative URL resolved.
-		 */
-		protected function _resolve_css_relatives_import_cb(array $m)
-		{
-			return $m['import'].$m['open_encap'].$this->resolve_relative_url($m['url'], $this->current_base).$m['close_encap'];
-		}
-
-		/**
-		 * Callback handler for CSS relative URL resolutions.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $m An array of regex matches.
-		 *
-		 * @return string CSS `url()` resource with relative URL resolved.
-		 */
-		protected function _resolve_css_relatives_url_cb(array $m)
-		{
-			if(stripos($m['url'], 'data:') === 0)
-				return $m[0]; // Don't resolve `data:` URIs.
-
-			return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolve_relative_url($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
-		}
-
-		/**
-		 * Get a CSS link href value from a tag fragment.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $tag_frag A CSS tag fragment.
-		 *
-		 * @return string The link href value if possible; else an empty string.
-		 */
-		protected function get_link_css_href(array $tag_frag)
-		{
-			if(!empty($tag_frag['link_self_closing_tag']) && preg_match('/type\s*\=\s*(["\'])text\/css\\1|rel\s*=\s*(["\'])stylesheet\\2/i', $tag_frag['link_self_closing_tag']))
-				if(preg_match('/\s+href\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $href) && ($link_css_href = trim($this->n_url_amps($href['value']))))
-					return $link_css_href;
-
-			return '';
-		}
-
-		/**
-		 * Get a CSS link media rule from a tag fragment.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $tag_frag A CSS tag fragment.
-		 *
-		 * @return string The link media value if possible; else a default value of `all`.
-		 */
-		protected function get_link_css_media(array $tag_frag)
-		{
-			if(!empty($tag_frag['link_self_closing_tag']) && preg_match('/type\s*\=\s*(["\'])text\/css\\1|rel\s*=\s*(["\'])stylesheet\\2/i', $tag_frag['link_self_closing_tag']))
-				if(preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $media) && ($link_css_media = trim($media['value'])))
-					return $link_css_media;
-
-			return 'all';
-		}
-
-		/**
-		 * Get a CSS style media rule from a tag fragment.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $tag_frag A CSS tag fragment.
-		 *
-		 * @return string The style media value if possible; else a default value of `all`.
-		 */
-		protected function get_style_css_media(array $tag_frag)
-		{
-			if(!empty($tag_frag['style_open_tag']) && !empty($tag_frag['style_closing_tag']) && preg_match('/\<style\s*\>|type\s*\=\s*(["\'])text\/css\\1/i', $tag_frag['style_open_tag']))
-				if(preg_match('/\s+media\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $media) && ($style_css_media = trim($media['value'])))
-					return $style_css_media;
-
-			return 'all';
-		}
-
-		/**
-		 * Get style CSS from a CSS tag fragment.
-		 *
-		 * @since 140417 Initial release.
-		 *
-		 * @param array $tag_frag A CSS tag fragment.
-		 *
-		 * @return string The style CSS code (if possible); else an empty string.
-		 */
-		protected function get_style_css(array $tag_frag)
-		{
-			if(!empty($tag_frag['style_open_tag']) && !empty($tag_frag['style_closing_tag']) && preg_match('/\<style\s*\>|type\s*\=\s*(["\'])text\/css\\1/i', $tag_frag['style_open_tag']))
-				if(!empty($tag_frag['style_css']) && ($style_css = trim($tag_frag['style_css'])))
-					return $style_css;
-
-			return '';
+			return TRUE; // Yes, this is JavaScript.
 		}
 
 		/**
@@ -1255,17 +1392,23 @@ namespace websharks\html_compressor
 		 *
 		 * @since 140417 Initial release.
 		 *
-		 * @param array $tag_frag A JS tag fragment.
+		 * @param array   $tag_frag A JS tag fragment.
+		 * @param boolean $test_for_js Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's JavaScript.
 		 *
 		 * @return string The script JS src value (if possible); else an empty string.
 		 */
-		protected function get_script_js_src(array $tag_frag)
+		protected function get_script_js_src(array $tag_frag, $test_for_js = TRUE)
 		{
-			if(!empty($tag_frag['script_open_tag']) && !empty($tag_frag['script_closing_tag']) && preg_match('/\<script\s*\>|type\s*\=\s*(["\'])(?:text\/javascript|application\/(?:x\-)?javascript)\\1|language\s*\=\s*(["\'])javascript\\2/i', $tag_frag['script_open_tag']))
-				if(preg_match('/\s+src\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $src) && ($script_js_src = trim($this->n_url_amps($src['value']))))
-					return $script_js_src;
+			if($test_for_js && !$this->is_script_tag_frag_js($tag_frag))
+				return ''; // This script tag does not contain JavaScript.
 
-			return '';
+			if(preg_match('/\ssrc\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m))
+				return trim($this->n_url_amps($_m['value']));
+
+			unset($_m); // Just a little housekeeping.
+
+			return ''; // Unable to find an `src` attribute value.
 		}
 
 		/**
@@ -1273,17 +1416,23 @@ namespace websharks\html_compressor
 		 *
 		 * @since 140417 Initial release.
 		 *
-		 * @param array $tag_frag A JS tag fragment.
+		 * @param array   $tag_frag A JS tag fragment.
+		 * @param boolean $test_for_js Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's JavaScript.
 		 *
 		 * @return string The script JS async|defer value (if possible); else an empty string.
 		 */
-		protected function get_script_js_async(array $tag_frag)
+		protected function get_script_js_async(array $tag_frag, $test_for_js = TRUE)
 		{
-			if(!empty($tag_frag['script_open_tag']) && !empty($tag_frag['script_closing_tag']) && preg_match('/\<script\s*\>|type\s*\=\s*(["\'])(?:text\/javascript|application\/(?:x\-)?javascript)\\1|language\s*\=\s*(["\'])javascript\\2/i', $tag_frag['script_open_tag']))
-				if(preg_match('/\s+(?:async|defer)(?:\>|\s*\=\s*(["\'])(?P<value>[^"\']*?)\\1|\s+)?/i', $tag_frag['script_open_tag'], $async) && (empty($async['value']) || in_array(strtolower($async), array('1', 'on', 'yes', 'true', 'defer', 'async'), TRUE)) && ($script_js_async = 'async'))
-					return $script_js_async;
+			if($test_for_js && !$this->is_script_tag_frag_js($tag_frag))
+				return ''; // This script tag does not contain JavaScript.
 
-			return '';
+			if(preg_match('/\s(?:async|defer)(?:\>|\s+[^=]|\s*\=\s*(["\'])(?:1|on|yes|true|async|defer)\\1)/i', $tag_frag['script_open_tag'], $_m))
+				return 'async'; // Yes, load this asynchronously.
+
+			unset($_m); // Just a little housekeeping.
+
+			return ''; // Unable to find a TRUE `async|defer` attribute.
 		}
 
 		/**
@@ -1291,18 +1440,28 @@ namespace websharks\html_compressor
 		 *
 		 * @since 140417 Initial release.
 		 *
-		 * @param array $tag_frag A JS tag fragment.
+		 * @param array   $tag_frag A JS tag fragment.
+		 * @param boolean $test_for_js Defaults to a TRUE value.
+		 *    If TRUE, we will test tag fragment to make sure it's JavaScript.
 		 *
 		 * @return string The script JS code (if possible); else an empty string.
 		 */
-		protected function get_script_js(array $tag_frag)
+		protected function get_script_js(array $tag_frag, $test_for_js = TRUE)
 		{
-			if(!empty($tag_frag['script_open_tag']) && !empty($tag_frag['script_closing_tag']) && preg_match('/\<script\s*\>|type\s*\=\s*(["\'])(?:text\/javascript|application\/(?:x\-)?javascript)\\1|language\s*\=\s*(["\'])javascript\\2/i', $tag_frag['script_open_tag']))
-				if(!empty($tag_frag['script_js']) && ($script_js = trim($tag_frag['script_js'])))
-					return $script_js;
+			if(empty($tag_frag['script_js'])) // An obvious issue.
+				return ''; // Not possible; no JavaScript code.
 
-			return '';
+			if($test_for_js && !$this->is_script_tag_frag_js($tag_frag))
+				return ''; // This script tag does not contain JavaScript.
+
+			return trim($tag_frag['script_js']); // JavaScript code.
 		}
+
+		/********************************************************************************************************/
+
+		/*
+		 * Frag-Related Utilities
+		 */
 
 		/**
 		 * Build an HTML fragment from HTML source code.
@@ -1318,7 +1477,7 @@ namespace websharks\html_compressor
 			if(!($html = (string)$html))
 				return array(); // Nothing to do.
 
-			if(preg_match('/(?P<all>(?P<open_tag>\<html(?:\s+[^\>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/html\>))/is', $html, $html_frag))
+			if(preg_match('/(?P<all>(?P<open_tag>\<html(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/html\>))/is', $html, $html_frag))
 				return $this->remove_numeric_keys_deep($html_frag);
 
 			return array();
@@ -1338,7 +1497,7 @@ namespace websharks\html_compressor
 			if(!($html = (string)$html))
 				return array(); // Nothing to do.
 
-			if(preg_match('/(?P<all>(?P<open_tag>\<head(?:\s+[^\>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/head\>))/is', $html, $head_frag))
+			if(preg_match('/(?P<all>(?P<open_tag>\<head(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/head\>))/is', $html, $head_frag))
 				return $this->remove_numeric_keys_deep($head_frag);
 
 			return array();
@@ -1365,20 +1524,25 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * Cleans up self-closing HTML tag lines.
+		 * Construct a checksum for an array of tag fragments.
 		 *
 		 * @since 140417 Initial release.
 		 *
-		 * @param string $html Self-closing HTML tag lines.
+		 * @note This routine purposely excludes any "exclusions" from the checksum.
+		 *    All that's important here is an exclusion's position in the array,
+		 *    not its fragmentation; it's excluded anyway.
 		 *
-		 * @return string Cleaned self-closing HTML tag lines.
+		 * @param array $tag_frags Array of tag fragments.
+		 *
+		 * @return string MD5 checksum.
 		 */
-		protected function cleanup_self_closing_html_tag_lines($html)
+		protected function get_tag_frags_checksum(array $tag_frags)
 		{
-			if(!($html = (string)$html))
-				return $html; // Nothing to do.
+			foreach($tag_frags as &$_frag) // Exclude exclusions.
+				$_frag = ($_frag['exclude']) ? array('exclude' => TRUE) : $_frag;
+			unset($_frag); // A little housekeeping.
 
-			return trim(preg_replace('/\>\s*?'."[\r\n]+".'\s*\</', ">\n<", $html));
+			return md5(serialize($tag_frags));
 		}
 
 		/********************************************************************************************************/
@@ -1444,7 +1608,7 @@ namespace websharks\html_compressor
 			if(!($html = (string)$html))
 				return $html; // Nothing to do.
 
-			$static =& static::$cache[__FUNCTION__];
+			$static =& static::$static[__FUNCTION__];
 
 			if(!isset($static['preservations'], $static['compressions'], $static['compress_with']))
 			{
@@ -1551,7 +1715,7 @@ namespace websharks\html_compressor
 			if(!($css = (string)$css))
 				return $css; // Nothing to do.
 
-			$static =& static::$cache[__FUNCTION__];
+			$static =& static::$static[__FUNCTION__];
 
 			if(!isset($static['replace'], $static['with'], $static['colors']))
 			{
@@ -2019,6 +2183,23 @@ namespace websharks\html_compressor
 			return $this->esc_refs_deep((string)$string, $times);
 		}
 
+		/**
+		 * Cleans up self-closing HTML tag lines.
+		 *
+		 * @since 140417 Initial release.
+		 *
+		 * @param string $html Self-closing HTML tag lines.
+		 *
+		 * @return string Cleaned self-closing HTML tag lines.
+		 */
+		protected function cleanup_self_closing_html_tag_lines($html)
+		{
+			if(!($html = (string)$html))
+				return $html; // Nothing to do.
+
+			return trim(preg_replace('/\>\s*?'."[\r\n]+".'\s*\</', ">\n<", $html));
+		}
+
 		/********************************************************************************************************/
 
 		/*
@@ -2073,8 +2254,8 @@ namespace websharks\html_compressor
 
 			$cache_key = $type.$checksum.(integer)$base_only;
 
-			if(isset($this->icache[__FUNCTION__.'_'.$cache_key]))
-				return $this->icache[__FUNCTION__.'_'.$cache_key];
+			if(isset($this->cache[__FUNCTION__.'_'.$cache_key]))
+				return $this->cache[__FUNCTION__.'_'.$cache_key];
 
 			if(!empty($this->options[__FUNCTION__.'_'.$type]))
 				$basedir = $this->n_dir_seps($this->options[__FUNCTION__.'_'.$type]);
@@ -2102,7 +2283,7 @@ namespace websharks\html_compressor
 			if(!is_readable($dir) || !is_writable($dir)) // Must have this directory; and it MUST be readable/writable.
 				throw new \exception(sprintf('Cache directory not readable/writable: `%1$s`. Failed on `%2$s`.', $basedir, $dir));
 
-			return ($this->icache[__FUNCTION__.'_'.$cache_key] = $dir);
+			return ($this->cache[__FUNCTION__.'_'.$cache_key] = $dir);
 		}
 
 		/**
@@ -2134,8 +2315,8 @@ namespace websharks\html_compressor
 
 			$cache_key = $type.$checksum.(integer)$base_only;
 
-			if(isset($this->icache[__FUNCTION__.'_'.$cache_key]))
-				return $this->icache[__FUNCTION__.'_'.$cache_key];
+			if(isset($this->cache[__FUNCTION__.'_'.$cache_key]))
+				return $this->cache[__FUNCTION__.'_'.$cache_key];
 
 			$basedir = $this->cache_dir($type, '', TRUE);
 
@@ -2160,7 +2341,7 @@ namespace websharks\html_compressor
 				$url .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
 				$url .= ($checksum) ? '/'.implode('/', str_split($checksum)) : '';
 			}
-			return ($this->icache[__FUNCTION__.'_'.$cache_key] = $url);
+			return ($this->cache[__FUNCTION__.'_'.$cache_key] = $url);
 		}
 
 		/**
@@ -2362,22 +2543,22 @@ namespace websharks\html_compressor
 		 */
 		protected function current_url_ssl()
 		{
-			if(isset(static::$cache[__FUNCTION__]))
-				return static::$cache[__FUNCTION__];
+			if(isset(static::$static[__FUNCTION__]))
+				return static::$static[__FUNCTION__];
 
 			if(!empty($_SERVER['SERVER_PORT']))
 				if($_SERVER['SERVER_PORT'] === '443')
-					return (static::$cache[__FUNCTION__] = TRUE);
+					return (static::$static[__FUNCTION__] = TRUE);
 
 			if(!empty($_SERVER['HTTPS']))
 				if($_SERVER['HTTPS'] === '1' || strcasecmp($_SERVER['HTTPS'], 'on') === 0)
-					return (static::$cache[__FUNCTION__] = TRUE);
+					return (static::$static[__FUNCTION__] = TRUE);
 
 			if(!empty($_SERVER['HTTP_X_FORWARDED_PROTO']))
 				if(strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0)
-					return (static::$cache[__FUNCTION__] = TRUE);
+					return (static::$static[__FUNCTION__] = TRUE);
 
-			return (static::$cache[__FUNCTION__] = FALSE);
+			return (static::$static[__FUNCTION__] = FALSE);
 		}
 
 		/**
@@ -2391,16 +2572,16 @@ namespace websharks\html_compressor
 		 */
 		protected function current_url_scheme()
 		{
-			if(isset(static::$cache[__FUNCTION__]))
-				return static::$cache[__FUNCTION__];
+			if(isset(static::$static[__FUNCTION__]))
+				return static::$static[__FUNCTION__];
 
 			if(!empty($this->options[__FUNCTION__])) // Defined explicity?
-				return (static::$cache[__FUNCTION__] = $this->n_url_scheme($this->options[__FUNCTION__]));
+				return (static::$static[__FUNCTION__] = $this->n_url_scheme($this->options[__FUNCTION__]));
 
 			if(!empty($_SERVER['REQUEST_SCHEME']))
-				return (static::$cache[__FUNCTION__] = $this->n_url_scheme($_SERVER['REQUEST_SCHEME']));
+				return (static::$static[__FUNCTION__] = $this->n_url_scheme($_SERVER['REQUEST_SCHEME']));
 
-			return (static::$cache[__FUNCTION__] = ($this->current_url_ssl()) ? 'https' : 'http');
+			return (static::$static[__FUNCTION__] = ($this->current_url_ssl()) ? 'https' : 'http');
 		}
 
 		/**
@@ -2414,16 +2595,16 @@ namespace websharks\html_compressor
 		 */
 		protected function current_url_host()
 		{
-			if(isset(static::$cache[__FUNCTION__]))
-				return static::$cache[__FUNCTION__];
+			if(isset(static::$static[__FUNCTION__]))
+				return static::$static[__FUNCTION__];
 
 			if(!empty($this->options[__FUNCTION__])) // Defined explicity?
-				return (static::$cache[__FUNCTION__] = $this->n_url_host($this->options[__FUNCTION__]));
+				return (static::$static[__FUNCTION__] = $this->n_url_host($this->options[__FUNCTION__]));
 
 			if(empty($_SERVER['HTTP_HOST']))
 				throw new \exception('Missing required `$_SERVER[\'HTTP_HOST\']`.');
 
-			return (static::$cache[__FUNCTION__] = $this->n_url_host($_SERVER['HTTP_HOST']));
+			return (static::$static[__FUNCTION__] = $this->n_url_host($_SERVER['HTTP_HOST']));
 		}
 
 		/**
@@ -2437,16 +2618,16 @@ namespace websharks\html_compressor
 		 */
 		protected function current_url_uri()
 		{
-			if(isset(static::$cache[__FUNCTION__]))
-				return static::$cache[__FUNCTION__];
+			if(isset(static::$static[__FUNCTION__]))
+				return static::$static[__FUNCTION__];
 
 			if(!empty($this->options[__FUNCTION__])) // Defined explicity?
-				return (static::$cache[__FUNCTION__] = $this->must_parse_uri($this->options[__FUNCTION__]));
+				return (static::$static[__FUNCTION__] = $this->must_parse_uri($this->options[__FUNCTION__]));
 
 			if(empty($_SERVER['REQUEST_URI']))
 				throw new \exception('Missing required `$_SERVER[\'REQUEST_URI\']`.');
 
-			return (static::$cache[__FUNCTION__] = $this->must_parse_uri($_SERVER['REQUEST_URI']));
+			return (static::$static[__FUNCTION__] = $this->must_parse_uri($_SERVER['REQUEST_URI']));
 		}
 
 		/**
@@ -2458,14 +2639,14 @@ namespace websharks\html_compressor
 		 */
 		protected function current_url()
 		{
-			if(isset(static::$cache[__FUNCTION__]))
-				return static::$cache[__FUNCTION__];
+			if(isset(static::$static[__FUNCTION__]))
+				return static::$static[__FUNCTION__];
 
 			$url = $this->current_url_scheme().'://';
 			$url .= $this->current_url_host();
 			$url .= $this->current_url_uri();
 
-			return (static::$cache[__FUNCTION__] = $url);
+			return (static::$static[__FUNCTION__] = $url);
 		}
 
 		/**
