@@ -28,6 +28,15 @@ namespace websharks\html_compressor
 		 */
 
 		/**
+		 * Current product title.
+		 *
+		 * @since 140926 Enhance JS error reporting.
+		 *
+		 * @var string Current product title.
+		 */
+		protected $product_title = 'HTML Compressor';
+
+		/**
 		 * Current version string.
 		 *
 		 * @since 140418 Version indicates release date.
@@ -219,9 +228,14 @@ namespace websharks\html_compressor
 		{
 			$this->options = $options; // Instance options.
 
+			# Product Title
+
+			if(!empty($this->options['product_title']) && is_string($this->options['product_title']))
+				$this->product_title = (string)$this->options['product_title'];
+
 			# Cache Expiration Time
 
-			if(!empty($this->options['cache_expiration_time']))
+			if(!empty($this->options['cache_expiration_time']) && is_string($this->options['cache_expiration_time']))
 				$this->cache_expiration_time = (string)$this->options['cache_expiration_time'];
 
 			# Vendor-Specific CSS Prefixes
@@ -311,15 +325,12 @@ namespace websharks\html_compressor
 
 			if($benchmark && !empty($time))
 			{
-				$product_title = 'HTML Compressor';
-				if(!empty($this->options['product_title']))
-					$product_title = (string)$this->options['product_title'];
 				$time = number_format(microtime(TRUE) - $time, 5, '.', '');
 
 				if($this->benchmark_times) $html .= "\n";
 				foreach($this->benchmark_times as $_benchmark_time)
-					$html .= "\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
-				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (overall). -->', htmlspecialchars($product_title), htmlspecialchars($time));
+					$html .= "\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($this->product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
+				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (overall). -->', htmlspecialchars($this->product_title), htmlspecialchars($time));
 				unset($_benchmark_time); // Housekeeping.
 			}
 			return $html;
