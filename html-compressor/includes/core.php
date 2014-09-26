@@ -1784,7 +1784,13 @@ namespace websharks\html_compressor
 				if(!$this->options['compress_js_code'])
 					$disabled = TRUE; // Disabled flag.
 
-			if(!$js || !empty($disabled)) goto finale; // Nothing to do.
+			if(!$js || !empty($disabled))
+				goto finale; // Nothing to do.
+
+			if(strlen($js) > 1000000)
+				// Exclude VERY large files. Too time-consuming.
+				// Should really be compressed ahead-of-time anyway.
+				goto finale; // Don't compress HUGE files.
 
 			try // Fail silently on exceptions.
 			{
