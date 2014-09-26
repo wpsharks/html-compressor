@@ -1792,13 +1792,17 @@ namespace websharks\html_compressor
 				// Should really be compressed ahead-of-time anyway.
 				goto finale; // Don't compress HUGE files.
 
-			try // Fail silently on exceptions.
+			try // Catch JS compression-related exceptions.
 			{
-				if(($compressed_js = js_minifier::compress($js)))
-					$js = $compressed_js;
+				if(!($compressed_js = js_minifier::compress($js)))
+					// `E_USER_NOTICE` to avoid a show-stopping problem.
+					trigger_error('JS compression failure.', E_USER_NOTICE);
+
+				else $js = $compressed_js; // Use compressed JS file.
 			}
-			catch(\exception $exception)
+			catch(\exception $exception) // Avoid show-stopping problems.
 			{
+				trigger_error($exception->getMessage(), E_USER_NOTICE);
 			}
 			finale: // Target point; finale/return value.
 
