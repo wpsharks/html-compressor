@@ -1786,9 +1786,14 @@ namespace websharks\html_compressor
 
 			if(!$js || !empty($disabled)) goto finale; // Nothing to do.
 
-			if(($compressed_js = js_minifier::compress($js)))
-				$js = $compressed_js;
-
+			try // Fail silently on exceptions.
+			{
+				if(($compressed_js = js_minifier::compress($js)))
+					$js = $compressed_js;
+			}
+			catch(\exception $exception)
+			{
+			}
 			finale: // Target point; finale/return value.
 
 			if($js) $js = trim($js);
