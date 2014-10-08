@@ -3402,7 +3402,7 @@ namespace websharks\html_compressor
 				$this->benchmark_times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
-					      'task'     => sprintf('fetching remote resource: `%1$s`', $url));
+					      'task'     => sprintf('fetching remote resource: `%1$s`; `%2$s` bytes received;', $url, strlen($response_body)));
 
 			return ($return_array) ? array('code' => $response_code, 'body' => $response_body) : $response_body;
 		}
