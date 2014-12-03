@@ -3276,8 +3276,8 @@ namespace websharks\html_compressor
 			unset($_key, $_value, $_header, $_header_value); // Housekeeping.
 
 			if($custom_request_method === 'POST' || ($body && $custom_request_method !== 'GET'))
-				$wp_remote_request = wp_remote_post($url, array('headers' => $assoc_headers, 'body' => $body, 'timeout' => $max_con_secs, 'redirection' => 5));
-			else $wp_remote_request = wp_remote_get($url, array('headers' => $assoc_headers, 'timeout' => $max_con_secs, 'redirection' => 5));
+				$wp_remote_request = wp_remote_post($url, array('headers' => $assoc_headers, 'body' => $body, 'timeout' => $max_con_secs, 'redirection' => 5, 'user-agent' => $this->product_title));
+			else $wp_remote_request = wp_remote_get($url, array('headers' => $assoc_headers, 'timeout' => $max_con_secs, 'redirection' => 5, 'user-agent' => $this->product_title));
 
 			if(is_wp_error($wp_remote_request)) // If this returns a \WP_Error we fail silently.
 				goto finale; // Nothing we can do in this case; this error could be attributed to one many issues.
@@ -3314,7 +3314,9 @@ namespace websharks\html_compressor
 				CURLOPT_ENCODING       => '',
 				CURLOPT_VERBOSE        => FALSE,
 				CURLOPT_FAILONERROR    => $fail_on_error,
-				CURLOPT_SSL_VERIFYPEER => FALSE
+				CURLOPT_SSL_VERIFYPEER => FALSE,
+
+				CURLOPT_USERAGENT      => $this->product_title,
 			);
 			if($body) // Has a request body that we need to send?
 			{
@@ -3363,7 +3365,9 @@ namespace websharks\html_compressor
 				                         'timeout'         => $max_stream_secs,
 
 				                         'follow_location' => $can_follow,
-				                         'max_redirects'   => $can_follow ? 5 : 0
+				                         'max_redirects'   => $can_follow ? 5 : 0,
+
+				                         'user_agent'      => $this->product_title,
 			                         ));
 			if(!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', FALSE, $stream_context)))
 			{
