@@ -350,3 +350,9 @@ See: <http://websharks.github.io/HTML-Compressor/codex/>
 Copyright: © 2014 [WebSharks, Inc.](http://www.websharks-inc.com/) (coded in the USA)
 
 Released under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.html).
+
+---
+
+## Throughput Graph (powered by waffle.io)
+
+[![Throughput Graph](https://graphs.waffle.io/websharks/html-compressor/throughput.svg)](https://waffle.io/websharks/html-compressor/metrics)
