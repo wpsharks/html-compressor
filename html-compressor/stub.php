@@ -4,7 +4,7 @@
  *
  * @since 140417 Initial release.
  * @package websharks\html_compressor
- * @author JasWSInc <https://github.com/JasWSInc>
+ * @author JasWSInc <https://github.com/jaswsinc>
  * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
  * @license GNU General Public License, version 2
  *

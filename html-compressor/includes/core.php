@@ -4,7 +4,7 @@
  *
  * @since 140417 Initial release.
  * @package websharks\html_compressor
- * @author JasWSInc <https://github.com/JasWSInc>
+ * @author JasWSInc <https://github.com/jaswsinc>
  * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
  * @license GNU General Public License, version 2
  */
@@ -14,10 +14,11 @@ namespace websharks\html_compressor
 	 * HTML Compressor (core class).
 	 *
 	 * @package websharks\html_compressor
-	 * @author JasWSInc <https://github.com/JasWSInc>
+	 * @author JasWSInc <https://github.com/jaswsinc>
 	 *
-	 * @property-read string $version Read-only access to version string.
-	 * @property-read array  $options Read-only access to current options.
+	 * @property-read string          $version Read-only access to version string.
+	 * @property-read array           $options Read-only access to current options.
+	 * @property-read benchmark_data  $benchmark_data Read-only access to benchmark data.
 	 */
 	class core // Heart of the HTML Compressor.
 	{
@@ -164,9 +165,9 @@ namespace websharks\html_compressor
 		 *
 		 * @since 140521 Adding additional benchmarks.
 		 *
-		 * @var array Filled by various methods.
+		 * @var benchmark_data Filled by various methods.
 		 */
-		protected $benchmark_times = array();
+		protected $benchmark_data;
 
 		/**
 		 * Current base HREF value.
@@ -226,7 +227,8 @@ namespace websharks\html_compressor
 		 */
 		public function __construct(array $options = array())
 		{
-			$this->options = $options; // Instance options.
+			$this->options        = $options;
+			$this->benchmark_data = new benchmark_data;
 
 			# Product Title
 
@@ -327,13 +329,15 @@ namespace websharks\html_compressor
 			{
 				$time = number_format(microtime(TRUE) - $time, 5, '.', '');
 
-				if($this->benchmark_times) $html .= "\n";
-				foreach($this->benchmark_times as $_benchmark_time)
+				if($this->benchmark_data->times)
+					$html .= "\n"; // Append.
+
+				foreach($this->benchmark_data->times as $_benchmark_time)
 					$html .= "\n".'<!-- '.sprintf('%1$s took %2$s seconds %3$s. -->', htmlspecialchars($this->product_title), htmlspecialchars($_benchmark_time['time']), htmlspecialchars($_benchmark_time['task']));
 				$html .= "\n\n".'<!-- '.sprintf('%1$s took %2$s seconds (overall). -->', htmlspecialchars($this->product_title), htmlspecialchars($time));
 				unset($_benchmark_time); // Housekeeping.
 			}
-			return $html;
+			return $html; // HTML markup.
 		}
 
 		/********************************************************************************************************/
@@ -422,7 +426,7 @@ namespace websharks\html_compressor
 			if($html) $html = trim($html);
 
 			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing/combining head/body CSS in checksum: `%1$s`', md5($html)));
@@ -573,7 +577,7 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $css_parts_checksum)
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('building parts based on CSS tag frags in checksum: `%1$s`', $css_parts_checksum));
@@ -664,7 +668,7 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $html_frag)
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compiling CSS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
@@ -1086,7 +1090,7 @@ namespace websharks\html_compressor
 			if($html) $html = trim($html);
 
 			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing/combining head JS in checksum: `%1$s`', md5($html)));
@@ -1143,7 +1147,7 @@ namespace websharks\html_compressor
 			if($html) $html = trim($html);
 
 			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing/combining footer JS in checksum: `%1$s`', md5($html)));
@@ -1268,7 +1272,7 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $js_parts_checksum)
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('building parts based on JS tag frags in checksum: `%1$s`', $js_parts_checksum));
@@ -1353,7 +1357,7 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $html_frag)
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compiling JS tag frags in checksum: `%1$s`', md5(serialize($html_frag))));
@@ -1593,7 +1597,7 @@ namespace websharks\html_compressor
 			if($html) $html = trim($html);
 
 			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing HTML w/ checksum: `%1$s`', md5($html)));
@@ -1700,7 +1704,7 @@ namespace websharks\html_compressor
 			if($css) $css = trim($css);
 
 			if($benchmark && !empty($time) && $css && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing CSS w/ checksum: `%1$s`', md5($css)));
@@ -1820,7 +1824,7 @@ namespace websharks\html_compressor
 			if($js) $js = trim($js);
 
 			if($benchmark && !empty($time) && $js && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing JS w/ checksum: `%1$s`', md5($js)));
@@ -1890,7 +1894,7 @@ namespace websharks\html_compressor
 			if($html) $html = trim($html);
 
 			if($benchmark && !empty($time) && $html && empty($disabled))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('compressing inline JS in checksum: `%1$s`', md5($html)));
@@ -2403,7 +2407,7 @@ namespace websharks\html_compressor
 			unset($_dir_file); // Housekeeping.
 
 			if($benchmark && !empty($time))
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => 'cleaning up the public/private cache directories');
@@ -3366,12 +3370,31 @@ namespace websharks\html_compressor
 			finale: // Target point; finale/return value.
 
 			if($benchmark && !empty($time) && $url)
-				$this->benchmark_times[] = // Benchmark data.
+				$this->benchmark_data->times[] = // Benchmark data.
 					array('function' => __FUNCTION__, // Function marker.
 					      'time'     => number_format(microtime(TRUE) - $time, 5, '.', ''),
 					      'task'     => sprintf('fetching remote resource: `%1$s`; `%2$s` bytes received;', $url, strlen($response_body)));
 
 			return ($return_array) ? array('code' => $response_code, 'body' => $response_body) : $response_body;
 		}
+	}
+
+	/**
+	 * HTML Compressor (benchmark data).
+	 *
+	 * @package websharks\html_compressor
+	 * @author JasWSInc <https://github.com/jaswsinc>
+	 */
+	class benchmark_data
+	{
+		/**
+		 * @var array An array of times.
+		 */
+		public $times = array();
+
+		/**
+		 * @var array An array of fragments.
+		 */
+		public $frags = array();
 	}
 }
