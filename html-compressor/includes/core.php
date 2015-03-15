@@ -1738,7 +1738,7 @@ namespace websharks\html_compressor
 					'line_breaks'     => '/['."\r\n\t".']+/',
 					'extra_spaces'    => '/ +/',
 					'de_spacifiables' => '/ *('.$de_spacifiables.') */',
-					'unnecessary_;s'  => '/;\}/'
+					'unnecessary_;s'  => '/;\}/',
 				);
 				$static['with']    = array('', '', ' ', '${1}', '}');
 				$static['colors']  = '/(?P<context>[:,\h]+#)(?P<hex>[a-z0-9]{6})/i';
