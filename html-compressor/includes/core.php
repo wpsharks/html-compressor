@@ -3217,7 +3217,7 @@ namespace websharks\html_compressor
 		 * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
 		 *
 		 * @throws \exception If unable to find a workable HTTP transport layer.
-		 *    Supported transports include: `wordpress`, `curl`, and `fopen`.
+		 *    Supported transports include: `curl` and `fopen`.
 		 */
 		protected function remote($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(),
 		                          $cookie_file = '', $fail_on_error = TRUE, $return_array = FALSE)
@@ -3239,7 +3239,7 @@ namespace websharks\html_compressor
 			$cookie_file = (string)$cookie_file;
 
 			$custom_request_regex = // e.g.`PUT::http://www.example.com/`
-				'/^(?P<custom_request_method>(?:GET|POST|PUT|DELETE))\:{2}(?P<url>.+)/i';
+				'/^(?P<custom_request_method>(?:GET|POST|PUT|PATCH|DELETE))\:{2}(?P<url>.+)/i';
 
 			if(preg_match($custom_request_regex, $url, $_url_parts))
 			{
@@ -3256,47 +3256,10 @@ namespace websharks\html_compressor
 
 			/* ---------------------------------------------------------- */
 
-			wordpress_transport: // WordPress transport layer.
-
-			/*
-			 * This is currently disabled because it runs in the shutdown phase.
-			 * Meaning, objects may have already been destructed by the time this runs.
-			 * Until a good reliable solution is found, this will remain disabled via `0 === 0`.
-			 */
-			if(0 === 0 || !defined('WPINC') || !class_exists('\\WP_Http') || !did_action('init') || $cookie_file
-			   || ($custom_request_method && !in_array($custom_request_method, array('GET', 'POST'), TRUE))
-			) goto curl_transport; // WP_Http unavailable; or unable to handle the request method type.
-
-			$assoc_headers = array(); // Initialize associative headers.
-			foreach($headers as $_key => $_value) if(strpos($_value, ':') > 0)
-			{
-				list($_header, $_header_value) = explode(':', $_value, 2);
-				$assoc_headers[trim($_header)] = trim($_header_value);
-			}
-			unset($_key, $_value, $_header, $_header_value); // Housekeeping.
-
-			if($custom_request_method === 'POST' || ($body && $custom_request_method !== 'GET'))
-				$wp_remote_request = wp_remote_post($url, array('headers' => $assoc_headers, 'body' => $body, 'timeout' => $max_con_secs, 'redirection' => 5, 'user-agent' => $this->product_title));
-			else $wp_remote_request = wp_remote_get($url, array('headers' => $assoc_headers, 'timeout' => $max_con_secs, 'redirection' => 5, 'user-agent' => $this->product_title));
-
-			if(is_wp_error($wp_remote_request)) // If this returns a \WP_Error we fail silently.
-				goto finale; // Nothing we can do in this case; this error could be attributed to one many issues.
-
-			$response_code = (integer)wp_remote_retrieve_response_code($wp_remote_request);
-			$response_body = trim((string)wp_remote_retrieve_body($wp_remote_request));
-
-			if($fail_on_error && $response_code >= 400)
-				$response_body = ''; // Fail silently.
-
-			goto finale; // All done here, jump to finale.
-
-			/* ---------------------------------------------------------- */
-
 			curl_transport: // cURL transport layer (recommended).
 
 			if(!extension_loaded('curl') || !is_callable('curl_version')
-			   || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
-			                                          && $curl_version['features'] & CURL_VERSION_SSL))
+			   || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version()) && $curl_version['features'] & CURL_VERSION_SSL))
 			) goto fopen_transport; // cURL will not work in this case.
 
 			$curl_opts = array(
