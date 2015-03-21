@@ -69,7 +69,7 @@ namespace websharks\html_compressor
 				                $_early_hook['priority'], $_early_hook['accepted_args']);
 			}
 			unset($_early_hook); // Just a little housekeeping.
-			$GLOBALS[__NAMESPACE__.'_early_hooks'] = array(); // Empty.
+			$early_hooks = array(); // Empty; i.e., reset early hooks.
 		}
 
 		/**
