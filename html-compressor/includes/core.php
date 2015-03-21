@@ -2303,10 +2303,10 @@ namespace websharks\html_compressor
 			if(!empty($this->options[__FUNCTION__.'_'.$type]))
 				$basedir = $this->n_dir_seps($this->options[__FUNCTION__.'_'.$type]);
 
-			else if(defined('WP_CONTENT_DIR'))
+			else if(defined('WP_CONTENT_DIR')) // On WordPress?
 				$basedir = $this->n_dir_seps(WP_CONTENT_DIR.'/htmlc/cache/'.$type);
 
-			else if(!empty($_SERVER['DOCUMENT_ROOT']))
+			else if(!empty($_SERVER['DOCUMENT_ROOT'])) // Decent fallback.
 				$basedir = $this->n_dir_seps($_SERVER['DOCUMENT_ROOT'].'/htmlc/cache/'.$type);
 
 			else throw new \exception(sprintf('Unable to find a good location for the cache directory. Please set option: `%1$s`.', __FUNCTION__.'_'.$type));
@@ -2317,12 +2317,18 @@ namespace websharks\html_compressor
 			{
 				$dir = $basedir; // Start with the base directory.
 				$dir .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
-				$dir .= ($checksum) ? '/'.implode('/', str_split($checksum)) : '';
+				$dir .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
 			}
-			if(!is_dir($dir) && mkdir($dir, 0775, TRUE) && $type === $this::dir_private_type && !is_file($basedir.'/.htaccess'))
-				if(!file_put_contents($basedir.'/.htaccess', $this->dir_htaccess_deny)) // Secure the private directory.
-					throw new \exception(sprintf('Unable to create `.htaccess` file in private cache directory: `%1$s`.', $basedir));
+			if(!is_dir($dir) && mkdir($dir, 0775, TRUE)) // New directory?
+			{
+				if($type === $this::dir_public_type && !is_file($basedir.'/.htaccess'))
+					if(!file_put_contents($basedir.'/.htaccess', $this->dir_htaccess_allow)) // Configure public directory.
+						throw new \exception(sprintf('Unable to create `.htaccess` file in public cache directory: `%1$s`.', $basedir));
 
+				if($type === $this::dir_private_type && !is_file($basedir.'/.htaccess'))
+					if(!file_put_contents($basedir.'/.htaccess', $this->dir_htaccess_deny)) // Secure the private directory.
+						throw new \exception(sprintf('Unable to create `.htaccess` file in private cache directory: `%1$s`.', $basedir));
+			}
 			if(!is_readable($dir) || !is_writable($dir)) // Must have this directory; and it MUST be readable/writable.
 				throw new \exception(sprintf('Cache directory not readable/writable: `%1$s`. Failed on `%2$s`.', $basedir, $dir));
 
@@ -2483,13 +2489,22 @@ namespace websharks\html_compressor
 		}
 
 		/**
-		 * Apache `.htaccess` access denial snippet.
+		 * Apache `.htaccess` denial snippet.
 		 *
 		 * @since 140417 Initial release.
 		 *
 		 * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
 		 */
 		protected $dir_htaccess_deny = "<IfModule authz_core_module>\n\tRequire all denied\n</IfModule>\n<IfModule !authz_core_module>\n\tdeny from all\n</IfModule>";
+
+		/**
+		 * Apache `.htaccess` for public files.
+		 *
+		 * @since 150321 Improving publicly cacheable files.
+		 *
+		 * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
+		 */
+		protected $dir_htaccess_allow = "<IfModule authz_core_module>\n\tRequire all granted\n</IfModule>\n<IfModule !authz_core_module>\n\tallow from all\n</IfModule>\n\n<IfModule headers_module>\n\t<FilesMatch \"\\.(html|js|css)$\">\n\t\tHeader append Vary: Accept-Encoding\n\t</FilesMatch>\n</IfModule>";
 
 		/********************************************************************************************************/
 
