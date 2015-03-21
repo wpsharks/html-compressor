@@ -747,8 +747,8 @@ namespace websharks\html_compressor
 
 			$type = ''; // Initialize.
 
-			if(stripos($tag_frag['script_open_tag'], 'type') !== 0)
-				if(preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m))
+			if(stripos($tag_frag['style_open_tag'], 'type') !== 0)
+				if(preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $_m))
 					$type = $_m['value'];
 
 			unset($_m); // Just a little housekeeping.
