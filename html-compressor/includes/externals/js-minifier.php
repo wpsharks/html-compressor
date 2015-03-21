@@ -35,8 +35,15 @@ class js_minifier {
      */
     public static function compress($js)
     {
-        $js_minifier = new js_minifier($js);
-        return $js_minifier->min();
+	    try // Fail gracefully on error.
+	    {
+			$js_minifier = new js_minifier($js);
+			return $js_minifier->min();
+	    }
+	    catch(\exception $exception)
+	    {
+		    return $js; // Original JavaScript.
+	    }
     }
 
     /**
