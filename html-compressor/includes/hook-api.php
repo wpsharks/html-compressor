@@ -45,6 +45,31 @@ namespace websharks\html_compressor
 		 */
 		public function __construct()
 		{
+			if(empty($GLOBALS[__NAMESPACE__.'_early_hooks']))
+				return; // Nothing more to do here.
+
+			$GLOBALS[__NAMESPACE__.'_early_hooks'] = (array)$GLOBALS[__NAMESPACE__.'_early_hooks'];
+			$early_hooks                           = &$GLOBALS[__NAMESPACE__.'_early_hooks'];
+
+			foreach($early_hooks as $_early_hook)
+			{
+				if(empty($_early_hook['hook']))
+					continue; // Empty; bypass.
+
+				if(empty($_early_hook['function']))
+					continue; // Empty; bypass.
+
+				if(!isset($_early_hook['priority']))
+					$_early_hook['priority'] = 10;
+
+				if(!isset($_early_hook['accepted_args']))
+					$_early_hook['accepted_args'] = 1;
+
+				$this->add_hook($_early_hook['hook'], $_early_hook['function'],
+				                $_early_hook['priority'], $_early_hook['accepted_args']);
+			}
+			unset($_early_hook); // Just a little housekeeping.
+			$GLOBALS[__NAMESPACE__.'_early_hooks'] = array(); // Empty.
 		}
 
 		/**
