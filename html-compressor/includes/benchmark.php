@@ -91,10 +91,10 @@ namespace websharks\html_compressor
 			if(!($function = trim((string)$function)))
 				return; // Not possible.
 
-			if(!($start_time = (float)$start_time) <= 0)
+			if(($start_time = (float)$start_time) <= 0)
 				return; // Not possible.
 
-			if(!($end_time = (float)microtime(TRUE)) <= 0)
+			if(($end_time = (float)microtime(TRUE)) <= 0)
 				return; // Not possible.
 
 			if(!($task = trim((string)$task)))
