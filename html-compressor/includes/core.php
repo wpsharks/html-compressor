@@ -10,6 +10,7 @@
  */
 namespace websharks\html_compressor
 {
+	require_once dirname(__FILE__).'/hook-api.php';
 	require_once dirname(__FILE__).'/benchmark.php';
 
 	/**
@@ -21,6 +22,7 @@ namespace websharks\html_compressor
 	 *
 	 * @property-read string    $version Read-only access to version string.
 	 * @property-read array     $options Read-only access to current options.
+	 * @property-read hook_api  $hook_api Read-only access to hook API class.
 	 * @property-read benchmark $benchmark Read-only access to benchmark class.
 	 */
 	class core // Heart of the HTML Compressor.
@@ -57,6 +59,24 @@ namespace websharks\html_compressor
 		 * @var array Set dynamically by class constructor.
 		 */
 		protected $options = array();
+
+		/**
+		 * Hook API class instance.
+		 *
+		 * @since 150321 Adding hook API for plugins.
+		 *
+		 * @var hook_api Hook API class instance.
+		 */
+		protected $hook_api; // Class instance.
+
+		/**
+		 * Benchmark class instance.
+		 *
+		 * @since 150315 Adding additional benchmarks.
+		 *
+		 * @var benchmark Filled by various methods.
+		 */
+		protected $benchmark; // Class instance.
 
 		/**
 		 * Compatible with PHP's `strtotime()` function.
@@ -164,15 +184,6 @@ namespace websharks\html_compressor
 		protected $built_in_regex_js_exclusion_patterns = array('\.js#.', '\.google\-analytics\.com\/', '\Wga\s*\(', '\W_gaq\.push\s*\(');
 
 		/**
-		 * Benchmark class instance.
-		 *
-		 * @since 150315 Adding additional benchmarks.
-		 *
-		 * @var benchmark Filled by various methods.
-		 */
-		protected $benchmark; // Class instance.
-
-		/**
 		 * Current base HREF value.
 		 *
 		 * @since 140417 Initial release.
@@ -231,6 +242,7 @@ namespace websharks\html_compressor
 		public function __construct(array $options = array())
 		{
 			$this->options   = $options; // Configurable options.
+			$this->hook_api  = new hook_api; // Class instance.
 			$this->benchmark = new benchmark; // Class instance.
 
 			# Product Title
