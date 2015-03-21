@@ -577,6 +577,7 @@ namespace websharks\html_compressor
 
 					$_css_code_path     = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_path);
 					$_css_code_url      = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_url);
+					$_css_code_url      = $this->hook_api->apply_filters('part_url', $_css_code_url);
 					$_css_code_path_tmp = $_css_code_path.'.'.uniqid('', TRUE).'.tmp';
 					// Cache file creation is atomic; i.e. tmp file w/ rename.
 
@@ -1278,6 +1279,7 @@ namespace websharks\html_compressor
 
 					$_js_code_path     = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_path);
 					$_js_code_url      = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_url);
+					$_js_code_url      = $this->hook_api->apply_filters('part_url', $_js_code_url);
 					$_js_code_path_tmp = $_js_code_path.'.'.uniqid('', TRUE).'.tmp';
 					// Cache file creation is atomic; e.g. tmp file w/ rename.
 
