@@ -48,15 +48,15 @@ The HTML Compressor class was developed because all of us here at WebSharks™ a
 
 #### ↑ The Problem Here?
 
-Instead of a single CSS and/or JS file (i.e. one or two HTTP connections); the browser needs to make *several* requests; and it needs to download each of these resources seperately. This is not a problem that impacts WordPress alone, we see this issue across many publishing platforms where plugins are brought into the mix.
+Instead of a single CSS and/or JS file (i.e., one or two HTTP connections); the browser needs to make *several* requests; and it needs to download each of these resources seperately. This is not a problem that impacts WordPress alone, we see this issue across many publishing platforms where plugins are brought into the mix.
 
-Ideally, your publishing platform (or theme) would minimize the number of external resources that it depends on by consolidating those external resources (i.e. CSS/JS files) into just one or two files; and then compress them too. However, not all themes do this. In fact, this is not always possible (even when a theme/plugin developer is aware of the issue).
+Ideally, your publishing platform (or theme) would minimize the number of external resources that it depends on by consolidating those external resources (i.e., CSS/JS files) into just one or two files; and then compress them too. However, not all themes do this. In fact, this is not always possible (even when a theme/plugin developer is aware of the issue).
 
-For instance, if a theme/plugin developer is working within a set of PHP framework standards (e.g. doing things "the WordPress way"), the end result may not always be optimized in an ideal fashion. We know first-hand that this really bugs developers. Experienced developers don't create a mess by choice, it's just how the framework pulls everything together that can sometimes produce a mess. Also, when a site owner adds plugins to the mix later; where the publishing platform (or theme) is being supplemented by CSS/JS files that are plugin-specific — this is where things can really get crazy; e.g. a new CSS and/or JS file for each plugin.
+For instance, if a theme/plugin developer is working within a set of PHP framework standards (e.g., doing things "the WordPress way"), the end result may not always be optimized in an ideal fashion. We know first-hand that this really bugs developers. Experienced developers don't create a mess by choice, it's just how the framework pulls everything together that can sometimes produce a mess. Also, when a site owner adds plugins to the mix later; where the publishing platform (or theme) is being supplemented by CSS/JS files that are plugin-specific — this is where things can really get crazy; e.g., a new CSS and/or JS file for each plugin.
 
 ## Solution, the WebSharks™ HTML Compressor!
 
-**The WebSharks™ HTML Compressor works as an additional layer of functionality that can come in after your publishing platform pieces everything together.** The WebSharks™ HTML Compressor analyzes each page of your site in real-time; i.e. as it's being loaded; inspecting each line of HTML code.
+**The WebSharks™ HTML Compressor works as an additional layer of functionality that can come in after your publishing platform pieces everything together.** The WebSharks™ HTML Compressor analyzes each page of your site in real-time; i.e., as it's being loaded; inspecting each line of HTML code.
 
 CSS/JS files are combined (where possible) and compressed (where possible); then it can optimize the HTML code and any inline JavaScript/CSS too. The goal is to speed things up for your visitors and to reduce the number of HTTP connections that your server processes.
 
@@ -64,13 +64,13 @@ CSS/JS files are combined (where possible) and compressed (where possible); then
 
 All of these compression options are enabled by default, but you can modify this behavior as you see fit. Toward the bottom of this file you will find a list of all possible configuration options.
 
-**1.** The HTML Compressor starts by inspecting the `<head>` and `<body>` of the HTML document. An attempt is made to recursively combine all CSS resources (including inline styles, and all remote resources too) into a single CSS file. If `compress_css_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, hex color codes are optimized, etc, etc).
+**1.** The HTML Compressor starts by inspecting the `<head>` and `<body>` of the HTML document. An attempt is made to recursively combine all CSS resources (including inline styles, and all remote resources too) into a single CSS file. If `compress_css_code` is enabled (on by default), the code in this single file is also compressed (i.e., extra whitespace is removed, hex color codes are optimized, etc, etc).
 
    *A few NOTES regarding step `1`.*
 
    - **NOTE:** The HTML Compressor does its best to remain standards-compliant during this process; thereby reducing the chance of a conflict to an absolute minimum.
 
-   - **NOTE:** An attempt is made to fetch remote resources (e.g. externally hosted resources) or `@import` rules. Any remote resources are simply added to the single CSS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated CSS. The HTML Compressor is also capable of resolving file paths and `url()` references to the proper location during this process.
+   - **NOTE:** An attempt is made to fetch remote resources (e.g., externally hosted resources) or `@import` rules. Any remote resources are simply added to the single CSS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated CSS. The HTML Compressor is also capable of resolving file paths and `url()` references to the proper location during this process.
 
    - **NOTE:** The HTML Compressor avoids cascading conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site; or from page-to-page even. If 1 file is possible, that's what you'll get; otherwise you will get whatever compression is possible.
 
@@ -78,18 +78,18 @@ All of these compression options are enabled by default, but you can modify this
 
    - **NOTE:** All CSS `@` rules are preserved by the HTML Compressor too. This includes `@media` specifications (whether they be defined in an `@import` or `<link media="">` tag; or with an embedded `@media` rule). There is only one exception. The `@charset` rule is always forced to a value of `@charset "UTF-8";` (recommended anyway).
 
-   - **NOTE:** Conditional CSS (e.g. `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Cascading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
+   - **NOTE:** Conditional CSS (e.g., `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Cascading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
 
-**2.** Next, we inspect the `<head>` of the HTML document. An attempt is made to combine all JS resources in the `<head>` into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
+**2.** Next, we inspect the `<head>` of the HTML document. An attempt is made to combine all JS resources in the `<head>` into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e., extra whitespace is removed, variable names are optimized, etc, etc).
 
-**3.** Next, we inspect a special area of the source code that can be flagged for compression by wrapping a section with `<!--footer-scripts--><!--footer-scripts-->`. This flagging is only necessary if you have scripts that you intentionally place in the footer. If the HTML Compressor finds a `<!--footer-scripts--><!--footer-scripts-->` section; an attempt is made to combine all JS resources into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e. extra whitespace is removed, variable names are optimized, etc, etc).
+**3.** Next, we inspect a special area of the source code that can be flagged for compression by wrapping a section with `<!--footer-scripts--><!--footer-scripts-->`. This flagging is only necessary if you have scripts that you intentionally place in the footer. If the HTML Compressor finds a `<!--footer-scripts--><!--footer-scripts-->` section; an attempt is made to combine all JS resources into a single JS file. If `compress_js_code` is enabled (on by default), the code in this single file is also compressed (i.e., extra whitespace is removed, variable names are optimized, etc, etc).
 
    *A few NOTES regarding steps `2` and `3`.*
 
 
    - **NOTE:** The HTML Compressor does its best to remain standards-compliant during this process; thereby reducing the chance of a conflict to an absolute minimum.
 
-   - **NOTE:** An attempt is made to fetch remote resources (e.g. externally hosted JavaScript resources). Any remote resources are simply added to the single JS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated JS. The HTML Compressor is also capable of resolving file paths and references to the proper location during this process.
+   - **NOTE:** An attempt is made to fetch remote resources (e.g., externally hosted JavaScript resources). Any remote resources are simply added to the single JS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated JS. The HTML Compressor is also capable of resolving file paths and references to the proper location during this process.
 
    - **NOTE:** The HTML Compressor avoids loading order conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site; or from page-to-page even. If 1 file is possible, that's what you'll get; otherwise you will get whatever compression is possible.
 
@@ -97,11 +97,11 @@ All of these compression options are enabled by default, but you can modify this
 
    - **NOTE:** All JavaScript `async` indicators are preserved during this process. Asynchronous loading is detected by the `async` and/or `defer` attribute in a `<script>` tag.
 
-   - **NOTE:** Conditional JS (e.g. `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Loading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
+   - **NOTE:** Conditional JS (e.g., `<!--if[]` tags) are always excluded from consolidation so their behavior is not altered. Loading order is preserved when exclusions are encountered; this goes for `<!--if[]` tags too of course.
 
 **4.** Next, we look at the `<body>` for any inline `<script>` tags. While it is not possible  to consolidate inline JS; if `compress_inline_js_code` is enabled (on by default) an attempt is made to compress the JavaScript code in these inline code snippets to reduce the amount of overhead they might add.
 
-**5.** Last, we compress the HTML code itself (i.e. extra whitespace is removed). Care is taken to preserve special tags where raw formatting is important; but you should end up with a much smaller HTML file; and the external resources it depends on will have certainly be reduced to a bare minimum.
+**5.** Last, we compress the HTML code itself (i.e., extra whitespace is removed). Care is taken to preserve special tags where raw formatting is important; but you should end up with a much smaller HTML file; and the external resources it depends on will have certainly be reduced to a bare minimum.
 
 ----
 
@@ -196,7 +196,7 @@ $html = $html_compressor->compress($html);
 
 ## Class Constructor Options
 
-e.g. `new \websharks\html_compressor\core($options);`
+e.g., `new \websharks\html_compressor\core($options);`
 
 *where `$options` is an associative array with one or more keys listed below.*
 
@@ -207,29 +207,29 @@ e.g. `new \websharks\html_compressor\core($options);`
  *NOTE: these options only apply if compression is enabled for CSS/JS files.*
 
 - (array)`css_exclusions` Defaults to `array()`. If you have some CSS files (or inline styles) that should NOT be included by compression routines,
- please specify an array of search tokens to exclude. Search tokens are compared to external CSS file `href` values (i.e. URLs or paths).
+ please specify an array of search tokens to exclude. Search tokens are compared to external CSS file `href` values (i.e., URLs or paths).
  Search tokens are also compared to the contents of any inline `<style></style>` tags.
 
 - (array)`js_exclusions` Defaults to `array()`. If you have some JS files (or inline scripts) that should NOT be included by compression routines,
- please specify an array of search tokens to exclude. Search tokens are compared to external JS file `src` values (i.e. URLs or paths).
+ please specify an array of search tokens to exclude. Search tokens are compared to external JS file `src` values (i.e., URLs or paths).
  Search tokens are also compared to the contents of any inline `<script></script>` tags in cases where compression is possible.
 
   *NOTE: Search tokens should be string literals. The HTML Compressor currently does NOT support wildcards or regex in search tokens.
- If you need to use regex patterns instead of search tokens, please use a `regex_` prefix when you define the option key; e.g. `'regex_js_exclusions' => '/\special\-script\.js/i'`. This works for `regex_css_exclusions` too.*
+ If you need to use regex patterns instead of search tokens, please use a `regex_` prefix when you define the option key; e.g., `'regex_js_exclusions' => '/\special\-script\.js/i'`. This works for `regex_css_exclusions` too.*
 
 ----
 
 - (boolean)`disable_built_in_css_exclusions` Defaults to `FALSE`. There are a few built-in exclusion patterns that are updated (improved) with each new release of the HTML Compressor. It is recommended that you leave these enabled at all times.
- However, if you prefer to turn them off (i.e. to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
+ However, if you prefer to turn them off (i.e., to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
  Built-in exclusions deal with things that should almost always be excluded; for any site. If you'd like to see the list of built-in patterns
  you can read the `$built_in_regex_css_exclusion_patterns` class property. It's an array of regular expressions that are compared to external CSS file
- `href` values (i.e. URLs or paths); and they are also compared to the contents of any inline `<style></style>` tags.
+ `href` values (i.e., URLs or paths); and they are also compared to the contents of any inline `<style></style>` tags.
 
 - (boolean)`disable_built_in_js_exclusions` Defaults to `FALSE`. There are a few built-in exclusion patterns that are updated (improved) with each new release of the HTML Compressor. It is recommended that you leave these enabled at all times.
- However, if you prefer to turn them off (i.e. to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
+ However, if you prefer to turn them off (i.e., to *only* exclude the patterns you specify), you can set this to a `TRUE` value to disable all of those which are built-in.
  Built-in exclusions deal with things that should almost always be excluded; for any site. If you'd like to see the list of built-in patterns
  you can read the `$built_in_regex_js_exclusion_patterns` class property. It's an array of regular expressions that are compared to external JS file
- `src` values (i.e. URLs or paths); and they are also compared to the contents of any inline `<script></script>` tags.
+ `src` values (i.e., URLs or paths); and they are also compared to the contents of any inline `<script></script>` tags.
 
 ----
 
@@ -246,20 +246,20 @@ e.g. `new \websharks\html_compressor\core($options);`
   **There are two scenarios where a cache regeneration occurs.**
 
   1. When a cache file expires (based on your expiration time).
-  2. A cache file MUST be regenerated because there is a checksum mis-match (e.g. the content changed dynamically).
+  2. A cache file MUST be regenerated because there is a checksum mis-match (e.g., the content changed dynamically).
 
-  In short, `cache_expiration_time` controls the first scenario; i.e. the absolute maximum amount of time that a cache file can ever live (or be used); and this will impact the automatic cleanup routine too of course.
+  In short, `cache_expiration_time` controls the first scenario; i.e., the absolute maximum amount of time that a cache file can ever live (or be used); and this will impact the automatic cleanup routine too of course.
 
-- (string)`cache_dir_public` Absolute server path to a local cache directory that is available over HTTP (i.e. publicly accessible).
- If you exclude this, there are two default handlers. If `WP_CONTENT_DIR` is defined (i.e. you are running this within WordPress),
+- (string)`cache_dir_public` Absolute server path to a local cache directory that is available over HTTP (i.e., publicly accessible).
+ If you exclude this, there are two default handlers. If `WP_CONTENT_DIR` is defined (i.e., you are running this within WordPress),
  then your public cache directory will be located under: `wp-content/htmlc/cache/public`. Otherwise, this will default to
  a value of `$_SERVER['DOCUMENT_ROOT']/htmlc/cache/public`.
 
 - (string)`cache_dir_url_public` A publicly available URL which leads to your `cache_dir_public`.
- If you exclude this option, an automatic detection is used (i.e. a best guess based on `cache_dir_public`).
+ If you exclude this option, an automatic detection is used (i.e., a best guess based on `cache_dir_public`).
 
-- (string)`cache_dir_private` Absolute server path to a local cache directory that is NOT available over HTTP (i.e. private/hidden).
- If you exclude this, there are two default handlers. If `WP_CONTENT_DIR` is defined (i.e. you are running this within WordPress),
+- (string)`cache_dir_private` Absolute server path to a local cache directory that is NOT available over HTTP (i.e., private/hidden).
+ If you exclude this, there are two default handlers. If `WP_CONTENT_DIR` is defined (i.e., you are running this within WordPress),
  then your private cache directory will be located under: `wp-content/htmlc/cache/private`. Otherwise, this will default to
  a value of `$_SERVER['DOCUMENT_ROOT']/htmlc/cache/private`.
 
@@ -267,7 +267,7 @@ e.g. `new \websharks\html_compressor\core($options);`
  are never generated. Therefore, under normal circumstances you can ignore this option value all together.
 
 - (boolean)`cleanup_cache_dirs` Defaults to TRUE. By default, cache directories are cleaned up automatically
- over time; i.e. at semi-random intervals and also based on your `cache_expiration_time`. If you would prefer to cleanup
+ over time; i.e., at semi-random intervals and also based on your `cache_expiration_time`. If you would prefer to cleanup
  the cache on your own, you can set this to a FALSE value.
 
 ----
@@ -288,7 +288,7 @@ e.g. `new \websharks\html_compressor\core($options);`
 
 - (string)`current_url_uri` When this class is running as a web application, we can detect this value automatically.
  That said, if you intend to run this class outside of a web server environment you will need to tell the compressor
- what the current URI (i.e. path and query string) would be if the file you are compressing was being served as a web page.
+ what the current URI (i.e., path and query string) would be if the file you are compressing was being served as a web page.
  This should be set to something like `/path/to/page/?one=1&two=2`.
 
 ----
@@ -311,21 +311,21 @@ e.g. `new \websharks\html_compressor\core($options);`
 
 - (boolean)`compress_combine_remote_css_js` TRUE by default. If you prefer NOT to combine CSS/JS files from remote resource locations
  please set this to a FALSE value. By default, the options: `compress_combine_head_body_css`, `compress_combine_head_js`, `compress_combine_footer_js` will recursively combine all resources (including those from remote locations).
- If you set this to a FALSE value, all remote (externally hosted resources; e.g. those from CDNs or other remote URLs) will be excluded automatically to prevent remote off-site connections from taking place.
+ If you set this to a FALSE value, all remote (externally hosted resources; e.g., those from CDNs or other remote URLs) will be excluded automatically to prevent remote off-site connections from taking place.
 
-- (boolean)`compress_inline_js_code` TRUE by default. If you prefer NOT to compress inline JS code (i.e. minify the contents of inline `<script>` tags),
+- (boolean)`compress_inline_js_code` TRUE by default. If you prefer NOT to compress inline JS code (i.e., minify the contents of inline `<script>` tags),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the inline JS compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
-- (boolean)`compress_css_code` TRUE by default. If you prefer NOT to compress CSS files (i.e. minify the underlying CSS code),
+- (boolean)`compress_css_code` TRUE by default. If you prefer NOT to compress CSS files (i.e., minify the underlying CSS code),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the CSS compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
-- (boolean)`compress_js_code` TRUE by default. If you prefer NOT to compress JS files (i.e. minify the underlying JS code),
+- (boolean)`compress_js_code` TRUE by default. If you prefer NOT to compress JS files (i.e., minify the underlying JS code),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the JS compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
-- (boolean)`compress_html_code` TRUE by default. If you prefer NOT to compress HTML markup (i.e. the removal of extra whitespace, etc),
+- (boolean)`compress_html_code` TRUE by default. If you prefer NOT to compress HTML markup (i.e., the removal of extra whitespace, etc),
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the HTML compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
@@ -335,7 +335,7 @@ e.g. `new \websharks\html_compressor\core($options);`
 
 - (boolean|string)`benchmark` Off by default. If enabled, HTML comments are added to the final output with some useful information. If you set this to a `TRUE` value, it simply enables an overall time calculation. If you're debugging, and you need to see many other details too; you can set this to the string: `details` (not recommended in a production environment).
 
-- (string)`product_title` Define this if you'd like to change the title of a particular HTML Compressor instance (i.e. to change the name from the default "HTML Compressor" to something else you like better). If undefined, this defaults to `HTML Compressor`. Note: this impacts the title of the product displayed in the HTML comments; assuming that `benchmark` is enabled where comments are included in the final output.
+- (string)`product_title` Define this if you'd like to change the title of a particular HTML Compressor instance (i.e., to change the name from the default "HTML Compressor" to something else you like better). If undefined, this defaults to `HTML Compressor`. Note: this impacts the title of the product displayed in the HTML comments; assuming that `benchmark` is enabled where comments are included in the final output.
 
 - (array)`vendor_css_prefixes` An array of known vendor-specific CSS prefixes. Defaults to `array('moz','webkit','khtml','ms','o')`.
 

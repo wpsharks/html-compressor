@@ -2382,7 +2382,7 @@ namespace websharks\html_compressor
 			{
 				$url = $baseurl; // Start with the base URL.
 				$url .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
-				$url .= ($checksum) ? '/'.implode('/', str_split($checksum)) : '';
+				$url .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
 			}
 			return ($this->cache[__FUNCTION__.'_'.$cache_key] = $url);
 		}
