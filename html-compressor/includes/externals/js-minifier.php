@@ -37,8 +37,9 @@ class js_minifier {
     {
 	    try // Fail gracefully on error.
 	    {
-			$js_minifier = new js_minifier($js);
-			return $js_minifier->min();
+		    $js_minifier = new js_minifier($js);
+		    $minified_js = $js_minifier->min();
+		    return $minified_js;
 	    }
 	    catch(\exception $exception)
 	    {
