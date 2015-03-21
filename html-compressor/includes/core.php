@@ -2333,7 +2333,7 @@ namespace websharks\html_compressor
 				$dir .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->current_url_host()), '-');
 				$dir .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
 			}
-			if(!is_dir($dir) && mkdir($dir, 0775, TRUE)) // New directory?
+			if(!is_dir($dir) && mkdir($dir, 0755, TRUE)) // New directory?
 			{
 				if($type === $this::dir_public_type && !is_file($basedir.'/.htaccess'))
 					if(!file_put_contents($basedir.'/.htaccess', $this->dir_htaccess_allow)) // Configure public directory.
