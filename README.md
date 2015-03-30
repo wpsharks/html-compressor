@@ -13,8 +13,6 @@ ob_start(array($html_compressor, 'compress'));
 
 ----
 
-This project is now on Floobits too! [Watch us code](https://floobits.com/jaswsinc/html-compressor/redirect) in real-time :-) <a href="https://floobits.com/jaswsinc/html-compressor/redirect"><img alt="Floobits status" width="100" height="40" src="https://floobits.com/jaswsinc/html-compressor.png" align="right" /></a>
-
 ## Where do I get the PHAR file?
 
 A PHAR binary is made available for each official release. See: [releases](https://github.com/websharks/html-compressor/releases).
@@ -350,9 +348,3 @@ See: <http://websharks.github.io/HTML-Compressor/codex/>
 Copyright: © 2014 [WebSharks, Inc.](http://www.websharks-inc.com/) (coded in the USA)
 
 Released under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.html).
-
----
-
-## Throughput Graph (powered by waffle.io)
-
-[![Throughput Graph](https://graphs.waffle.io/websharks/html-compressor/throughput.svg)](https://waffle.io/websharks/html-compressor/metrics)
