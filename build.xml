@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-model xlink:href="/usr/share/php5/PEAR/data/phing/etc/phing-grammar.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0" ?>
+
+  <project name="HTML Compressor" default="default">
+
+    <property name="build_dir" value=".~build" />
+    <property name="phar_file" value="${build_dir}/html-compressor.phar" />
+    <property name="phar_stub_file" value="stub.php" />
+    <property name="vendor_dir" value="includes/vendor" />
+    <property name="composer_lock" value="composer.lock" />
+
+    <target name="preamble">
+      <echo msg="PHP version: ${php.version}" />
+      <echo msg="Phing version: ${phing.version}" />
+      <echo msg="------------------------------------" />
+      <echo msg="Project: ${phing.project.name}" />
+      <echo msg="Base directory: ${project.basedir}" />
+      <echo msg="------------------------------------" />
+    </target>
+
+    <target name="prepare" depends="preamble">
+      <echo msg="Preparing to build..." />
+
+      <echo msg="Deleting previous: ${build_dir} ..." />
+      <delete dir="${build_dir}" includeemptydirs="true" quiet="true" />
+
+      <echo msg="Deleting previous: ${vendor_dir} ..." />
+      <delete dir="${vendor_dir}" includeemptydirs="true" quiet="true" />
+
+      <echo msg="Deleting previous: ${composer_lock} ..." />
+      <delete file="${composer_lock}" quiet="true" />
+
+      <echo msg="------------------------------------" />
+    </target>
+
+    <target name="build" depends="prepare">
+      <echo msg="Creating: ${build_dir} ..." />
+      <mkdir dir="${build_dir}" />
+
+      <echo msg="Running Composer..." />
+      <composer composer="composer" />
+
+      <echo msg="Creating PHAR package file..." />
+      <pharpackage basedir="./" stub="${phar_stub_file}" destfile="${phar_file}" />
+    </target>
+
+    <target name="default" depends="build_or_rebuild">
+      <echo msg="Build complete! :-)" />
+    </target>
+
+  </project>

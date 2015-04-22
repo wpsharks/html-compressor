@@ -40,11 +40,11 @@
 
 	"autoload"         : {
 		"psr-4": {
-			"WebSharks\\HtmlCompressor\\": "includes/classes/"
+			"WebSharks\\HtmlCompressor\\": "src/includes/classes/"
 		}
 	},
 
 	"config"           : {
-		"vendor-dir": "includes/vendor"
+		"vendor-dir": "src/includes/vendor"
 	}
 }
