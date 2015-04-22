@@ -16,6 +16,7 @@ ob_start(array($html_compressor, 'compress'));
 ## Installation Instructions (Two Options)
 
 1. As a [Composer](https://packagist.org/packages/websharks/html-compressor) Dependency
+
   ```json
   {
       "require": {
@@ -23,6 +24,7 @@ ob_start(array($html_compressor, 'compress'));
       }
   }
   ```
+
 2. Or, Download the PHAR Binary
   See: https://github.com/websharks/html-compressor/releases
 
