@@ -7,11 +7,24 @@ Combines & compresses CSS/JS/HTML code.
 ```php
 <?php
 require_once 'html-compressor.phar';
-$html_compressor = new \websharks\html_compressor\core();
+$html_compressor = new WebSharks\HtmlCompressor\Core();
 ob_start(array($html_compressor, 'compress'));
 ```
 
 ----
+
+## Installation Instructions (Two Options)
+
+1. As a [Composer](https://packagist.org/packages/websharks/html-compressor) Dependency
+  ```json
+  {
+      "require": {
+          "websharks/html-compressor": "dev-master"
+      }
+  }
+  ```
+2. Or, Download the PHAR Binary
+  See: https://github.com/websharks/html-compressor/releases
 
 ## Where do I get the PHAR file?
 
@@ -23,34 +36,34 @@ The HTML Compressor class was developed because all of us here at WebSharks™ a
 
 **For example**, if you look at the HTML source code for most sites powered by a publishing platform such as WordPress (or audit one in a web developer console), you will find **a complete mess like this**...
 
-	<link rel="stylesheet" href="theme.css" type="text/css" />
-	<link rel="stylesheet" href="child-theme.css" type="text/css" />
-	<link rel="stylesheet" href="theme-variation.css" type="text/css" />
-	<link rel="stylesheet" href="plugin1.css" type="text/css" />
-	<link rel="stylesheet" href="plugin2.css" type="text/css" />
-	<link rel="stylesheet" href="plugin3.css" type="text/css" />
-	<link rel="stylesheet" href="plugin4.css" type="text/css" />
-	<link rel="stylesheet" href="plugin5.css" type="text/css" />
-	... and on, and on, and on ...
+    <link rel="stylesheet" href="theme.css" type="text/css" />
+    <link rel="stylesheet" href="child-theme.css" type="text/css" />
+    <link rel="stylesheet" href="theme-variation.css" type="text/css" />
+    <link rel="stylesheet" href="plugin1.css" type="text/css" />
+    <link rel="stylesheet" href="plugin2.css" type="text/css" />
+    <link rel="stylesheet" href="plugin3.css" type="text/css" />
+    <link rel="stylesheet" href="plugin4.css" type="text/css" />
+    <link rel="stylesheet" href="plugin5.css" type="text/css" />
+    ... and on, and on, and on ...
 
-	<script type="text/javascript" src="jquery.js"></script>
-	<script type="text/javascript" src="jquery-migrate.min.js"></script>
-	<script type="text/javascript" src="tabs.min.js"></script>
-	<script type="text/javascript" src="custom.js"></script>
-	<script type="text/javascript" src="plugin1.js"></script>
-	<script type="text/javascript" src="plugin2.js"></script>
-	<script type="text/javascript" src="plugin3.js"></script>
-	<script type="text/javascript" src="plugin4.js"></script>
-	<script type="text/javascript" src="plugin5.js"></script>
-	... and on, and on, and on ...
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="jquery-migrate.min.js"></script>
+    <script type="text/javascript" src="tabs.min.js"></script>
+    <script type="text/javascript" src="custom.js"></script>
+    <script type="text/javascript" src="plugin1.js"></script>
+    <script type="text/javascript" src="plugin2.js"></script>
+    <script type="text/javascript" src="plugin3.js"></script>
+    <script type="text/javascript" src="plugin4.js"></script>
+    <script type="text/javascript" src="plugin5.js"></script>
+    ... and on, and on, and on ...
 
 #### ↑ The Problem Here?
 
-Instead of a single CSS and/or JS file (i.e., one or two HTTP connections); the browser needs to make *several* requests; and it needs to download each of these resources seperately. This is not a problem that impacts WordPress alone, we see this issue across many publishing platforms where plugins are brought into the mix.
+Instead of a single CSS and/or JS file (i.e., one or two HTTP connections); the browser needs to make *several* requests; and it needs to download each of these resources separately. This is not a problem that impacts WordPress alone, we see this issue across many publishing platforms where plugins are brought into the mix.
 
 Ideally, your publishing platform (or theme) would minimize the number of external resources that it depends on by consolidating those external resources (i.e., CSS/JS files) into just one or two files; and then compress them too. However, not all themes do this. In fact, this is not always possible (even when a theme/plugin developer is aware of the issue).
 
-For instance, if a theme/plugin developer is working within a set of PHP framework standards (e.g., doing things "the WordPress way"), the end result may not always be optimized in an ideal fashion. We know first-hand that this really bugs developers. Experienced developers don't create a mess by choice, it's just how the framework pulls everything together that can sometimes produce a mess. Also, when a site owner adds plugins to the mix later; where the publishing platform (or theme) is being supplemented by CSS/JS files that are plugin-specific — this is where things can really get crazy; e.g., a new CSS and/or JS file for each plugin.
+For instance, if a theme/plugin developer is working within a set of PHP framework standards (e.g., doing things "the WordPress way"), the end result may not always be optimized in an ideal fashion. We know first-hand that this really bugs developers. Experienced developers don't create a mess by choice, it's just how the framework pulls everything together that can sometimes produce a mess. Also, when a site owner adds plugins to the mix later; where the publishing platform (or theme) is being supplemented by CSS/JS files that are plugin-specific—this is where things can really get crazy; e.g., a new CSS and/or JS file for each plugin.
 
 ## Solution, the WebSharks™ HTML Compressor!
 
@@ -70,7 +83,7 @@ All of these compression options are enabled by default, but you can modify this
 
    - **NOTE:** An attempt is made to fetch remote resources (e.g., externally hosted resources) or `@import` rules. Any remote resources are simply added to the single CSS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated CSS. The HTML Compressor is also capable of resolving file paths and `url()` references to the proper location during this process.
 
-   - **NOTE:** The HTML Compressor avoids cascading conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site; or from page-to-page even. If 1 file is possible, that's what you'll get; otherwise you will get whatever compression is possible.
+   - **NOTE:** The HTML Compressor avoids cascading conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site—or from page-to-page even. If 1 file is possible, that's what you'll get. Otherwise, you will get whatever compression is possible.
 
    - **NOTE:** Under no circumstance will the HTML Compression alter the loading order of the underlying CSS resources. Even when files are combined in multiple sets (or certain exclusions are skipped over), the loading order is always preserved so that CSS conflicts are not introduced by this process.
 
@@ -84,12 +97,11 @@ All of these compression options are enabled by default, but you can modify this
 
    *A few NOTES regarding steps `2` and `3`.*
 
-
    - **NOTE:** The HTML Compressor does its best to remain standards-compliant during this process; thereby reducing the chance of a conflict to an absolute minimum.
 
    - **NOTE:** An attempt is made to fetch remote resources (e.g., externally hosted JavaScript resources). Any remote resources are simply added to the single JS file to eliminate any possibility of more than one HTTP connection being required to load the consolidated JS. The HTML Compressor is also capable of resolving file paths and references to the proper location during this process.
 
-   - **NOTE:** The HTML Compressor avoids loading order conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site; or from page-to-page even. If 1 file is possible, that's what you'll get; otherwise you will get whatever compression is possible.
+   - **NOTE:** The HTML Compressor avoids loading order conflicts by intelligently skipping over any exclusions that you define and/or anything that is impossible to consolidate. In some cases 10 files might become 1; in other cases 10 files might become 2 or 3. This could vary from site to site; or from page-to-page even. If 1 file is possible, that's what you'll get. Otherwise, you will get whatever compression is possible.
 
    - **NOTE:** Under no circumstance will the HTML Compression alter the loading order of the underlying JS resources. Even when files are combined in multiple sets (or certain exclusions are skipped over), the loading order is always preserved so that JS conflicts are not introduced by this process.
 
@@ -105,19 +117,19 @@ All of these compression options are enabled by default, but you can modify this
 
 ## Some Usage Examples
 
-### 1. HTML Compressor as an Output Buffer
+### 1. HTML Compressor As An Output Buffer
 *This code snippet should be processed BEFORE any other output occurs.*
 
 ```php
 <?php
 require_once 'html-compressor.phar';
-$html_compressor = new \websharks\html_compressor\core();
+$html_compressor = new WebSharks\HtmlCompressor\Core();
 ob_start(array($html_compressor, 'compress'));
 ```
 
 **TIP:** The `php.ini` directive [auto_prepend_file](http://www.php.net/manual/en/ini.core.php#ini.auto-prepend-file) is a nice/clean way to integrate the HTML Compressor. You could create a file as seen in this example and specify that as the `auto_prepend_file` to enable compression of every HTML file that you serve; noting that the HTML Compressor will simply pass any non-HTML code through it's buffer without compressing it. The HTML Compressor only attempts to compress data which contains a closing `</html>` tag.
 
-**IMPORTANT NOTE:** One thing to keep in mind is that the WebSharks™ HTML Compressor works best when it's integrated together with a page caching plugin like Quick Cache for WordPress; or another page caching plugin that you might prefer. **Why use a page caching plugin?** The HTML Compressor can be used on any site powered by PHP; but ideally you would cache the optimized HTML that it outputs, thereby removing the need for the HTML Compressor to analzye every single request. Of course, you *can* analyze every single request if you want to *(and the HTML Compressor has a cache of it's own to help keep things sane)*, but it's always better to store (cache) the compressed HTML output by this class. This will reduce server load and make your site even faster.
+**IMPORTANT NOTE:** One thing to keep in mind is that the WebSharks™ HTML Compressor works best when it's integrated together with a page caching plugin like ZenCache for WordPress; or another page caching plugin that you might prefer. **Why use a page caching plugin?** The HTML Compressor can be used on any site powered by PHP; but ideally you would cache the optimized HTML that it outputs, thereby removing the need for the HTML Compressor to analyze every single request. Of course, you *can* analyze every single request if you want to *(and the HTML Compressor has a cache of it's own to help keep things sane)*, but it's always better to store (cache) the compressed HTML output by this class. This will reduce server load and make your site even faster.
 
 **FAQ:** Is `html-compressor.phar` the only file that I need? Yes. The other files that you see in the GitHub repo are already compressed into the PHAR file. The only file you need is the `html-compressor.phar`. A PHAR binary is made available for each official release. See: [releases](https://github.com/websharks/html-compressor/releases).
 
@@ -129,27 +141,27 @@ ob_start(array($html_compressor, 'compress'));
 require_once 'html-compressor.phar';
 $html_compressor_options = array(
 
-	'css_exclusions' => array(),
-	'js_exclusions' => array('.php?'),
+    'css_exclusions' => array(),
+    'js_exclusions' => array('.php?'),
 
-	'cache_expiration_time' => '14 days',
-	'cache_dir_public' => '/var/www/public_html/htmlc/cache/public',
-	'cache_dir_url_public' => 'http://example.com/htmlc/cache/public',
-	'cache_dir_private' => '/var/www/public_html/htmlc/cache/private',
+    'cache_expiration_time' => '14 days',
+    'cache_dir_public' => '/var/www/public_html/htmlc/cache/public',
+    'cache_dir_url_public' => 'http://example.com/htmlc/cache/public',
+    'cache_dir_private' => '/var/www/public_html/htmlc/cache/private',
 
-	'compress_combine_head_body_css' => TRUE,
-	'compress_combine_head_js' => TRUE,
-	'compress_combine_footer_js' => TRUE,
-	'compress_inline_js_code' => TRUE,
-	'compress_css_code' => TRUE,
-	'compress_js_code' => TRUE,
-	'compress_html_code' => TRUE,
+    'compress_combine_head_body_css' => TRUE,
+    'compress_combine_head_js' => TRUE,
+    'compress_combine_footer_js' => TRUE,
+    'compress_inline_js_code' => TRUE,
+    'compress_css_code' => TRUE,
+    'compress_js_code' => TRUE,
+    'compress_html_code' => TRUE,
 
-	'benchmark' => FALSE,
-	'product_title' => 'HTML Compressor',
-	'vendor_css_prefixes' => array('moz','webkit','khtml','ms','o')
+    'benchmark' => FALSE,
+    'product_title' => 'HTML Compressor',
+    'vendor_css_prefixes' => array('moz','webkit','khtml','ms','o')
 );
-$html_compressor = new \websharks\html_compressor\core($html_compressor_options);
+$html_compressor = new WebSharks\HtmlCompressor\Core($html_compressor_options);
 ob_start(array($html_compressor, 'compress'));
 ```
 
@@ -161,32 +173,32 @@ ob_start(array($html_compressor, 'compress'));
 require_once 'html-compressor.phar';
 $html_compressor_options = array(
 
-	'css_exclusions' => array(),
-	'js_exclusions' => array('.php?'),
+    'css_exclusions' => array(),
+    'js_exclusions' => array('.php?'),
 
-	'cache_expiration_time' => '14 days',
-	'cache_dir_public' => '/var/www/public_html/htmlc/cache/public',
-	'cache_dir_url_public' => 'http://example.com/htmlc/cache/public',
-	'cache_dir_private' => '/var/www/public_html/htmlc/cache/private',
+    'cache_expiration_time' => '14 days',
+    'cache_dir_public' => '/var/www/public_html/htmlc/cache/public',
+    'cache_dir_url_public' => 'http://example.com/htmlc/cache/public',
+    'cache_dir_private' => '/var/www/public_html/htmlc/cache/private',
 
-	'current_url_scheme' => 'http',
-	'current_url_host' => 'www.example.com',
-	'current_url_uri' => '/raw/file/test.html?one=1&two=2',
+    'current_url_scheme' => 'http',
+    'current_url_host' => 'www.example.com',
+    'current_url_uri' => '/raw/file/test.html?one=1&two=2',
 
-	'compress_combine_head_body_css' => TRUE,
-	'compress_combine_head_js' => TRUE,
-	'compress_combine_footer_js' => TRUE,
-	'compress_inline_js_code' => TRUE,
-	'compress_css_code' => TRUE,
-	'compress_js_code' => TRUE,
-	'compress_html_code' => TRUE,
+    'compress_combine_head_body_css' => TRUE,
+    'compress_combine_head_js' => TRUE,
+    'compress_combine_footer_js' => TRUE,
+    'compress_inline_js_code' => TRUE,
+    'compress_css_code' => TRUE,
+    'compress_js_code' => TRUE,
+    'compress_html_code' => TRUE,
 
-	'benchmark' => FALSE,
-	'product_title' => 'HTML Compressor',
-	'vendor_css_prefixes' => array('moz','webkit','khtml','ms','o')
+    'benchmark' => FALSE,
+    'product_title' => 'HTML Compressor',
+    'vendor_css_prefixes' => array('moz','webkit','khtml','ms','o')
 );
 $html = '<html> ... </html>';
-$html_compressor = new \websharks\html_compressor\core($html_compressor_options);
+$html_compressor = new WebSharks\HtmlCompressor\Core($html_compressor_options);
 $html = $html_compressor->compress($html);
 ```
 
@@ -194,7 +206,7 @@ $html = $html_compressor->compress($html);
 
 ## Class Constructor Options
 
-e.g., `new \websharks\html_compressor\core($options);`
+e.g., `new WebSharks\HtmlCompressor\Core($options);`
 
 *where `$options` is an associative array with one or more keys listed below.*
 
@@ -339,12 +351,8 @@ e.g., `new \websharks\html_compressor\core($options);`
 
 ----
 
-## Codex (Source Code Documentation)
-
-See: <http://websharks.github.io/HTML-Compressor/codex/>
-
 ## License
 
-Copyright: © 2014 [WebSharks, Inc.](http://www.websharks-inc.com/) (coded in the USA)
+Copyright: © 2014 [WebSharks, Inc.](http://websharks-inc.com/) (coded in the USA)
 
 Released under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.html).
