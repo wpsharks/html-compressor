@@ -1,51 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<?xml-model xlink:href="/usr/share/php5/PEAR/data/phing/etc/phing-grammar.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0" ?>
 
-  <project name="HTML Compressor" default="default">
+<project name="HTML Compressor" default="build">
 
-    <property name="build_dir" value=".~build" />
-    <property name="phar_file" value="${build_dir}/html-compressor.phar" />
-    <property name="phar_stub_file" value="stub.php" />
-    <property name="vendor_dir" value="includes/vendor" />
-    <property name="composer_lock" value="composer.lock" />
+  <property name="build_dir" value="${project.basedir}/.~build" />
 
-    <target name="preamble">
-      <echo msg="PHP version: ${php.version}" />
-      <echo msg="Phing version: ${phing.version}" />
-      <echo msg="------------------------------------" />
-      <echo msg="Project: ${phing.project.name}" />
-      <echo msg="Base directory: ${project.basedir}" />
-      <echo msg="------------------------------------" />
-    </target>
+  <property name="phar_file" value="${build_dir}/html-compressor.phar" />
+  <property name="phar_stub_file" value="${project.basedir}/src/phar-stub.php" />
 
-    <target name="prepare" depends="preamble">
-      <echo msg="Preparing to build..." />
+  <property name="composer_path" value="/usr/bin/env composer" />
+  <property name="vendor_dir" value="${project.basedir}/src/includes/vendor" />
 
-      <echo msg="Deleting previous: ${build_dir} ..." />
-      <delete dir="${build_dir}" includeemptydirs="true" quiet="true" />
+  <target name="preamble">
+    <echo msg="OS: ${os.name}" />
+    <echo msg="HOME: ${user.home}" />
+    <echo msg="------------------------------------" />
+    <echo msg="PHP version: ${php.version}" />
+    <echo msg="Phing version: ${phing.version}" />
+    <echo msg="------------------------------------" />
+    <echo msg="Project: ${phing.project.name}" />
+    <echo msg="Base directory: ${project.basedir}" />
+    <echo msg="------------------------------------" />
+  </target>
 
-      <echo msg="Deleting previous: ${vendor_dir} ..." />
-      <delete dir="${vendor_dir}" includeemptydirs="true" quiet="true" />
+  <target name="prepare" depends="preamble">
+    <echo msg="Preparing to build..." />
+    <echo msg="------------------------------------" />
+    <echo msg="Deleting previous: ${build_dir} ..." />
+    <delete dir="${build_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="------------------------------------" />
+    <echo msg="Creating: ${build_dir} ..." />
+    <mkdir dir="${build_dir}" />
+    <echo msg="------------------------------------" />
+  </target>
 
-      <echo msg="Deleting previous: ${composer_lock} ..." />
-      <delete file="${composer_lock}" quiet="true" />
+  <target name="composer" depends="preamble,prepare">
+    <echo msg="Deleting previous: ${vendor_dir} ..." />
+    <delete dir="${vendor_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="------------------------------------" />
+    <echo msg="Running Composer..." />
+    <exec command="${composer_path} install" dir="${project.basedir}" checkreturn="true" />
+    <echo msg="------------------------------------" />
+  </target>
 
-      <echo msg="------------------------------------" />
-    </target>
+  <target name="phar" depends="preamble,prepare">
+    <echo msg="Deleting previous: ${phar_file} ..." />
+    <delete file="${phar_file}" quiet="true" />
+    <echo msg="------------------------------------" />
+    <echo msg="Creating PHAR file..." />
+    <pharpackage basedir="${project.basedir}/src" stub="${phar_stub_file}" destfile="${phar_file}">
+      <fileset dir="${project.basedir}/src">
+        <exclude name="includes/vendor/bin/**" />
+        <exclude name="includes/vendor/phing/**" />
+        <exclude name="phar-stub.php" />
+      </fileset>
+    </pharpackage>
+    <echo msg="------------------------------------" />
+  </target>
 
-    <target name="build" depends="prepare">
-      <echo msg="Creating: ${build_dir} ..." />
-      <mkdir dir="${build_dir}" />
+  <target name="build" depends="preamble,prepare,composer,phar">
+    <echo msg="Build complete! :-)" />
+  </target>
 
-      <echo msg="Running Composer..." />
-      <composer composer="composer" />
+  <target name="rebuild" depends="preamble,prepare,phar">
+    <echo msg="Rebuild complete! :-)" />
+  </target>
 
-      <echo msg="Creating PHAR package file..." />
-      <pharpackage basedir="./" stub="${phar_stub_file}" destfile="${phar_file}" />
-    </target>
-
-    <target name="default" depends="build_or_rebuild">
-      <echo msg="Build complete! :-)" />
-    </target>
-
-  </project>
+</project>

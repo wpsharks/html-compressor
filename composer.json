@@ -33,6 +33,7 @@
 
 	"require"          : {
 		"php"                  : ">=5.3",
+		"phing/phing"          : "dev-master",
 		"websharks/js-minifier": "dev-master"
 	},
 	"minimum-stability": "dev",
