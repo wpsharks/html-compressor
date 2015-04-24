@@ -8,6 +8,9 @@
 *~
 *.bak
 
+# Composer
+vendor/
+
 # Node
 node_modules/
 npm-debug.log

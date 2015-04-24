@@ -1,0 +1,12 @@
+<IfModule authz_core_module>
+	Require all granted
+</IfModule>
+<IfModule !authz_core_module>
+	allow from all
+</IfModule>
+
+<IfModule headers_module>
+	<FilesMatch "\.(html|js|css)$">
+		Header append Vary: Accept-Encoding
+	</FilesMatch>
+</IfModule>

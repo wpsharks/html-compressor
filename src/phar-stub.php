@@ -1,15 +1,11 @@
 <?php
 /**
- * HTML Compressor Stub.
+ * PHAR Stub.
  *
  * @since 150421 Improving PHAR support.
- *
- * @author JasWSInc <https://github.com/jaswsinc>
- * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
- * @license GNU General Public License, version 2
  */
 namespace WebSharks\HtmlCompressor;
 
-\Phar::mapPhar('html-compressor.phar');
-require_once 'phar://html-compressor.phar/stub.php';
+\Phar::mapPhar('websharks-html-compressor.phar');
+require_once 'phar://websharks-html-compressor.phar/src/vendor/autoload.php';
 __HALT_COMPILER();

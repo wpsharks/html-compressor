@@ -1,21 +1,10 @@
 <?php
-/**
- * HTML Compressor (core class file).
- *
- * @since 140417 Initial release.
- *
- * @author JasWSInc <https://github.com/jaswsinc>
- * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
- * @license GNU General Public License, version 2
- */
 namespace WebSharks\HtmlCompressor;
 
 /**
  * HTML Compressor (core class).
  *
  * @since 140417 Initial release.
- *
- * @author JasWSInc <https://github.com/jaswsinc>
  *
  * @property-read string    $version Read-only access to version string.
  * @property-read array     $options Read-only access to current options.
@@ -46,7 +35,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @type string Dated version string: `YYMMDD`.
      */
-    protected $version = '150321';
+    protected $version = '150424';
 
     /**
      * An array of class options.
@@ -266,9 +255,6 @@ class Core // Heart of the HTML Compressor.
 
         # Benchmark and Hook API instances.
 
-        require_once dirname(__FILE__).'/HookApi.php';
-        require_once dirname(__FILE__).'/Benchmark.php';
-
         $this->benchmark = new Benchmark(); // Instance.
         $this->hook_api  = new HookApi(); // Instance.
 
@@ -321,12 +307,6 @@ class Core // Heart of the HTML Compressor.
         if ($this->built_in_regex_js_exclusion_patterns && empty($this->options['disable_built_in_js_exclusions'])) {
             $this->built_in_regex_js_exclusions = '/'.implode('|', $this->built_in_regex_js_exclusion_patterns).'/i';
         }
-
-        # Require Additional Libs; i.e. Dependencies
-
-        if (is_file($js_minifier = dirname(dirname(__FILE__)).'/vendor/websharks/js-minifier/includes/classes/Core.php')) {
-            require_once $js_minifier; // Only if it exists; this might be autoloaded only.
-        }
     }
 
     /********************************************************************************************************/
@@ -367,6 +347,7 @@ class Core // Heart of the HTML Compressor.
         $html = $this->maybeCompressCombineHeadJs($html);
         $html = $this->maybeCompressCombineFooterJs($html);
         $html = $this->maybeCompressInlineJsCode($html);
+        $html = $this->maybeCompressInlineJsonCode($html);
         $html = $this->maybeCompressHtmlCode($html);
 
         if (!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs']) {
@@ -566,7 +547,6 @@ class Core // Heart of the HTML Compressor.
                     }
                     $css_parts[$_css_part]['tag']          = '';
                     $css_parts[$_css_part]['exclude_frag'] = $_css_tag_frag_pos;
-
                     $_css_part++; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_css_tag_frag['link_href']) {
@@ -616,8 +596,8 @@ class Core // Heart of the HTML Compressor.
         unset($_css_part, $_last_css_tag_frag_media, $_css_tag_frag_pos, $_css_tag_frag, $_css_code);
 
         foreach (array_keys($css_parts = array_values($css_parts)) as $_css_part) {
-            if (!empty($css_parts[$_css_part]['code'])) {
-                $_css_media = 'all';
+            if (!isset($css_parts[$_css_part]['exclude_frag']) && !empty($css_parts[$_css_part]['code'])) {
+                $_css_media = 'all'; // Default media value; i.e., `all` media queries.
                 if (!empty($css_parts[$_css_part]['media'])) {
                     $_css_media = $css_parts[$_css_part]['media'];
                 }
@@ -673,7 +653,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function getCssTagFrags(array $html_frag)
     {
-        if ((!empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
+        if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
             $time = microtime(true);
         }
         $css_tag_frags = array(); // Initialize.
@@ -1323,13 +1303,12 @@ class Core // Heart of the HTML Compressor.
 
         foreach ($js_tag_frags as $_js_tag_frag_pos => $_js_tag_frag) {
             if ($_js_tag_frag['exclude']) {
-                if ($_js_tag_frag['script_src'] || $_js_tag_frag['script_js']) {
+                if ($_js_tag_frag['script_src'] || $_js_tag_frag['script_js'] || $_js_tag_frag['script_json']) {
                     if ($js_parts) {
                         $_js_part++; // Starts new part.
                     }
                     $js_parts[$_js_part]['tag']          = '';
                     $js_parts[$_js_part]['exclude_frag'] = $_js_tag_frag_pos;
-
                     $_js_part++; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_js_tag_frag['script_src']) {
@@ -1357,12 +1336,18 @@ class Core // Heart of the HTML Compressor.
                         $js_parts[$_js_part]['code'] = $_js_code;
                     }
                 }
+            } elseif ($_js_tag_frag['script_json']) {
+                if ($js_parts) {
+                    $_js_part++; // Starts new part.
+                }
+                $js_parts[$_js_part]['tag'] = $_js_tag_frag['all'];
+                $_js_part++; // Always indicates a new part in the next iteration.
             }
         }
         unset($_js_part, $_js_tag_frag_pos, $_js_tag_frag, $_js_code);
 
         foreach (array_keys($js_parts = array_values($js_parts)) as $_js_part) {
-            if (!empty($js_parts[$_js_part]['code'])) {
+            if (!isset($js_parts[$_js_part]['exclude_frag']) && !empty($js_parts[$_js_part]['code'])) {
                 $_js_code    = $js_parts[$_js_part]['code'];
                 $_js_code_cs = md5($_js_code); // Before compression.
                 $_js_code    = $this->maybeCompressJsCode($_js_code);
@@ -1429,25 +1414,35 @@ class Core // Heart of the HTML Compressor.
 
         if (!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER)) {
             foreach ($_tag_frags as $_tag_frag) {
-                $_script_src = $_script_js = $_script_async = ''; // Initialize.
+                if (isset($_tag_frag['script_js'])) {
+                    $_tag_frag['script_json'] = $_tag_frag['script_js'];
+                } // Assume that this is either/or for the time being.
+                $_script_src = $_script_js = $_script_json = $_script_async = ''; // Initialize.
+                $_is_js      = $this->isScriptTagFragJs($_tag_frag); // JavaScript or JSON?
+                $_is_json    = !$_is_js && $this->isScriptTagFragJson($_tag_frag);
 
-                if ($this->isScriptTagFragJs($_tag_frag)) {
-                    if (($_script_src = $this->getScriptJsSrc($_tag_frag, false)) || ($_script_js = $this->getScriptJs($_tag_frag, false))) {
+                if ($_is_js || $_is_json) {
+                    if ($_is_js && ($_script_src = $this->getScriptJsSrc($_tag_frag, false))) {
                         $_script_async = $this->getScriptJsAsync($_tag_frag, false);
+                    } elseif ($_is_js && ($_script_js = $this->getScriptJs($_tag_frag, false))) {
+                        $_script_async = $this->getScriptJsAsync($_tag_frag, false);
+                    } elseif ($_is_json && ($_script_json = $this->getScriptJson($_tag_frag, false))) {
+                        $_script_async = ''; // Not applicable.
                     }
-                    if ($_script_src || $_script_js) {
+                    if ($_script_src || $_script_js || $_script_json) {
                         $js_tag_frags[] = array(
                             'all'                 => $_tag_frag['all'],
 
                             'if_open_tag'         => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
                             'if_closing_tag'      => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
 
-                            'script_open_tag'     => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
-                            'script_src_external' => ($_script_src) ? $this->isUrlExternal($_script_src) : false,
-                            'script_src'          => $_script_src, // This could also be empty.
-                            'script_js'           => $_script_js, // This could also be empty.
-                            'script_async'        => $_script_async, // This could also be empty.
-                            'script_closing_tag'  => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
+                            'script_open_tag'       => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
+                            'script_src_external'   => $_is_js && $_script_src ? $this->isUrlExternal($_script_src) : false,
+                            'script_src'            => $_is_js ? $_script_src : '', // This could also be empty.
+                            'script_js'             => $_is_js ? $_script_js : '', // This could also be empty.
+                            'script_json'           => $_is_json ? $_script_json : '', // This could also be empty.
+                            'script_async'          => $_is_js ? $_script_async : '', // This could also be empty.
+                            'script_closing_tag'    => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
 
                             'exclude'             => false, // Default value.
                         );
@@ -1457,15 +1452,15 @@ class Core // Heart of the HTML Compressor.
                             $_tag_frag_r['exclude'] = true;
                         } elseif ($_tag_frag_r['script_src'] && $_tag_frag_r['script_src_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js']) {
                             $_tag_frag_r['exclude'] = true;
-                        } elseif ($this->regex_js_exclusions && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'])) {
+                        } elseif ($this->regex_js_exclusions && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
                             $_tag_frag_r['exclude'] = true;
-                        } elseif ($this->built_in_regex_js_exclusions && preg_match($this->built_in_regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'])) {
+                        } elseif ($this->built_in_regex_js_exclusions && preg_match($this->built_in_regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
                             $_tag_frag_r['exclude'] = true;
                         }
                     }
                 }
             }
-            unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_script_src, $_script_js, $_script_async);
+            unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_script_src, $_script_js, $_script_json, $_script_async, $_is_js, $_is_json);
         }
         finale: // Target point; finale/return value.
 
@@ -1509,13 +1504,60 @@ class Core // Heart of the HTML Compressor.
         }
         unset($_m); // Just a little housekeeping.
 
+        if ($type && stripos($type, 'json') !== false) {
+            return false; // JSON; not JavaScript.
+        }
         if ($type && stripos($type, 'javascript') === false) {
             return false; // Not JavaScript.
+        }
+        if ($language && stripos($language, 'json') !== false) {
+            return false; // JSON; not JavaScript.
         }
         if ($language && stripos($language, 'javascript') === false) {
             return false; // Not JavaScript.
         }
         return true; // Yes, this is JavaScript.
+    }
+
+    /**
+     * Test a script tag fragment to see if it's JSON.
+     *
+     * @since 150424 Adding support for JSON compression.
+     *
+     * @param array $tag_frag A JS tag fragment.
+     *
+     * @return bool TRUE if it contains JSON.
+     */
+    protected function isScriptTagFragJson(array $tag_frag)
+    {
+        if (empty($tag_frag['script_open_tag']) || empty($tag_frag['script_closing_tag'])) {
+            return false; // Nope; missing open|closing tag.
+        }
+        $type = $language = ''; // Initialize.
+
+        if (stripos($tag_frag['script_open_tag'], 'type') !== 0) {
+            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+                $type = $_m['value'];
+            }
+        }
+        unset($_m); // Just a little housekeeping.
+
+        if (stripos($tag_frag['script_open_tag'], 'language') !== 0) {
+            if (preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+                $language = $_m['value'];
+            }
+        }
+        unset($_m); // Just a little housekeeping.
+
+        if (($type && stripos($type, 'javascript') === false) || ($language && stripos($language, 'javascript') === false)) {
+            if ($type && stripos($type, 'json') !== false) {
+                return true; // Yes, this is JSON.
+            }
+            if ($language && stripos($language, 'json') !== false) {
+                return true; // Yes, this is JSON.
+            }
+        }
+        return false; // No, not JSON.
     }
 
     /**
@@ -1586,6 +1628,28 @@ class Core // Heart of the HTML Compressor.
             return ''; // This script tag does not contain JavaScript.
         }
         return trim($tag_frag['script_js']); // JavaScript code.
+    }
+
+    /**
+     * Get script JSON from a JS tag fragment.
+     *
+     * @since 150424 Adding support for JSON compression.
+     *
+     * @param array $tag_frag    A JS tag fragment.
+     * @param bool  $test_for_js Defaults to a TRUE value.
+     *                           If TRUE, we will test tag fragment to make sure it's JSON.
+     *
+     * @return string The script JSON code (if possible); else an empty string.
+     */
+    protected function getScriptJson(array $tag_frag, $test_for_json = true)
+    {
+        if (empty($tag_frag['script_json'])) {
+            return ''; // Not possible; no JSON code.
+        }
+        if ($test_for_json && !$this->isScriptTagFragJson($tag_frag)) {
+            return ''; // This script tag does not contain JSON.
+        }
+        return trim($tag_frag['script_json']); // JSON code.
     }
 
     /********************************************************************************************************/
@@ -1984,7 +2048,7 @@ class Core // Heart of the HTML Compressor.
         }
         if (($html_frag = $this->getHtmlFrag($html)) && ($js_tag_frags = $this->getJsTagFrags($html_frag))) {
             foreach ($js_tag_frags as $_js_tag_frag_key => $_js_tag_frag) {
-                if ($_js_tag_frag['script_js']) {
+                if (!$_js_tag_frag['exclude'] && $_js_tag_frag['script_js']) {
                     $js_tag_frags_script_js_parts[]                             = $_js_tag_frag['all'];
                     $js_tag_frags_script_js_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
                     $js_tag_frags_script_js_part_placeholder_key_replacements[] = $_js_tag_frag_key;
@@ -2054,6 +2118,109 @@ class Core // Heart of the HTML Compressor.
             return '/*<![CDATA[*/'.$compressed_js.'/*]]>*/';
         }
         return $js;
+    }
+
+    /**
+     * Maybe compress inline JSON code within the HTML source.
+     *
+     * @since 150424 Adding support for JSON compression.
+     *
+     * @param string $html Raw HTML code.
+     *
+     * @return string HTML source code, with possible inline JSON compression.
+     */
+    protected function maybeCompressInlineJsonCode($html)
+    {
+        if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
+            $time = microtime(true);
+        }
+        $html = (string) $html; // Force string value.
+
+        if (isset($this->options['compress_js_code'])) {
+            if (!$this->options['compress_js_code']) {
+                $disabled = true; // Disabled flag.
+            }
+        }
+        if (isset($this->options['compress_inline_js_code'])) {
+            if (!$this->options['compress_inline_js_code']) {
+                $disabled = true; // Disabled flag.
+            }
+        }
+        if (!$html || !empty($disabled)) {
+            goto finale; // Nothing to do.
+        }
+        if (($html_frag = $this->getHtmlFrag($html)) && ($js_tag_frags = $this->getJsTagFrags($html_frag))) {
+            foreach ($js_tag_frags as $_js_tag_frag_key => $_js_tag_frag) {
+                if (!$_js_tag_frag['exclude'] && $_js_tag_frag['script_json']) {
+                    $js_tag_frags_script_json_parts[]                             = $_js_tag_frag['all'];
+                    $js_tag_frags_script_json_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
+                    $js_tag_frags_script_json_part_placeholder_key_replacements[] = $_js_tag_frag_key;
+                }
+                if (isset($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements)) {
+                    $html = $this->replaceOnce($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $html);
+
+                    foreach ($js_tag_frags_script_json_part_placeholder_key_replacements as &$_json_tag_frag_key_replacement) {
+                        $_js_tag_frag = $js_tag_frags[$_json_tag_frag_key_replacement];
+
+                        $_json_tag_frag_key_replacement = $_js_tag_frag['if_open_tag'];
+                        $_json_tag_frag_key_replacement .= $_js_tag_frag['script_open_tag'];
+                        $_json_tag_frag_key_replacement .= $this->compressInlineJsonCode($_js_tag_frag['script_json']);
+                        $_json_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
+                        $_json_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
+                    }
+                    unset($_json_tag_frag_key_replacement); // Housekeeping.
+
+                    $html = $this->replaceOnce($js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements, $html);
+
+                    if ($benchmark) {
+                        $this->benchmark->addData(
+                            __FUNCTION__,
+                            compact(
+                                'js_tag_frags',
+                                'js_tag_frags_script_json_parts',
+                                'js_tag_frags_script_json_part_placeholders',
+                                'js_tag_frags_script_json_part_placeholder_key_replacements'
+                            )
+                        );
+                    }
+                }
+            }
+            unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
+        }
+        finale: // Target point; finale/return value.
+
+        if ($html) {
+            $html = trim($html);
+        } // Trim it up now!
+
+        if ($benchmark && !empty($time) && $html && empty($disabled)) {
+            $this->benchmark->addTime(
+                __FUNCTION__,
+                $time, // Caller, start time, task performed.
+                sprintf('compressing inline JSON in checksum: `%1$s`', md5($html))
+            );
+        }
+        return $html; // With possible compression having been applied here.
+    }
+
+    /**
+     * Helper function; compress inline JSON code.
+     *
+     * @since 150424 Adding support for JSON compression.
+     *
+     * @param string $js Raw JSON code.
+     *
+     * @return string JSON code (possibly minified).
+     */
+    protected function compressInlineJsonCode($json)
+    {
+        if (!($json = (string) $json)) {
+            return $json; // Nothing to do.
+        }
+        if (($compressed_json = \WebSharks\JsMinifier\Core::compress($json))) {
+            return '/*<![CDATA[*/'.$compressed_json.'/*]]>*/';
+        }
+        return $json;
     }
 
     /********************************************************************************************************/
@@ -3403,7 +3570,8 @@ class Core // Heart of the HTML Compressor.
         curl_transport: // cURL transport layer (recommended).
 
         if (!extension_loaded('curl') || !is_callable('curl_version')
-           || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version()) && $curl_version['features'] & CURL_VERSION_SSL))
+           || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
+           && $curl_version['features'] & CURL_VERSION_SSL))
         ) {
             goto fopen_transport; // cURL will not work in this case.
         }
@@ -3466,7 +3634,7 @@ class Core // Heart of the HTML Compressor.
            || (stripos($url, 'https:') === 0 && !in_array('ssl', stream_get_transports(), true))
         ) {
             throw new \Exception('Unable to find a workable transport layer for remote HTTP communication.'.
-                               ' Please install the cURL & OpenSSL extensions for PHP.');
+                                 ' Please install the cURL & OpenSSL extensions for PHP.');
         }
         $stream_options = array(
             // See: <http://php.net/manual/en/context.http.php>

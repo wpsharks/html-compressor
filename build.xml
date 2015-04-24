@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<project name="HTML Compressor" default="build">
+<project name="Project" default="build">
+
+  <basename property="project_basename" file="${project.basedir}" suffix="" />
 
   <property name="build_dir" value="${project.basedir}/.~build" />
 
-  <property name="phar_file" value="${build_dir}/html-compressor.phar" />
+  <property name="phar_file" value="${build_dir}/websharks-${project_basename}.phar" />
   <property name="phar_stub_file" value="${project.basedir}/src/phar-stub.php" />
 
   <property name="composer_path" value="/usr/bin/env composer" />
-  <property name="vendor_dir" value="${project.basedir}/src/includes/vendor" />
+  <property name="composer_lock" value="${project.basedir}/composer.lock" />
+  <property name="vendor_dir" value="${project.basedir}/src/vendor" />
 
   <target name="preamble">
     <echo msg="OS: ${os.name}" />
@@ -18,6 +21,7 @@
     <echo msg="Phing version: ${phing.version}" />
     <echo msg="------------------------------------" />
     <echo msg="Project: ${phing.project.name}" />
+    <echo msg="Project basename: ${project_basename}" />
     <echo msg="Base directory: ${project.basedir}" />
     <echo msg="------------------------------------" />
   </target>
@@ -37,8 +41,11 @@
     <echo msg="Deleting previous: ${vendor_dir} ..." />
     <delete dir="${vendor_dir}" includeemptydirs="true" quiet="true" />
     <echo msg="------------------------------------" />
+    <echo msg="Deleting previous: ${composer_lock} ..." />
+    <delete file="${composer_lock}" quiet="true" />
+    <echo msg="------------------------------------" />
     <echo msg="Running Composer..." />
-    <exec command="${composer_path} install" dir="${project.basedir}" checkreturn="true" />
+    <exec command="${composer_path} install" dir="${project.basedir}" passthru="true" checkreturn="true" />
     <echo msg="------------------------------------" />
   </target>
 
@@ -47,11 +54,14 @@
     <delete file="${phar_file}" quiet="true" />
     <echo msg="------------------------------------" />
     <echo msg="Creating PHAR file..." />
-    <pharpackage basedir="${project.basedir}/src" stub="${phar_stub_file}" destfile="${phar_file}">
+    <pharpackage basedir="${project.basedir}" stub="${phar_stub_file}" destfile="${phar_file}">
       <fileset dir="${project.basedir}/src">
-        <exclude name="includes/vendor/bin/**" />
-        <exclude name="includes/vendor/phing/**" />
-        <exclude name="phar-stub.php" />
+        <exclude name="**/vendor/bin/**" />
+        <exclude name="**/phar-stub.php" />
+        <exclude name="**/build.xml" />
+        <exclude name="**/composer.json" />
+        <exclude name="**/composer.lock" />
+        <exclude name="**/.~**" />
       </fileset>
     </pharpackage>
     <echo msg="------------------------------------" />

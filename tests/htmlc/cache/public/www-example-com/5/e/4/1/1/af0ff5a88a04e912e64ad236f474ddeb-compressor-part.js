@@ -1,0 +1,1 @@
+var test={hello:'hello',world:'world'};

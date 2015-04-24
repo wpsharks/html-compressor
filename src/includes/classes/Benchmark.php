@@ -1,21 +1,10 @@
 <?php
-/**
- * HTML Compressor (benchmark).
- *
- * @since 150315 Enhancing debugger.
- *
- * @author JasWSInc <https://github.com/jaswsinc>
- * @copyright WebSharks, Inc. <http://www.websharks-inc.com>
- * @license GNU General Public License, version 2
- */
 namespace WebSharks\HtmlCompressor;
 
 /**
  * HTML Compressor (benchmark).
  *
  * @since 150315 Enhancing debugger.
- *
- * @author JasWSInc <https://github.com/jaswsinc>
  *
  * @property-read $times Read-only access to times.
  * @property-read $data Read-only access to data.
