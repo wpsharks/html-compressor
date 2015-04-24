@@ -46,9 +46,9 @@ $html_compressor_options = array(
     'css_exclusions'                 => array(),
     'js_exclusions'                  => array('.php?'),
 
-    'cache_dir_url_public'           => 'http://example.com/htmlc/cache/public',
-    'cache_dir_public'               => dirname(__FILE__).'/htmlc/cache/public',
-    'cache_dir_private'              => dirname(__FILE__).'/htmlc/cache/private',
+    'cache_dir_url_public'           => 'http://example.com/cache/public',
+    'cache_dir_public'               => dirname(__FILE__).'/.~cache/public',
+    'cache_dir_private'              => dirname(__FILE__).'/.~cache/private',
 
     'current_url_scheme'             => 'http',
     'current_url_host'               => 'www.example.com',
