@@ -14,8 +14,8 @@ Combines & compresses CSS/JS/HTML code.
 [![](https://img.shields.io/github/downloads/websharks/html-compressor/latest/total.svg?label=downloads)](https://github.com/websharks/html-compressor/releases)
 [![](https://img.shields.io/packagist/dt/websharks/html-compressor.svg?label=packagist)](https://packagist.org/packages/websharks/html-compressor)
 
-[![](https://img.shields.io/badge/made-with_awesome_sauce-D8D4DB.svg?label=100%25+pure+awesome+sauce)](http://websharks-inc.com/)
-[![](https://img.shields.io/badge/by-websharks-656598.svg?label=WebSharks+Inc.)](http://www.websharks-inc.com/team/)
+[![](https://img.shields.io/badge/made-w%2F_100%25_pure_awesome_sauce-AB815F.svg?label=made)](http://websharks-inc.com/)
+[![](https://img.shields.io/badge/by-WebSharks_Inc.-656598.svg?label=by)](http://www.websharks-inc.com/team/)
 
 ```php
 <?php
