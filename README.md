@@ -8,7 +8,6 @@ Combines & compresses CSS/JS/HTML code.
 
 [![](https://img.shields.io/badge/made-w%2F_100%25_pure_awesome_sauce-AB815F.svg?label=made)](http://websharks-inc.com/)
 [![](https://img.shields.io/badge/by-WebSharks_Inc.-656598.svg?label=by)](http://www.websharks-inc.com/team/)
-
 [![](https://img.shields.io/github/release/websharks/html-compressor.svg?label=latest)](https://github.com/websharks/html-compressor/releases)
 [![](https://img.shields.io/packagist/v/websharks/html-compressor.svg?label=packagist)](https://packagist.org/packages/websharks/html-compressor)
 [![](https://img.shields.io/github/issues/websharks/html-compressor.svg?label=issues)](https://github.com/websharks/html-compressor/issues)
