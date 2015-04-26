@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/websharks/js-minifier.git",
-                "reference": "3ef227c3107fbdb646a80ea8219953be9674d688"
+                "reference": "e417d47970dbbcbec4006192a5d69429926c9f1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/websharks/js-minifier/zipball/3ef227c3107fbdb646a80ea8219953be9674d688",
-                "reference": "3ef227c3107fbdb646a80ea8219953be9674d688",
+                "url": "https://api.github.com/repos/websharks/js-minifier/zipball/e417d47970dbbcbec4006192a5d69429926c9f1a",
+                "reference": "e417d47970dbbcbec4006192a5d69429926c9f1a",
                 "shasum": ""
             },
             "require": {
@@ -59,7 +59,7 @@
                 "javascript",
                 "websharks"
             ],
-            "time": "2015-04-24 20:55:12"
+            "time": "2015-04-25 23:33:16"
         }
     ],
     "packages-dev": [],
