@@ -8,6 +8,7 @@
 
   <property name="project_version" value="%y%m%d" />
   <property name="project_php_required_version" value="5.3" />
+  <property name="project_php_up_to_version" value="${php.version}" />
   <property name="project_wp_required_version" value="" />
   <property name="project_wp_up_to_version" value="" />
 
@@ -41,7 +42,12 @@
     <echo msg="Project Org.: ${project_org}" />
     <echo msg="Project Slug: ${project_slug}" />
     <echo msg="Project SNS: ${project_sns}" />
+    <echo msg="------------------------------------" />
     <echo msg="Project Version: ${project_version}" />
+    <echo msg="Project PHP Required Version: ${project_php_required_version}" />
+    <echo msg="Project PHP Tested Up To Version: ${project_php_up_to_version}" />
+    <echo msg="Project WP Required Version: ${project_wp_required_version}" />
+    <echo msg="Project WP Tested Up To Version: ${project_wp_up_to_version}" />
     <echo msg="------------------------------------" />
     <echo msg="Build Directory: ${_build_dir}" />
     <echo msg="Src Directory: ${_src_dir}" />
@@ -87,8 +93,8 @@
               <regexp pattern="'[^']*?';\s*\/\/php\-required\-version\/\/$" replace="'${project_php_required_version}'; //php-required-version//" modifiers="m" />
               <regexp pattern='"[^"]*?";\s*\/\/php\-required\-version\/\/$' replace='"${project_php_required_version}"; //php-required-version//' modifiers="m" />
 
-              <regexp pattern="'[^']*?';\s*\/\/php\-up\-to\-version\/\/$" replace="'${php.version}'; //php-up-to-version//" modifiers="m" />
-              <regexp pattern='"[^"]*?";\s*\/\/php\-up\-to\-version\/\/$' replace='"${php.version}"; //php-up-to-version//' modifiers="m" />
+              <regexp pattern="'[^']*?';\s*\/\/php\-up\-to\-version\/\/$" replace="'${project_php_up_to_version}'; //php-up-to-version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/php\-up\-to\-version\/\/$' replace='"${project_php_up_to_version}"; //php-up-to-version//' modifiers="m" />
 
               <regexp pattern="'[^']*?';\s*\/\/wp\-required\-version\/\/$" replace="'${project_wp_required_version}'; //wp-required-version//" modifiers="m" />
               <regexp pattern='"[^"]*?";\s*\/\/wp\-required\-version\/\/$' replace='"${project_wp_required_version}"; //wp-required-version//' modifiers="m" />
@@ -126,7 +132,7 @@
               <regexp pattern="^Tested up to\:.+$" replace="Tested up to: ${project_wp_up_to_version}" modifiers="m" />
 
               <regexp pattern="^Requires PHP\:.+$" replace="Requires PHP: ${project_php_required_version}" modifiers="m" />
-              <regexp pattern="^Tested up to PHP\:.+$" replace="Tested up to PHP: ${php.version}" modifiers="m" />
+              <regexp pattern="^Tested up to PHP\:.+$" replace="Tested up to PHP: ${project_php_up_to_version}" modifiers="m" />
             </replaceregexp>
           </filterchain>
         </reflexive>
