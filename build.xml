@@ -170,11 +170,13 @@
         <echo msg="Rebranding: ${_vendor_dir}/websharks/core ..." />
         <reflexive>
           <fileset dir="${_vendor_dir}/websharks/core">
+            <include pattern="src/includes/interfaces/*.php" />
             <include pattern="src/includes/classes/*.php" />
             <include pattern="src/includes/traits/*.php" />
           </fileset>
           <filterchain>
             <replaceregexp>
+              <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Interfaces\b" replace="namespace WebSharks\\Core\\${project_sns}\\Interfaces" />
               <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Classes\b" replace="namespace WebSharks\\Core\\${project_sns}\\Classes" />
               <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Traits\b" replace="namespace WebSharks\\Core\\${project_sns}\\Traits" />
             </replaceregexp>
@@ -186,6 +188,7 @@
           </fileset>
           <filterchain>
             <replaceregexp>
+              <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Interfaces\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Interfaces" />
               <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Classes\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Classes" />
               <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Traits\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Traits" />
             </replaceregexp>
@@ -203,11 +206,13 @@
         <echo msg="Rebranding: ${_vendor_dir}/websharks/wp-core ..." />
         <reflexive>
           <fileset dir="${_vendor_dir}/websharks/wp-core">
+            <include pattern="src/includes/interfaces/*.php" />
             <include pattern="src/includes/classes/*.php" />
             <include pattern="src/includes/traits/*.php" />
           </fileset>
           <filterchain>
             <replaceregexp>
+              <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Interfaces\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Interfaces" />
               <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Classes\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Classes" />
               <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Traits\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Traits" />
             </replaceregexp>
@@ -219,6 +224,7 @@
           </fileset>
           <filterchain>
             <replaceregexp>
+              <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Interfaces\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Interfaces" />
               <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Classes\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Classes" />
               <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Traits\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Traits" />
             </replaceregexp>
