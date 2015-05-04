@@ -6,3 +6,7 @@
 - Adding support for JSON compression.
 - Bringing back the PHAR file in each release.
 - Adding `build.xml` and `composer.json`.
+
+## v14xxxx
+
+- Initial release.

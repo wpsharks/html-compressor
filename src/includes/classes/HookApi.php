@@ -38,7 +38,6 @@ class HookApi // For plugins.
         if (empty($GLOBALS[__NAMESPACE__.'_early_hooks'])) {
             return; // Nothing more to do here.
         }
-
         $GLOBALS[__NAMESPACE__.'_early_hooks'] = (array) $GLOBALS[__NAMESPACE__.'_early_hooks'];
         $early_hooks                           = &$GLOBALS[__NAMESPACE__.'_early_hooks'];
 
@@ -111,10 +110,12 @@ class HookApi // For plugins.
         } else {
             $function = (array) $function;
         }
-        if (is_object($function[0])) {
-            return spl_object_hash($function[0]).$function[1];
-        } elseif (is_string($function[0])) {
-            return $function[0].'::'.$function[1];
+        if (isset($function[0], $function[1])) {
+            if (is_object($function[0])) {
+                return spl_object_hash($function[0]).$function[1];
+            } elseif (is_string($function[0])) {
+                return $function[0].'::'.$function[1];
+            }
         }
         throw new \Exception('Invalid hook.');
     }
@@ -133,9 +134,15 @@ class HookApi // For plugins.
      */
     public function addHook($hook, $function, $priority = 10, $accepted_args = 1)
     {
-        $this->hooks[$hook][$priority][$this->hookId($function)]
-            = array('function' => $function, 'accepted_args' => (integer) $accepted_args);
+        $hook          = (string) $hook;
+        $priority      = (integer) $priority;
+        $accepted_args = max(0, (integer) $accepted_args);
+        $hook_id       = $this->hookId($function);
 
+        $this->hooks[$hook][$priority][$hook_id] = array(
+            'function'      => $function,
+            'accepted_args' => (integer) $accepted_args,
+        );
         return true; // Always returns true.
     }
 
@@ -180,14 +187,18 @@ class HookApi // For plugins.
      */
     public function removeHook($hook, $function, $priority = 10)
     {
-        if (!isset($this->hooks[$hook][$priority][$this->hookId($function)])) {
-            return false; // Nothing to remove in this case.
+        $hook     = (string) $hook;
+        $priority = (integer) $priority;
+        $hook_id  = $this->hookId($function);
+
+        if (!isset($this->hooks[$hook][$priority][$hook_id])) {
+            return false; // Nothing to remove.
         }
-        unset($this->hooks[$hook][$priority][$this->hookId($function)]);
+        unset($this->hooks[$hook][$priority][$hook_id]);
         if (!$this->hooks[$hook][$priority]) {
             unset($this->hooks[$hook][$priority]);
         }
-        return true; // Existed before it was removed in this case.
+        return true; // Existed before it was removed.
     }
 
     /**
@@ -227,13 +238,13 @@ class HookApi // For plugins.
      */
     public function doAction($hook)
     {
+        $hook = (string) $hook;
         if (empty($this->hooks[$hook])) {
             return; // No hooks.
         }
         $hook_actions = $this->hooks[$hook];
-        ksort($hook_actions); // Sort by priority.
-
-        $args = func_get_args(); // We'll need these below.
+        $args         = func_get_args();
+        ksort($hook_actions);
 
         foreach ($hook_actions as $_hook_action) {
             foreach ($_hook_action as $_action) {
@@ -258,13 +269,13 @@ class HookApi // For plugins.
      */
     public function applyFilters($hook, $value)
     {
+        $hook = (string) $hook;
         if (empty($this->hooks[$hook])) {
             return $value; // No hooks.
         }
         $hook_filters = $this->hooks[$hook];
-        ksort($hook_filters); // Sort by priority.
-
-        $args = func_get_args(); // We'll need these below.
+        $args         = func_get_args();
+        ksort($hook_filters);
 
         foreach ($hook_filters as $_hook_filter) {
             foreach ($_hook_filter as $_filter) {
