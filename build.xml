@@ -17,13 +17,13 @@
   <property name="_build_dir" value="${project.basedir}/.~build" />
   <property name="_src_dir" value="${project.basedir}/src" />
   <property name="_vendor_dir" value="${_src_dir}/vendor" />
-  <property name="_stub" value="${_src_dir}/stub.php" />
+  <property name="_stub" value="${_src_dir}/includes/stub.php" />
 
   <property name="_composer_path" value="/usr/bin/env composer" />
   <property name="_composer_json" value="${project.basedir}/composer.json" />
   <property name="_composer_lock" value="${project.basedir}/composer.lock" />
 
-  <property name="_phar_stub" value="${_src_dir}/phar-stub.php" />
+  <property name="_phar_stub" value="${_src_dir}/includes/phar-stub.php" />
   <property name="_phar_file" value="${_build_dir}/${project_org}-${project_slug}.phar" />
 
   <tstamp><format property="_time_ymd" pattern="%y%m%d" /></tstamp>
@@ -77,6 +77,38 @@
   <target name="-rtokens" depends="-preamble,-prepare">
     <if>
       <and>
+        <and>
+          <available file="${project.basedir}/readme.txt" />
+        </and>
+      </and>
+      <then>
+        <echo msg="Replacing WP tokens in: ${project.basedir} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}">
+            <include pattern="readme.txt" />
+            <include pattern="plugin.php" />
+            <include pattern="uninstall.php" />
+            <include pattern="functions.php" />
+            <include pattern="style.css" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="^Version\:.+$" replace="Version: ${project_version}" modifiers="m" />
+              <regexp pattern="^Stable tag\:.+$" replace="Stable tag: ${project_version}" modifiers="m" />
+
+              <regexp pattern="^Requires at least\:.+$" replace="Requires at least: ${project_wp_required_version}" modifiers="m" />
+              <regexp pattern="^Tested up to\:.+$" replace="Tested up to: ${project_wp_up_to_version}" modifiers="m" />
+
+              <regexp pattern="^Requires PHP\:.+$" replace="Requires PHP: ${project_php_required_version}" modifiers="m" />
+              <regexp pattern="^Tested up to PHP\:.+$" replace="Tested up to PHP: ${project_php_up_to_version}" modifiers="m" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+    <if>
+      <and>
         <available resource="${_src_dir}" type="dir" />
       </and>
       <then>
@@ -84,6 +116,10 @@
         <reflexive>
           <fileset dir="${_src_dir}">
             <exclude pattern="vendor/**" />
+            <include pattern="**.php" />
+            <include pattern="**.scss" />
+            <include pattern="**.css" />
+            <include pattern="**.js" />
           </fileset>
           <filterchain>
             <replaceregexp>
@@ -101,38 +137,6 @@
 
               <regexp pattern="'[^']*?';\s*\/\/wp\-up\-to\-version\/\/$" replace="'${project_wp_up_to_version}'; //wp-up-to-version//" modifiers="m" />
               <regexp pattern='"[^"]*?";\s*\/\/wp\-up\-to\-version\/\/$' replace='"${project_wp_up_to_version}"; //wp-up-to-version//' modifiers="m" />
-            </replaceregexp>
-          </filterchain>
-        </reflexive>
-        <echo msg="------------------------------------" />
-      </then>
-    </if>
-    <if>
-      <and>
-        <available file="${_src_dir}/readme.txt" />
-        <or>
-          <available file="${_src_dir}/plugin.php" />
-          <available file="${_src_dir}/style.css" />
-        </or>
-      </and>
-      <then>
-        <echo msg="Replacing WP tokens in: ${_src_dir ..." />
-        <reflexive>
-          <fileset dir="${_src_dir}">
-            <exclude pattern="readme.txt" />
-            <exclude pattern="plugin.php" />
-            <exclude pattern="style.css" />
-          </fileset>
-          <filterchain>
-            <replaceregexp>
-              <regexp pattern="^Version\:.+$" replace="Version: ${project_version}" modifiers="m" />
-              <regexp pattern="^Stable tag\:.+$" replace="Stable tag: ${project_version}" modifiers="m" />
-
-              <regexp pattern="^Requires at least\:.+$" replace="Requires at least: ${project_wp_required_version}" modifiers="m" />
-              <regexp pattern="^Tested up to\:.+$" replace="Tested up to: ${project_wp_up_to_version}" modifiers="m" />
-
-              <regexp pattern="^Requires PHP\:.+$" replace="Requires PHP: ${project_php_required_version}" modifiers="m" />
-              <regexp pattern="^Tested up to PHP\:.+$" replace="Tested up to PHP: ${project_php_up_to_version}" modifiers="m" />
             </replaceregexp>
           </filterchain>
         </reflexive>
@@ -170,15 +174,15 @@
         <echo msg="Rebranding: ${_vendor_dir}/websharks/core ..." />
         <reflexive>
           <fileset dir="${_vendor_dir}/websharks/core">
-            <include pattern="src/includes/interfaces/*.php" />
-            <include pattern="src/includes/classes/*.php" />
-            <include pattern="src/includes/traits/*.php" />
+            <include pattern="src/includes/classes/**.php" />
+            <include pattern="src/includes/interfaces/**.php" />
+            <include pattern="src/includes/traits/**.php" />
           </fileset>
           <filterchain>
             <replaceregexp>
-              <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Classes\b" replace="namespace WebSharks\\Core\\${project_sns}\\Classes" />
-              <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Interfaces\b" replace="namespace WebSharks\\Core\\${project_sns}\\Interfaces" />
-              <regexp pattern="\bnamespace\s+WebSharks\\Core(?:\\[^\\]+)?\\Traits\b" replace="namespace WebSharks\\Core\\${project_sns}\\Traits" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Classes\b" replace="\1 WebSharks\\Core\\${project_sns}\\Classes" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Interfaces\b" replace="\1 WebSharks\\Core\\${project_sns}\\Interfaces" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Traits\b" replace="\1 WebSharks\\Core\\${project_sns}\\Traits" />
             </replaceregexp>
           </filterchain>
         </reflexive>
@@ -206,15 +210,15 @@
         <echo msg="Rebranding: ${_vendor_dir}/websharks/wp-core ..." />
         <reflexive>
           <fileset dir="${_vendor_dir}/websharks/wp-core">
-            <include pattern="src/includes/interfaces/*.php" />
-            <include pattern="src/includes/classes/*.php" />
-            <include pattern="src/includes/traits/*.php" />
+            <include pattern="src/includes/classes/**.php" />
+            <include pattern="src/includes/interfaces/**.php" />
+            <include pattern="src/includes/traits/**.php" />
           </fileset>
           <filterchain>
             <replaceregexp>
-              <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Classes\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Classes" />
-              <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Interfaces\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Interfaces" />
-              <regexp pattern="\bnamespace\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Traits\b" replace="namespace WebSharks\\WpCore\\${project_sns}\\Traits" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Classes\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Classes" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Interfaces\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Interfaces" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Traits\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Traits" />
             </replaceregexp>
           </filterchain>
         </reflexive>
