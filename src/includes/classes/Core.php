@@ -1877,12 +1877,24 @@ class Core // Heart of the HTML Compressor.
         if (!$css || !empty($disabled)) {
             goto finale; // Nothing to do.
         }
+        if (strlen($css) > 1000000) {
+            // Exclude VERY large files. Too time-consuming.
+            // Should really be compressed ahead-of-time anyway.
+            goto finale; // Don't compress HUGE files.
+        }
+        try { // Catch CSS compression-related exceptions.
+            if (!($compressed_css = \WebSharks\CssMinifier\Core::compress($css))) {
+                // `E_USER_NOTICE` to avoid a show-stopping problem.
+                trigger_error('CSS compression failure.', E_USER_NOTICE);
+            } else {
+                $css = $compressed_css;
+            } // Use compressed CSS file.
+        } catch (\Exception $exception) {
+            trigger_error($exception->getMessage(), E_USER_NOTICE);
+        }
         $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
         $css   = preg_replace($regex, '/', $css); // To absolute paths.
 
-        if (($compressed_css = $this->compressCss($css))) {
-            $css = $compressed_css;
-        }
         finale: // Target point; finale/return value.
 
         if ($css) {
@@ -1896,65 +1908,6 @@ class Core // Heart of the HTML Compressor.
             );
         }
         return $css;
-    }
-
-    /**
-     * Compresses CSS code (as quickly as possible).
-     *
-     * @since 140417 Initial release.
-     *
-     * @param string $css Any CSS code (excluding `<style></style>` tags please).
-     *
-     * @return string Compressed CSS code. This removes CSS comments, extra whitespace, and it compresses HEX color codes whenever possible.
-     *                In addition, this will also remove any unnecessary `;` line terminators to further optimize the overall file size.
-     *
-     * @TODO There are some additional optimizations we could do when it comes to shorthand CSS.
-     *    e.g. margin: 0 auto 0 auto; could be converted to margin: 0 auto;
-     */
-    protected function compressCss($css)
-    {
-        if (!($css = (string) $css)) {
-            return $css; // Nothing to do.
-        }
-        $static = &static::$static[__FUNCTION__];
-
-        if (!isset($static['replace'], $static['with'], $static['colors'])) {
-            $de_spacifiables = array('{', '}', '!=', '|=', '^=', '$=', '*=', '~=', '=', '~', ':', ';', ',', '>');
-            $de_spacifiables = implode('|', $this->pregQuoteDeep($de_spacifiables, '/'));
-
-            $static['replace'] = array(
-                'comments'        => '/\/\*.*?\*\//s',
-                'line_breaks'     => '/['."\r\n\t".']+/',
-                'extra_spaces'    => '/ +/',
-                'de_spacifiables' => '/ *('.$de_spacifiables.') */',
-                'unnecessary_;s'  => '/;\}/',
-            );
-            $static['with']    = array('', '', ' ', '${1}', '}');
-            $static['colors']  = '/(?P<context>[:,\h]+#)(?P<hex>[a-z0-9]{6})/i';
-        }
-        $css = preg_replace($static['replace'], $static['with'], $css);
-        $css = preg_replace_callback($static['colors'], array($this, 'maybeCompressCssColorCb'), $css);
-
-        return $css ? trim($css) : $css;
-    }
-
-    /**
-     * Compresses HEX color codes.
-     *
-     * @since 140417 Initial release.
-     *
-     * @param array $m Regular expression matches.
-     *
-     * @return string Full match with compressed HEX color code.
-     */
-    protected function maybeCompressCssColorCb(array $m)
-    {
-        $m['hex'] = strtoupper($m['hex']); // Convert to uppercase for easy comparison.
-
-        if ($m['hex'][0] === $m['hex'][1] && $m['hex'][2] === $m['hex'][3] && $m['hex'][4] === $m['hex'][5]) {
-            return $m['context'].$m['hex'][0].$m['hex'][2].$m['hex'][4];
-        }
-        return $m[0];
     }
 
     /********************************************************************************************************/

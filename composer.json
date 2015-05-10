@@ -32,7 +32,8 @@
         "ext-openssl": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
-        "websharks/js-minifier": "dev-master"
+        "websharks/js-minifier": "dev-master",
+        "websharks/css-minifier": "dev-master"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

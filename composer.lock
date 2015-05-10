@@ -4,20 +4,74 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c58e108b7582673e4281cb68f12e37d8",
+    "hash": "eef42e25726c877b291c8a0dcd93c94c",
     "packages": [
+        {
+            "name": "websharks/css-minifier",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/websharks/css-minifier.git",
+                "reference": "7460d5ff99090053a087726f49fbda367ddf55c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/websharks/css-minifier/zipball/7460d5ff99090053a087726f49fbda367ddf55c1",
+                "reference": "7460d5ff99090053a087726f49fbda367ddf55c1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=5.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "WebSharks\\CssMinifier\\": "src/includes/classes"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "websharks",
+                    "homepage": "http://websharks-inc.com/",
+                    "role": "company"
+                },
+                {
+                    "name": "jaswsinc",
+                    "homepage": "http://jaswsinc.com/",
+                    "role": "developer"
+                },
+                {
+                    "name": "raamdev",
+                    "homepage": "http://raam.org/",
+                    "role": "developer"
+                }
+            ],
+            "description": "Compresses CSS.",
+            "homepage": "https://github.com/websharks/css-minifier",
+            "keywords": [
+                "compressor",
+                "css",
+                "websharks"
+            ],
+            "time": "2015-05-10 22:25:57"
+        },
         {
             "name": "websharks/js-minifier",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/websharks/js-minifier.git",
-                "reference": "212cca9bb69a1e591219a86aa88c285cc6362e30"
+                "reference": "c138a090cc60f549e7071e782904f9ed69a27a42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/websharks/js-minifier/zipball/212cca9bb69a1e591219a86aa88c285cc6362e30",
-                "reference": "212cca9bb69a1e591219a86aa88c285cc6362e30",
+                "url": "https://api.github.com/repos/websharks/js-minifier/zipball/c138a090cc60f549e7071e782904f9ed69a27a42",
+                "reference": "c138a090cc60f549e7071e782904f9ed69a27a42",
                 "shasum": ""
             },
             "require": {
@@ -59,14 +113,15 @@
                 "javascript",
                 "websharks"
             ],
-            "time": "2015-05-10 11:46:24"
+            "time": "2015-05-10 23:03:53"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "websharks/js-minifier": 20
+        "websharks/js-minifier": 20,
+        "websharks/css-minifier": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
