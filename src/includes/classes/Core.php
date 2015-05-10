@@ -2053,24 +2053,27 @@ class Core // Heart of the HTML Compressor.
                     $js_tag_frags_script_js_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
                     $js_tag_frags_script_js_part_placeholder_key_replacements[] = $_js_tag_frag_key;
                 }
-                if (isset($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements)) {
-                    $html = $this->replaceOnce($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $html);
+            }
+            unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
 
-                    foreach ($js_tag_frags_script_js_part_placeholder_key_replacements as &$_js_tag_frag_key_replacement) {
-                        $_js_tag_frag = $js_tag_frags[$_js_tag_frag_key_replacement];
+            if (isset($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements)) {
+                $html = $this->replaceOnce($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $html);
 
-                        $_js_tag_frag_key_replacement = $_js_tag_frag['if_open_tag'];
-                        $_js_tag_frag_key_replacement .= $_js_tag_frag['script_open_tag'];
-                        $_js_tag_frag_key_replacement .= $this->compressInlineJsCode($_js_tag_frag['script_js']);
-                        $_js_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
-                        $_js_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
-                    }
-                    unset($_js_tag_frag_key_replacement); // Housekeeping.
+                foreach ($js_tag_frags_script_js_part_placeholder_key_replacements as &$_js_tag_frag_key_replacement) {
+                    $_js_tag_frag = $js_tag_frags[$_js_tag_frag_key_replacement];
 
-                    $html = $this->replaceOnce($js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements, $html);
+                    $_js_tag_frag_key_replacement = $_js_tag_frag['if_open_tag'];
+                    $_js_tag_frag_key_replacement .= $_js_tag_frag['script_open_tag'];
+                    $_js_tag_frag_key_replacement .= $this->compressInlineJsCode($_js_tag_frag['script_js']);
+                    $_js_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
+                    $_js_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
+                }
+                unset($_js_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
 
-                    if ($benchmark) {
-                        $this->benchmark->addData(
+                $html = $this->replaceOnce($js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements, $html);
+
+                if ($benchmark) {
+                    $this->benchmark->addData(
                             __FUNCTION__,
                             compact(
                                 'js_tag_frags',
@@ -2079,10 +2082,8 @@ class Core // Heart of the HTML Compressor.
                                 'js_tag_frags_script_js_part_placeholder_key_replacements'
                             )
                         );
-                    }
                 }
             }
-            unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
         }
         finale: // Target point; finale/return value.
 
@@ -2156,36 +2157,37 @@ class Core // Heart of the HTML Compressor.
                     $js_tag_frags_script_json_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
                     $js_tag_frags_script_json_part_placeholder_key_replacements[] = $_js_tag_frag_key;
                 }
-                if (isset($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements)) {
-                    $html = $this->replaceOnce($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $html);
-
-                    foreach ($js_tag_frags_script_json_part_placeholder_key_replacements as &$_json_tag_frag_key_replacement) {
-                        $_js_tag_frag = $js_tag_frags[$_json_tag_frag_key_replacement];
-
-                        $_json_tag_frag_key_replacement = $_js_tag_frag['if_open_tag'];
-                        $_json_tag_frag_key_replacement .= $_js_tag_frag['script_open_tag'];
-                        $_json_tag_frag_key_replacement .= $this->compressInlineJsonCode($_js_tag_frag['script_json']);
-                        $_json_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
-                        $_json_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
-                    }
-                    unset($_json_tag_frag_key_replacement); // Housekeeping.
-
-                    $html = $this->replaceOnce($js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements, $html);
-
-                    if ($benchmark) {
-                        $this->benchmark->addData(
-                            __FUNCTION__,
-                            compact(
-                                'js_tag_frags',
-                                'js_tag_frags_script_json_parts',
-                                'js_tag_frags_script_json_part_placeholders',
-                                'js_tag_frags_script_json_part_placeholder_key_replacements'
-                            )
-                        );
-                    }
-                }
             }
             unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
+
+            if (isset($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements)) {
+                $html = $this->replaceOnce($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $html);
+
+                foreach ($js_tag_frags_script_json_part_placeholder_key_replacements as &$_json_tag_frag_key_replacement) {
+                    $_js_tag_frag = $js_tag_frags[$_json_tag_frag_key_replacement];
+
+                    $_json_tag_frag_key_replacement = $_js_tag_frag['if_open_tag'];
+                    $_json_tag_frag_key_replacement .= $_js_tag_frag['script_open_tag'];
+                    $_json_tag_frag_key_replacement .= $this->compressInlineJsonCode($_js_tag_frag['script_json']);
+                    $_json_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
+                    $_json_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
+                }
+                unset($_json_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
+
+                $html = $this->replaceOnce($js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements, $html);
+
+                if ($benchmark) {
+                    $this->benchmark->addData(
+                        __FUNCTION__,
+                        compact(
+                            'js_tag_frags',
+                            'js_tag_frags_script_json_parts',
+                            'js_tag_frags_script_json_part_placeholders',
+                            'js_tag_frags_script_json_part_placeholder_key_replacements'
+                        )
+                    );
+                }
+            }
         }
         finale: // Target point; finale/return value.
 
