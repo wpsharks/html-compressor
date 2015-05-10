@@ -148,3 +148,8 @@
 *.exe binary
 *.sh text
 *.so binary
+
+# Archive ignores.
+assets/ export-ignore
+tests/ export-ignore
+.git* export-ignore
