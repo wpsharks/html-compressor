@@ -604,7 +604,8 @@ class Core // Heart of the HTML Compressor.
                 $_css_code    = $css_parts[$_css_part]['code'];
                 $_css_code    = $this->moveSpecialCssAtRulesToTop($_css_code);
                 $_css_code    = $this->stripPrependCssCharsetUtf8($_css_code);
-                $_css_code_cs = md5($_css_code); // Do this before compression.
+                $_css_code    = $this->forceAbsRelativePathsInCss($_css_code);
+                $_css_code_cs = md5($_css_code); // Before compression.
                 $_css_code    = $this->maybeCompressCssCode($_css_code);
 
                 $_css_code_path     = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_path);
@@ -1096,6 +1097,25 @@ class Core // Heart of the HTML Compressor.
         }
         return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolveRelativeUrl($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
     }
+
+   /**
+    * Force absolute relative paths in CSS.
+    *
+    * @since 150511 Improving CSS handling.
+    *
+    * @param string $css Raw CSS code.
+    *
+    * @return string CSS code (possibly altered here).
+    */
+   protected function forceAbsRelativePathsInCss($css)
+   {
+       if (!($css = (string) $css)) {
+           return $css; // Nothing to do.
+       }
+       $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
+
+       return preg_replace($regex, '/', $css); // Absolute relative paths.
+   }
 
     /********************************************************************************************************/
 
@@ -1892,9 +1912,6 @@ class Core // Heart of the HTML Compressor.
         } catch (\Exception $exception) {
             trigger_error($exception->getMessage(), E_USER_NOTICE);
         }
-        $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
-        $css   = preg_replace($regex, '/', $css); // To absolute paths.
-
         finale: // Target point; finale/return value.
 
         if ($css) {
