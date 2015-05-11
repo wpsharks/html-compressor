@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="PHP PSR-4 Project" default="build">
+
+  <!-- ============================================  -->
+  <!-- Configuration. -->
+  <!-- ============================================  -->
+
+  <!-- Property values. -->
+
+  <property file="${project.basedir}/.build.properties" />
+
+  <property name="_build_dir" value="${project.basedir}/.~build" />
+  <property name="_src_dir" value="${project.basedir}/src" />
+  <property name="_vendor_dir" value="${_src_dir}/vendor" />
+  <property name="_codex_dir" value="${_build_dir}/codex" />
+
+  <property name="_stub_file" value="${_src_dir}/includes/stub.php" />
+  <property name="_phar_stub_file" value="${_src_dir}/includes/phar-stub.php" />
+  <property name="_phar_file" value="${_build_dir}/${project_slug}.phar" />
+
+  <property name="_zip_file" value="${_build_dir}/${project_slug}.zip" />
+  <property name="_tgz_file" value="${_build_dir}/${project_slug}.tar.gz" />
+
+  <!-- Codex ignore list. -->
+
+  <property name="_codex_ignore" value="*/assets/*,*/tests/*,*/vendor/*" />
+
+  <!-- Fileset reference for PHAR files. -->
+
+  <fileset id="_phar_fileset" dir="${project.basedir}" casesensitive="false">
+    <exclude name="phar-stub.php" />
+    <exclude name="**/phar-stub.php" />
+
+    <exclude name=".**" />
+    <exclude name="**/.~**" />
+    <exclude name="**/.ht*" />
+    <exclude name="**/.git**" />
+    <exclude name="**/.idea/**" />
+    <exclude name="**/.tags" />
+    <exclude name="**/.post-receive" />
+    <exclude name="**/.apigen.neon" />
+    <exclude name="**/.travis.yml" />
+    <exclude name="**/.coveralls.yml" />
+    <exclude name="**/.scrutinizer.yml" />
+    <exclude name="**/.build.properties" />
+    <exclude name="**/.build.xml" />
+
+    <exclude name="assets/**" />
+    <exclude name="tests/**" />
+
+    <exclude name="composer.json" />
+    <exclude name="composer.lock" />
+    <exclude name="**/composer.json" />
+    <exclude name="**/composer.lock" />
+
+    <exclude name="license.txt" />
+    <exclude name="license.md" />
+    <exclude name="**/license.txt" />
+    <exclude name="**/license.md" />
+
+    <exclude name="readme.txt" />
+    <exclude name="readme.md" />
+    <exclude name="**/readme.txt" />
+    <exclude name="**/readme.md" />
+
+    <exclude name="changelog.txt" />
+    <exclude name="changelog.md" />
+    <exclude name="**/changelog.txt" />
+    <exclude name="**/changelog.md" />
+
+    <exclude name="authors.txt" />
+    <exclude name="authors.md" />
+    <exclude name="**/authors.txt" />
+    <exclude name="**/authors.md" />
+
+    <exclude name="contributors.txt" />
+    <exclude name="contributors.md" />
+    <exclude name="**/contributors.txt" />
+    <exclude name="**/contributors.md" />
+
+    <exclude name="vendor/bin/**" />
+    <exclude name="**/vendor/bin/**" />
+  </fileset>
+
+  <!-- Fileset reference for ZIP/TGZ files. -->
+
+  <fileset id="_zip_tgz_fileset" dir="${project.basedir}" casesensitive="false">
+    <exclude name="phar-stub.php" />
+    <exclude name="**/phar-stub.php" />
+
+    <exclude name=".**" />
+    <exclude name="**/.~**" />
+    <exclude name="**/.ht*" />
+    <exclude name="**/.git**" />
+    <exclude name="**/.idea/**" />
+    <exclude name="**/.tags" />
+    <exclude name="**/.post-receive" />
+    <exclude name="**/.apigen.neon" />
+    <exclude name="**/.travis.yml" />
+    <exclude name="**/.coveralls.yml" />
+    <exclude name="**/.scrutinizer.yml" />
+    <exclude name="**/.build.properties" />
+    <exclude name="**/.build.xml" />
+
+    <exclude name="assets/**" />
+    <exclude name="tests/**" />
+
+    <exclude name="composer.json" />
+    <exclude name="composer.lock" />
+    <exclude name="**/composer.json" />
+    <exclude name="**/composer.lock" />
+
+    <exclude name="vendor/bin/**" />
+    <exclude name="**/vendor/bin/**" />
+  </fileset>
+
+  <!-- Property replacement codes. -->
+
+  <tstamp><format property="_time_ymd" pattern="%y%m%d" /></tstamp>
+  <php expression="str_replace('%y%m%d', date('ymd'), '${project_version}')" returnproperty="project_version" />
+
+  <!-- ============================================  -->
+  <!-- Property validation. -->
+  <!-- ============================================  -->
+
+  <target name="-validate" hidden="true">
+    <fail unless="project_title" message="Missing `project_title` in properties file!" />
+    <fail unless="project_org" message="Missing `project_org` in properties file!" />
+    <fail unless="project_slug" message="Missing `project_slug` in properties file!" />
+    <fail unless="project_sns" message="Missing `project_sns` in properties file!" />
+    <fail unless="project_version" message="Missing `project_version` in properties file!" />
+
+    <fail unless="project_php_required_version" message="Missing `project_php_required_version` in properties file!" />
+    <fail unless="project_php_up_to_version" message="Missing `project_php_up_to_version` in properties file!" />
+
+    <fail unless="project_wp_required_version" message="Missing `project_wp_required_version` in properties file!" />
+    <fail unless="project_wp_up_to_version" message="Missing `project_wp_up_to_version` in properties file!" />
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Preamble. -->
+  <!-- ============================================  -->
+
+  <target name="-preamble" hidden="true">
+
+    <echo msg="OS: ${os.name}" />
+    <echo msg="Home: ${user.home}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="PHP Version: ${php.version}" />
+    <echo msg="Phing Version: ${phing.version}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Phing Title: ${phing.project.name}" />
+    <echo msg="Project Title: ${project_title}" />
+    <echo msg="Project Directory: ${project.basedir}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Project Org.: ${project_org}" />
+    <echo msg="Project Slug: ${project_slug}" />
+    <echo msg="Project SNS: ${project_sns}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Project Version: ${project_version}" />
+    <echo msg="Project PHP Required Version: ${project_php_required_version}" />
+    <echo msg="Project PHP Tested Up To Version: ${project_php_up_to_version}" />
+    <echo msg="Project WP Required Version: ${project_wp_required_version}" />
+    <echo msg="Project WP Tested Up To Version: ${project_wp_up_to_version}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Build Directory: ${_build_dir}" />
+    <echo msg="Src Directory: ${_src_dir}" />
+    <echo msg="Vendor Directory: ${_vendor_dir}" />
+    <echo msg="Codex Directory: ${_codex_dir}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Stub File: ${_stub_file}" />
+    <echo msg="PHAR Stub: ${_phar_stub_file}" />
+    <echo msg="PHAR File: ${_phar_file}" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="ZIP File: ${_zip_file}" />
+    <echo msg="TGZ File: ${_tgz_file}" />
+    <echo msg="------------------------------------" />
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Preparation. -->
+  <!-- ============================================  -->
+
+  <target name="-prepare" hidden="true">
+
+    <echo msg="Preparing to build..." />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Deleting previous: ${_build_dir} ..." />
+    <delete dir="${_build_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Creating: ${_build_dir} ..." />
+    <mkdir dir="${_build_dir}" />
+    <echo msg="------------------------------------" />
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Token replacements. -->
+  <!-- ============================================  -->
+
+  <target name="-rtokens" hidden="true">
+
+    <!-- WordPress theme/plugin replacements. -->
+
+    <if>
+      <and>
+        <available file="${project.basedir}/readme.txt" />
+      </and>
+      <then>
+        <echo msg="Replacing WP tokens in: ${project.basedir} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}" casesensitive="false">
+            <include pattern="readme.txt" />
+            <include pattern="plugin.php" />
+            <include pattern="uninstall.php" />
+            <include pattern="functions.php" />
+            <include pattern="style.css" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="^Version\:.+$" replace="Version: ${project_version}" modifiers="m" />
+              <regexp pattern="^Stable tag\:.+$" replace="Stable tag: ${project_version}" modifiers="m" />
+
+              <regexp pattern="^Requires at least\:.+$" replace="Requires at least: ${project_wp_required_version}" modifiers="m" />
+              <regexp pattern="^Tested up to\:.+$" replace="Tested up to: ${project_wp_up_to_version}" modifiers="m" />
+
+              <regexp pattern="^Requires PHP\:.+$" replace="Requires PHP: ${project_php_required_version}" modifiers="m" />
+              <regexp pattern="^Tested up to PHP\:.+$" replace="Tested up to PHP: ${project_php_up_to_version}" modifiers="m" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+    <!-- Other PHP/JS token replacements. -->
+
+    <if>
+      <and>
+        <available resource="${project.basedir}" type="dir" />
+      </and>
+      <then>
+        <echo msg="Replacing tokens in: ${project.basedir} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}" casesensitive="false">
+            <exclude pattern="**/vendor/**" />
+            <include pattern="*.php" />
+            <include pattern="**/*.php" />
+            <include pattern="*.js" />
+            <include pattern="**/*.js" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="'[^']*?';\s*\/\/version\/\/$" replace="'${project_version}'; //version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/version\/\/$' replace='"${project_version}"; //version//' modifiers="m" />
+
+              <regexp pattern="'[^']*?';\s*\/\/php\-required\-version\/\/$" replace="'${project_php_required_version}'; //php-required-version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/php\-required\-version\/\/$' replace='"${project_php_required_version}"; //php-required-version//' modifiers="m" />
+
+              <regexp pattern="'[^']*?';\s*\/\/php\-up\-to\-version\/\/$" replace="'${project_php_up_to_version}'; //php-up-to-version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/php\-up\-to\-version\/\/$' replace='"${project_php_up_to_version}"; //php-up-to-version//' modifiers="m" />
+
+              <regexp pattern="'[^']*?';\s*\/\/wp\-required\-version\/\/$" replace="'${project_wp_required_version}'; //wp-required-version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/wp\-required\-version\/\/$' replace='"${project_wp_required_version}"; //wp-required-version//' modifiers="m" />
+
+              <regexp pattern="'[^']*?';\s*\/\/wp\-up\-to\-version\/\/$" replace="'${project_wp_up_to_version}'; //wp-up-to-version//" modifiers="m" />
+              <regexp pattern='"[^"]*?";\s*\/\/wp\-up\-to\-version\/\/$' replace='"${project_wp_up_to_version}"; //wp-up-to-version//' modifiers="m" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Composer install routine. -->
+  <!-- ============================================  -->
+
+  <target name="-composer" hidden="true">
+
+    <if>
+      <and>
+        <available file="${project.basedir}/composer.json" />
+      </and>
+      <then>
+        <echo msg="Deleting previous: ${_vendor_dir} ..." />
+        <delete dir="${_vendor_dir}" includeemptydirs="true" quiet="true" />
+        <echo msg="------------------------------------" />
+
+        <echo msg="Deleting previous: ${project.basedir}/composer.lock ..." />
+        <delete file="${project.basedir}/composer.lock" quiet="true" />
+        <echo msg="------------------------------------" />
+
+        <echo msg="Running Composer..." />
+        <exec executable="/usr/bin/env" dir="${project.basedir}" passthru="true" checkreturn="true">
+          <arg value="composer" />
+          <arg value="install" />
+        </exec>
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Rebranding routines. -->
+  <!-- ============================================  -->
+
+  <target name="-rebrand" hidden="true">
+
+    <!-- WebSharks Core. -->
+
+    <if>
+      <and>
+        <available file="${_vendor_dir}/composer/autoload_psr4.php" />
+        <available resource="${_vendor_dir}/websharks/core" type="dir" />
+      </and>
+      <then>
+        <echo msg="Rebranding: ${_vendor_dir}/websharks/core ..." />
+
+        <reflexive>
+          <fileset dir="${_vendor_dir}/websharks/core" casesensitive="false">
+            <include pattern="src/includes/classes/**.php" />
+            <include pattern="src/includes/interfaces/**.php" />
+            <include pattern="src/includes/traits/**.php" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Classes\b" replace="\1 WebSharks\\Core\\${project_sns}\\Classes" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Interfaces\b" replace="\1 WebSharks\\Core\\${project_sns}\\Interfaces" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\Core(?:\\[^\\]+)?\\Traits\b" replace="\1 WebSharks\\Core\\${project_sns}\\Traits" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+
+        <reflexive>
+          <fileset dir="${_vendor_dir}/composer" casesensitive="false">
+            <include pattern="autoload_psr4.php" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Classes\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Classes" />
+              <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Interfaces\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Interfaces" />
+              <regexp pattern="\bWebSharks\\\\Core(?:\\\\[^\\]+)?\\\\Traits\b" replace="WebSharks\\\\Core\\\\${project_sns}\\\\Traits" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+    <!-- WebSharks WP Core. -->
+
+    <if>
+      <and>
+        <available file="${_vendor_dir}/composer/autoload_psr4.php" />
+        <available resource="${_vendor_dir}/websharks/wp-core" type="dir" />
+      </and>
+      <then>
+        <echo msg="Rebranding: ${_vendor_dir}/websharks/wp-core ..." />
+
+        <reflexive>
+          <fileset dir="${_vendor_dir}/websharks/wp-core" casesensitive="false">
+            <include pattern="src/includes/classes/**.php" />
+            <include pattern="src/includes/interfaces/**.php" />
+            <include pattern="src/includes/traits/**.php" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Classes\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Classes" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Interfaces\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Interfaces" />
+              <regexp pattern="\b(namespace|use)\s+WebSharks\\WpCore(?:\\[^\\]+)?\\Traits\b" replace="\1 WebSharks\\WpCore\\${project_sns}\\Traits" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+
+        <reflexive>
+          <fileset dir="${_vendor_dir}/composer" casesensitive="false">
+            <include pattern="autoload_psr4.php" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Classes\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Classes" />
+              <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Interfaces\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Interfaces" />
+              <regexp pattern="\bWebSharks\\\\WpCore(?:\\\\[^\\]+)?\\\\Traits\b" replace="WebSharks\\\\WpCore\\\\${project_sns}\\\\Traits" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- POT translation files. -->
+  <!-- ============================================  -->
+
+  <target name="-pots" hidden="true">
+
+    <!-- WordPress POT translation. -->
+    <if>
+      <and>
+        <available resource="${_vendor_dir}/websharks/wp-i18n-tools" type="dir" />
+      </and>
+      <then>
+
+        <!-- WordPress theme. -->
+
+        <if>
+          <and>
+            <available file="${project.basedir}/readme.txt" />
+            <available file="${project.basedir}/style.css" />
+          </and>
+          <then>
+            <echo msg="Building POT translation file for WP theme: ${project.basedir} ..." />
+            <exec executable="${_vendor_dir}/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
+              <arg value="wp-theme" />
+              <arg value="${project.basedir}" />
+              <arg value="${_src_dir}/includes/translations/${project_slug}.pot" />
+            </exec>
+            <echo msg="------------------------------------" />
+          </then>
+        </if>
+
+        <!-- WordPress plugin. -->
+
+        <if>
+          <and>
+            <available file="${project.basedir}/readme.txt" />
+            <available file="${project.basedir}/plugin.php" />
+          </and>
+          <then>
+            <echo msg="Building POT translation file for WP plugin: ${project.basedir} ..." />
+            <exec executable="${_vendor_dir}/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
+              <arg value="wp-plugin" />
+              <arg value="${project.basedir}" />
+              <arg value="${_src_dir}/includes/translations/${project_slug}.pot" />
+            </exec>
+            <echo msg="------------------------------------" />
+          </then>
+        </if>
+
+        <!-- Remove WP i18n Tools package now. -->
+
+        <echo msg="Deleting: ${_vendor_dir}/websharks/wp-i18n-tools ..." />
+        <delete dir="${_vendor_dir}/websharks/wp-i18n-tools" includeemptydirs="true" quiet="false" />
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Package generation. -->
+  <!-- ============================================  -->
+
+  <target name="-apigen" hidden="true">
+
+    <echo msg="Deleting previous: ${_codex_dir} ..." />
+    <delete dir="${_codex_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Running ApiGen (i.e., building codex)..." />
+    <exec executable="/usr/bin/env" dir="${project.basedir}" passthru="true" checkreturn="true">
+      <arg value="apigen" />
+      <arg value="generate" />
+      <arg value="--source=${_src_dir}" />
+      <arg value="--destination=${_codex_dir}" />
+      <arg value="--title=${project_title}" />
+      <arg value="--download" />
+      <arg value="--deprecated" />
+      <arg value="--todo" />
+      <arg value="--php" />
+      <arg value="--debug" />
+    </exec>
+    <echo msg="------------------------------------" />
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Package generation. -->
+  <!-- ============================================  -->
+
+  <target name="-packages" hidden="true">
+
+    <!-- PHAR file generation. -->
+    <if>
+      <and>
+        <available file="${_phar_stub_file}" />
+        <available resource="${_src_dir}" type="dir" />
+      </and>
+      <then>
+        <echo msg="Deleting previous: ${_phar_file} ..." />
+        <delete file="${_phar_file}" quiet="true" />
+        <echo msg="------------------------------------" />
+
+        <echo msg="Creating PHAR file: ${_phar_file}" />
+        <pharpackage basedir="${project.basedir}" stub="${_phar_stub_file}" destfile="${_phar_file}">
+          <fileset refid="_phar_fileset" />
+        </pharpackage>
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
+
+    <!-- ZIP file generation. -->
+
+    <echo msg="Deleting previous: ${_zip_file} ..." />
+    <delete file="${_zip_file}" quiet="true" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Creating ZIP file: ${_zip_file}" />
+    <zip basedir="${project.basedir}" destfile="${_zip_file}">
+      <fileset refid="_zip_tgz_fileset" />
+    </zip>
+    <echo msg="------------------------------------" />
+
+    <!-- TGZ file generation. -->
+
+    <echo msg="Deleting previous: ${_tgz_file} ..." />
+    <delete file="${_tgz_file}" quiet="true" />
+    <echo msg="------------------------------------" />
+
+    <echo msg="Creating TGZ file: ${_tgz_file}" />
+    <tar basedir="${project.basedir}" destfile="${_tgz_file}" compression="gzip">
+      <fileset refid="_zip_tgz_fileset" />
+    </tar>
+    <echo msg="------------------------------------" />
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Default/visible build target. -->
+  <!-- ============================================  -->
+
+  <target name="build" depends="-validate,-preamble,-prepare,-rtokens,-composer,-rebrand,-pots,-apigen,-packages">
+
+    <echo msg="Build complete! :-)" />
+
+  </target>
+
+</project>
