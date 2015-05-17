@@ -500,7 +500,7 @@ class Core // Heart of the HTML Compressor.
      * @since 140417 Initial release.
      *
      * @param array  $css_tag_frags CSS tag fragments.
-     * @param string $for           Where will these parts go? One of `head`, `body`, `footer`.
+     * @param string $for           Where will these parts go? One of `head`, `body`, `foot`.
      *
      * @throws \Exception If unable to cache CSS parts.
      *
@@ -1228,7 +1228,7 @@ class Core // Heart of the HTML Compressor.
             goto finale; // Nothing to do.
         }
         if (($footer_scripts_frag = $this->getFooterScriptsFrag($html)) /* e.g. <!-- footer-scripts --><!-- footer-scripts --> */) {
-            if (($js_tag_frags = $this->getJsTagFrags($footer_scripts_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags, 'footer'))) {
+            if (($js_tag_frags = $this->getJsTagFrags($footer_scripts_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags, 'foot'))) {
                 $js_tag_frags_all_compiled = $this->compileKeyElementsDeep($js_tag_frags, 'all');
                 $html                      = $this->replaceOnce($footer_scripts_frag['all'], '%%htmlc-footer-scripts%%', $html);
                 $cleaned_footer_scripts    = $this->replaceOnce($js_tag_frags_all_compiled, '', $footer_scripts_frag['contents']);
@@ -1285,7 +1285,7 @@ class Core // Heart of the HTML Compressor.
      * @since 140417 Initial release.
      *
      * @param array  $js_tag_frags JS tag fragments.
-     * @param string $for          Where will these parts go? One of `head`, `body`, `footer`.
+     * @param string $for          Where will these parts go? One of `head`, `body`, `foot`.
      *
      * @throws \Exception If unable to cache JS parts.
      *
