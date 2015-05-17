@@ -441,7 +441,7 @@ class Core // Heart of the HTML Compressor.
             goto finale; // Nothing to do.
         }
         if (($html_frag = $this->getHtmlFrag($html)) && ($head_frag = $this->getHeadFrag($html))) {
-            if (($css_tag_frags = $this->getCssTagFrags($html_frag)) && ($css_parts = $this->compileCssTagFragsIntoParts($css_tag_frags))) {
+            if (($css_tag_frags = $this->getCssTagFrags($html_frag)) && ($css_parts = $this->compileCssTagFragsIntoParts($css_tag_frags, 'head'))) {
                 $css_tag_frags_all_compiled = $this->compileKeyElementsDeep($css_tag_frags, 'all');
                 $html                       = $this->replaceOnce($head_frag['all'], '%%htmlc-head%%', $html);
                 $html                       = $this->replaceOnce($css_tag_frags_all_compiled, '', $html);
@@ -499,17 +499,19 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @param array $css_tag_frags CSS tag fragments.
+     * @param array  $css_tag_frags CSS tag fragments.
+     * @param string $for           Where will these parts go? One of `head`, `body`, `footer`.
      *
      * @throws \Exception If unable to cache CSS parts.
      *
      * @return array Array of CSS parts, else an empty array on failure.
      */
-    protected function compileCssTagFragsIntoParts(array $css_tag_frags)
+    protected function compileCssTagFragsIntoParts(array $css_tag_frags, $for)
     {
         if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
             $time = microtime(true);
         }
+        $for                = (string) $for; // Force string.
         $css_parts          = array(); // Initialize.
         $css_parts_checksum = ''; // Initialize.
 
@@ -610,7 +612,7 @@ class Core // Heart of the HTML Compressor.
 
                 $_css_code_path     = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_path);
                 $_css_code_url      = str_replace('%%code-checksum%%', $_css_code_cs, $cache_part_file_url);
-                $_css_code_url      = $this->hook_api->applyFilters('part_url', $_css_code_url);
+                $_css_code_url      = $this->hook_api->applyFilters('part_url', $_css_code_url, $for);
                 $_css_code_path_tmp = $_css_code_path.'.'.uniqid('', true).'.tmp';
                 // Cache file creation is atomic; i.e. tmp file w/ rename.
 
@@ -680,24 +682,24 @@ class Core // Heart of the HTML Compressor.
                 }
                 if ($_link_href || $_style_css) {
                     $css_tag_frags[] = array(
-                        'all'                   => $_tag_frag['all'],
+                        'all' => $_tag_frag['all'],
 
-                        'if_open_tag'           => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
-                        'if_closing_tag'        => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
+                        'if_open_tag'    => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
+                        'if_closing_tag' => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
 
                         'link_self_closing_tag' => isset($_tag_frag['link_self_closing_tag']) ? $_tag_frag['link_self_closing_tag'] : '',
                         'link_href_external'    => ($_link_href) ? $this->isUrlExternal($_link_href) : false,
                         'link_href'             => $_link_href, // This could also be empty.
 
-                        'style_open_tag'        => isset($_tag_frag['style_open_tag']) ? $_tag_frag['style_open_tag'] : '',
-                        'style_css'             => $_style_css, // This could also be empty.
-                        'style_closing_tag'     => isset($_tag_frag['style_closing_tag']) ? $_tag_frag['style_closing_tag'] : '',
+                        'style_open_tag'    => isset($_tag_frag['style_open_tag']) ? $_tag_frag['style_open_tag'] : '',
+                        'style_css'         => $_style_css, // This could also be empty.
+                        'style_closing_tag' => isset($_tag_frag['style_closing_tag']) ? $_tag_frag['style_closing_tag'] : '',
 
-                        'media'                 => $_media ? $_media : 'all', // Default value.
+                        'media' => $_media ? $_media : 'all', // Default value.
 
-                        'exclude'               => false, // Default value.
+                        'exclude' => false, // Default value.
                     );
-                    $_tag_frag_r     = &$css_tag_frags[count($css_tag_frags) - 1];
+                    $_tag_frag_r = &$css_tag_frags[count($css_tag_frags) - 1];
 
                     if ($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag']) {
                         $_tag_frag_r['exclude'] = true;
@@ -1149,7 +1151,7 @@ class Core // Heart of the HTML Compressor.
             goto finale; // Nothing to do.
         }
         if (($head_frag = $this->getHeadFrag($html)) /* No need to get the HTML frag here; we're operating on the `<head>` only. */) {
-            if (($js_tag_frags = $this->getJsTagFrags($head_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags))) {
+            if (($js_tag_frags = $this->getJsTagFrags($head_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags, 'head'))) {
                 $js_tag_frags_all_compiled = $this->compileKeyElementsDeep($js_tag_frags, 'all');
                 $html                      = $this->replaceOnce($head_frag['all'], '%%htmlc-head%%', $html);
                 $cleaned_head_contents     = $this->replaceOnce($js_tag_frags_all_compiled, '', $head_frag['contents']);
@@ -1226,7 +1228,7 @@ class Core // Heart of the HTML Compressor.
             goto finale; // Nothing to do.
         }
         if (($footer_scripts_frag = $this->getFooterScriptsFrag($html)) /* e.g. <!-- footer-scripts --><!-- footer-scripts --> */) {
-            if (($js_tag_frags = $this->getJsTagFrags($footer_scripts_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags))) {
+            if (($js_tag_frags = $this->getJsTagFrags($footer_scripts_frag)) && ($js_parts = $this->compileJsTagFragsIntoParts($js_tag_frags, 'footer'))) {
                 $js_tag_frags_all_compiled = $this->compileKeyElementsDeep($js_tag_frags, 'all');
                 $html                      = $this->replaceOnce($footer_scripts_frag['all'], '%%htmlc-footer-scripts%%', $html);
                 $cleaned_footer_scripts    = $this->replaceOnce($js_tag_frags_all_compiled, '', $footer_scripts_frag['contents']);
@@ -1282,17 +1284,19 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @param array $js_tag_frags JS tag fragments.
+     * @param array  $js_tag_frags JS tag fragments.
+     * @param string $for          Where will these parts go? One of `head`, `body`, `footer`.
      *
      * @throws \Exception If unable to cache JS parts.
      *
      * @return array Array of JS parts, else an empty array on failure.
      */
-    protected function compileJsTagFragsIntoParts(array $js_tag_frags)
+    protected function compileJsTagFragsIntoParts(array $js_tag_frags, $for)
     {
         if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
             $time = microtime(true);
         }
+        $for               = (string) $for; // Force string.
         $js_parts          = array(); // Initialize.
         $js_parts_checksum = ''; // Initialize.
 
@@ -1374,7 +1378,7 @@ class Core // Heart of the HTML Compressor.
 
                 $_js_code_path     = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_path);
                 $_js_code_url      = str_replace('%%code-checksum%%', $_js_code_cs, $cache_part_file_url);
-                $_js_code_url      = $this->hook_api->applyFilters('part_url', $_js_code_url);
+                $_js_code_url      = $this->hook_api->applyFilters('part_url', $_js_code_url, $for);
                 $_js_code_path_tmp = $_js_code_path.'.'.uniqid('', true).'.tmp';
                 // Cache file creation is atomic; e.g. tmp file w/ rename.
 
@@ -1451,22 +1455,22 @@ class Core // Heart of the HTML Compressor.
                     }
                     if ($_script_src || $_script_js || $_script_json) {
                         $js_tag_frags[] = array(
-                            'all'                 => $_tag_frag['all'],
+                            'all' => $_tag_frag['all'],
 
-                            'if_open_tag'         => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
-                            'if_closing_tag'      => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
+                            'if_open_tag'    => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
+                            'if_closing_tag' => isset($_tag_frag['if_closing_tag']) ? $_tag_frag['if_closing_tag'] : '',
 
-                            'script_open_tag'       => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
-                            'script_src_external'   => $_is_js && $_script_src ? $this->isUrlExternal($_script_src) : false,
-                            'script_src'            => $_is_js ? $_script_src : '', // This could also be empty.
-                            'script_js'             => $_is_js ? $_script_js : '', // This could also be empty.
-                            'script_json'           => $_is_json ? $_script_json : '', // This could also be empty.
-                            'script_async'          => $_is_js ? $_script_async : '', // This could also be empty.
-                            'script_closing_tag'    => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
+                            'script_open_tag'     => isset($_tag_frag['script_open_tag']) ? $_tag_frag['script_open_tag'] : '',
+                            'script_src_external' => $_is_js && $_script_src ? $this->isUrlExternal($_script_src) : false,
+                            'script_src'          => $_is_js ? $_script_src : '', // This could also be empty.
+                            'script_js'           => $_is_js ? $_script_js : '', // This could also be empty.
+                            'script_json'         => $_is_json ? $_script_json : '', // This could also be empty.
+                            'script_async'        => $_is_js ? $_script_async : '', // This could also be empty.
+                            'script_closing_tag'  => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
 
-                            'exclude'             => false, // Default value.
+                            'exclude' => false, // Default value.
                         );
-                        $_tag_frag_r    = &$js_tag_frags[count($js_tag_frags) - 1];
+                        $_tag_frag_r = &$js_tag_frags[count($js_tag_frags) - 1];
 
                         if ($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'] || $_tag_frag_r['script_async']) {
                             $_tag_frag_r['exclude'] = true;
@@ -3195,7 +3199,7 @@ class Core // Heart of the HTML Compressor.
         }
         if (in_array(gettype($parsed), array('array', 'string', 'integer'), true)) {
             if (is_array($parsed)) {
-                $defaults       = array(
+                $defaults = array(
                     'fragment' => '',
                     'host'     => '',
                     'pass'     => '',
@@ -3443,7 +3447,7 @@ class Core // Heart of the HTML Compressor.
 
         $relative_parts         = $this->mustParseUrl($relative_url_uri_query_fragment, null, 0);
         $relative_parts['path'] = $this->nUrlPathSeps($relative_parts['path'], true);
-        $base_parts             = $parts = $this->mustParseUrl($base_url);
+        $base_parts             = $parts             = $this->mustParseUrl($base_url);
 
         if ($relative_parts['host']) {
             if (!$relative_parts['scheme']) {
@@ -3564,7 +3568,7 @@ class Core // Heart of the HTML Compressor.
             CURLOPT_FAILONERROR    => $fail_on_error,
             CURLOPT_SSL_VERIFYPEER => false,
 
-            CURLOPT_USERAGENT      => $this->product_title,
+            CURLOPT_USERAGENT => $this->product_title,
         );
         if ($body) {
             if ($custom_request_method) {
@@ -3611,20 +3615,20 @@ class Core // Heart of the HTML Compressor.
         $stream_options = array(
             // See: <http://php.net/manual/en/context.http.php>
             'http' => array(
-             'method'          => $custom_request_method
+             'method' => $custom_request_method
                  ? $custom_request_method // Custom.
                  : ($body ? 'POST' : 'GET'),
 
-             'header'          => $headers,
-             'content'         => $body,
+             'header'  => $headers,
+             'content' => $body,
 
-             'ignore_errors'   => $fail_on_error,
-             'timeout'         => $max_stream_secs,
+             'ignore_errors' => $fail_on_error,
+             'timeout'       => $max_stream_secs,
 
              'follow_location' => $can_follow,
              'max_redirects'   => $can_follow ? 5 : 0,
 
-             'user_agent'      => $this->product_title,
+             'user_agent' => $this->product_title,
             ),
         );
         if (!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', false, $stream_context))) {
