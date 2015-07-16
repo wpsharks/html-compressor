@@ -2862,12 +2862,12 @@ class Core // Heart of the HTML Compressor.
             return static::$static[__FUNCTION__];
         }
         if (!empty($_SERVER['SERVER_PORT'])) {
-            if ($_SERVER['SERVER_PORT'] === '443') {
+            if ((integer)$_SERVER['SERVER_PORT'] === 443) {
                 return (static::$static[__FUNCTION__] = true);
             }
         }
         if (!empty($_SERVER['HTTPS'])) {
-            if ($_SERVER['HTTPS'] === '1' || strcasecmp($_SERVER['HTTPS'], 'on') === 0) {
+            if (filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN)) {
                 return (static::$static[__FUNCTION__] = true);
             }
         }
