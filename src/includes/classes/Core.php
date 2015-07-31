@@ -545,11 +545,11 @@ class Core // Heart of the HTML Compressor.
             if ($_css_tag_frag['exclude']) {
                 if ($_css_tag_frag['link_href'] || $_css_tag_frag['style_css']) {
                     if ($css_parts) {
-                        $_css_part++; // Starts new part.
+                        ++$_css_part; // Starts new part.
                     }
                     $css_parts[$_css_part]['tag']          = '';
                     $css_parts[$_css_part]['exclude_frag'] = $_css_tag_frag_pos;
-                    $_css_part++; // Always indicates a new part in the next iteration.
+                    ++$_css_part; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_css_tag_frag['link_href']) {
                 if (($_css_tag_frag['link_href'] = $this->resolveRelativeUrl($_css_tag_frag['link_href']))) {
@@ -559,9 +559,9 @@ class Core // Heart of the HTML Compressor.
 
                         if ($_css_code) {
                             if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
-                                $_css_part++; // Starts new part; different `@media` spec here.
+                                ++$_css_part; // Starts new part; different `@media` spec here.
                             } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
-                                $_css_part++; // Starts new part; existing code contains an @import.
+                                ++$_css_part; // Starts new part; existing code contains an @import.
                             }
                             $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
 
@@ -580,9 +580,9 @@ class Core // Heart of the HTML Compressor.
 
                 if ($_css_code) {
                     if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
-                        $_css_part++; // Starts new part; different `@media` spec here.
+                        ++$_css_part; // Starts new part; different `@media` spec here.
                     } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
-                        $_css_part++; // Starts new part; existing code contains an @import.
+                        ++$_css_part; // Starts new part; existing code contains an @import.
                     }
                     $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
 
@@ -1329,11 +1329,11 @@ class Core // Heart of the HTML Compressor.
             if ($_js_tag_frag['exclude']) {
                 if ($_js_tag_frag['script_src'] || $_js_tag_frag['script_js'] || $_js_tag_frag['script_json']) {
                     if ($js_parts) {
-                        $_js_part++; // Starts new part.
+                        ++$_js_part; // Starts new part.
                     }
                     $js_parts[$_js_part]['tag']          = '';
                     $js_parts[$_js_part]['exclude_frag'] = $_js_tag_frag_pos;
-                    $_js_part++; // Always indicates a new part in the next iteration.
+                    ++$_js_part; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_js_tag_frag['script_src']) {
                 if (($_js_tag_frag['script_src'] = $this->resolveRelativeUrl($_js_tag_frag['script_src']))) {
@@ -1362,10 +1362,10 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_json']) {
                 if ($js_parts) {
-                    $_js_part++; // Starts new part.
+                    ++$_js_part; // Starts new part.
                 }
                 $js_parts[$_js_part]['tag'] = $_js_tag_frag['all'];
-                $_js_part++; // Always indicates a new part in the next iteration.
+                ++$_js_part; // Always indicates a new part in the next iteration.
             }
         }
         unset($_js_part, $_js_tag_frag_pos, $_js_tag_frag, $_js_code);
@@ -2559,7 +2559,7 @@ class Core // Heart of the HTML Compressor.
             $dir = $basedir; // Caller wants only the base directory.
         } else {
             $dir = $basedir; // Start with the base directory.
-            $dir .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->currentUrlHost()), '-');
+            $dir .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
             $dir .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         if (!is_dir($dir) && mkdir($dir, 0755, true)) {
@@ -2631,7 +2631,7 @@ class Core // Heart of the HTML Compressor.
             $url = $baseurl; // Caller wants only the base directory.
         } else {
             $url = $baseurl; // Start with the base URL.
-            $url .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->currentUrlHost()), '-');
+            $url .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
             $url .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         return ($this->cache[__FUNCTION__.'_'.$cache_key] = $url);
@@ -2862,7 +2862,7 @@ class Core // Heart of the HTML Compressor.
             return static::$static[__FUNCTION__];
         }
         if (!empty($_SERVER['SERVER_PORT'])) {
-            if ((integer)$_SERVER['SERVER_PORT'] === 443) {
+            if ((integer) $_SERVER['SERVER_PORT'] === 443) {
                 return (static::$static[__FUNCTION__] = true);
             }
         }
