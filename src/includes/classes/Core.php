@@ -545,23 +545,23 @@ class Core // Heart of the HTML Compressor.
             if ($_css_tag_frag['exclude']) {
                 if ($_css_tag_frag['link_href'] || $_css_tag_frag['style_css']) {
                     if ($css_parts) {
-                        $_css_part++; // Starts new part.
+                        ++$_css_part; // Starts new part.
                     }
                     $css_parts[$_css_part]['tag']          = '';
                     $css_parts[$_css_part]['exclude_frag'] = $_css_tag_frag_pos;
-                    $_css_part++; // Always indicates a new part in the next iteration.
+                    ++$_css_part; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_css_tag_frag['link_href']) {
                 if (($_css_tag_frag['link_href'] = $this->resolveRelativeUrl($_css_tag_frag['link_href']))) {
-                    if (($_css_code = $this->remote($_css_tag_frag['link_href']))) {
+                    if (($_css_code = $this->stripUtf8Bom($this->remote($_css_tag_frag['link_href'])))) {
                         $_css_code = $this->resolveCssRelatives($_css_code, $_css_tag_frag['link_href']);
                         $_css_code = $this->resolveResolvedCssImports($_css_code, $_css_tag_frag['media']);
 
                         if ($_css_code) {
                             if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
-                                $_css_part++; // Starts new part; different `@media` spec here.
+                                ++$_css_part; // Starts new part; different `@media` spec here.
                             } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
-                                $_css_part++; // Starts new part; existing code contains an @import.
+                                ++$_css_part; // Starts new part; existing code contains an @import.
                             }
                             $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
 
@@ -575,14 +575,15 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_css_tag_frag['style_css']) {
                 $_css_code = $_css_tag_frag['style_css'];
+                $_css_code = $this->stripUtf8Bom($_css_code);
                 $_css_code = $this->resolveCssRelatives($_css_code);
                 $_css_code = $this->resolveResolvedCssImports($_css_code, $_css_tag_frag['media']);
 
                 if ($_css_code) {
                     if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
-                        $_css_part++; // Starts new part; different `@media` spec here.
+                        ++$_css_part; // Starts new part; different `@media` spec here.
                     } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
-                        $_css_part++; // Starts new part; existing code contains an @import.
+                        ++$_css_part; // Starts new part; existing code contains an @import.
                     }
                     $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
 
@@ -1037,7 +1038,9 @@ class Core // Heart of the HTML Compressor.
             return $m[0]; // Not possible; different media.
         }
         if (($css = $this->remote($m['url']))) {
-            $css = $this->resolveCssRelatives($css, $m['url']);
+            if (($css = $this->stripUtf8Bom($css))) {
+                $css = $this->resolveCssRelatives($css, $m['url']);
+            }
         }
         return $css;
     }
@@ -1100,24 +1103,24 @@ class Core // Heart of the HTML Compressor.
         return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolveRelativeUrl($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
     }
 
-   /**
-    * Force absolute relative paths in CSS.
-    *
-    * @since 150511 Improving CSS handling.
-    *
-    * @param string $css Raw CSS code.
-    *
-    * @return string CSS code (possibly altered here).
-    */
-   protected function forceAbsRelativePathsInCss($css)
-   {
-       if (!($css = (string) $css)) {
-           return $css; // Nothing to do.
-       }
-       $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
+    /**
+     * Force absolute relative paths in CSS.
+     *
+     * @since 150511 Improving CSS handling.
+     *
+     * @param string $css Raw CSS code.
+     *
+     * @return string CSS code (possibly altered here).
+     */
+    protected function forceAbsRelativePathsInCss($css)
+    {
+        if (!($css = (string) $css)) {
+            return $css; // Nothing to do.
+        }
+        $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
 
-       return preg_replace($regex, '/', $css); // Absolute relative paths.
-   }
+        return preg_replace($regex, '/', $css); // Absolute relative paths.
+    }
 
     /********************************************************************************************************/
 
@@ -1329,11 +1332,11 @@ class Core // Heart of the HTML Compressor.
             if ($_js_tag_frag['exclude']) {
                 if ($_js_tag_frag['script_src'] || $_js_tag_frag['script_js'] || $_js_tag_frag['script_json']) {
                     if ($js_parts) {
-                        $_js_part++; // Starts new part.
+                        ++$_js_part; // Starts new part.
                     }
                     $js_parts[$_js_part]['tag']          = '';
                     $js_parts[$_js_part]['exclude_frag'] = $_js_tag_frag_pos;
-                    $_js_part++; // Always indicates a new part in the next iteration.
+                    ++$_js_part; // Always indicates a new part in the next iteration.
                 }
             } elseif ($_js_tag_frag['script_src']) {
                 if (($_js_tag_frag['script_src'] = $this->resolveRelativeUrl($_js_tag_frag['script_src']))) {
@@ -1362,10 +1365,10 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_json']) {
                 if ($js_parts) {
-                    $_js_part++; // Starts new part.
+                    ++$_js_part; // Starts new part.
                 }
                 $js_parts[$_js_part]['tag'] = $_js_tag_frag['all'];
-                $_js_part++; // Always indicates a new part in the next iteration.
+                ++$_js_part; // Always indicates a new part in the next iteration.
             }
         }
         unset($_js_part, $_js_tag_frag_pos, $_js_tag_frag, $_js_code);
@@ -2048,14 +2051,14 @@ class Core // Heart of the HTML Compressor.
 
                 if ($benchmark) {
                     $this->benchmark->addData(
-                            __FUNCTION__,
-                            compact(
-                                'js_tag_frags',
-                                'js_tag_frags_script_js_parts',
-                                'js_tag_frags_script_js_part_placeholders',
-                                'js_tag_frags_script_js_part_placeholder_key_replacements'
-                            )
-                        );
+                        __FUNCTION__,
+                        compact(
+                            'js_tag_frags',
+                            'js_tag_frags_script_js_parts',
+                            'js_tag_frags_script_js_part_placeholders',
+                            'js_tag_frags_script_js_part_placeholder_key_replacements'
+                        )
+                    );
                 }
             }
         }
@@ -2288,6 +2291,23 @@ class Core // Heart of the HTML Compressor.
     /*
      * String Utilities
      */
+
+    /**
+     * Removes UTF-8 BOM (Byte Order Marker).
+     *
+     * @since 15xxxx Correcting bug in CSS compilation.
+     *
+     * @param string $string Input string to strip.
+     *
+     * @return string Stripped string.
+     */
+    protected function stripUtf8Bom($string)
+    {
+        if (!($string = (string) $string)) {
+            return $string;
+        }
+        return preg_replace('/^\xEF\xBB\xBF/', '', $string);
+    }
 
     /**
      * Escapes regex special chars deeply (i.e. `preg_quote()` deeply).
@@ -2559,7 +2579,7 @@ class Core // Heart of the HTML Compressor.
             $dir = $basedir; // Caller wants only the base directory.
         } else {
             $dir = $basedir; // Start with the base directory.
-            $dir .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->currentUrlHost()), '-');
+            $dir .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
             $dir .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         if (!is_dir($dir) && mkdir($dir, 0755, true)) {
@@ -2631,7 +2651,7 @@ class Core // Heart of the HTML Compressor.
             $url = $baseurl; // Caller wants only the base directory.
         } else {
             $url = $baseurl; // Start with the base URL.
-            $url .= '/'.trim(preg_replace('/[^a-z0-9\-]/i', '-', $this->currentUrlHost()), '-');
+            $url .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
             $url .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         return ($this->cache[__FUNCTION__.'_'.$cache_key] = $url);
@@ -2862,7 +2882,7 @@ class Core // Heart of the HTML Compressor.
             return static::$static[__FUNCTION__];
         }
         if (!empty($_SERVER['SERVER_PORT'])) {
-            if ((integer)$_SERVER['SERVER_PORT'] === 443) {
+            if ((integer) $_SERVER['SERVER_PORT'] === 443) {
                 return (static::$static[__FUNCTION__] = true);
             }
         }
@@ -3228,7 +3248,7 @@ class Core // Heart of the HTML Compressor.
      * @return array|string|int|null {@inheritdoc}
      *
      * @see parseUrl()
-     * @inheritdoc parseUrl()
+     * {@inheritdoc} parseUrl()
      */
     protected function mustParseUrl() // Arguments are NOT listed here.
     {
@@ -3320,7 +3340,7 @@ class Core // Heart of the HTML Compressor.
      * @return string {@inheritdoc}
      *
      * @see unparseUrl()
-     * @inheritdoc unparseUrl()
+     * {@inheritdoc} unparseUrl()
      */
     protected function mustUnparseUrl() // Arguments are NOT listed here.
     {
@@ -3365,7 +3385,7 @@ class Core // Heart of the HTML Compressor.
      * @return array|null {@inheritdoc}
      *
      * @see parseUriParts()
-     * @inheritdoc parseUriParts()
+     * {@inheritdoc} parseUriParts()
      */
     protected function mustParseUriParts() // Arguments are NOT listed here.
     {
@@ -3410,7 +3430,7 @@ class Core // Heart of the HTML Compressor.
      * @return string|null {@inheritdoc}
      *
      * @see parseUri()
-     * @inheritdoc parseUri()
+     * {@inheritdoc} parseUri()
      */
     protected function mustParseUri() // Arguments are NOT listed here.
     {
