@@ -10,18 +10,6 @@
 
   <property file="${project.basedir}/.build.properties" />
 
-  <property name="_build_dir" value="${project.basedir}/.~build" />
-  <property name="_src_dir" value="${project.basedir}/src" />
-  <property name="_vendor_dir" value="${_src_dir}/vendor" />
-  <property name="_codex_dir" value="${_build_dir}/codex" />
-
-  <property name="_stub_file" value="${_src_dir}/includes/stub.php" />
-  <property name="_phar_stub_file" value="${_src_dir}/includes/phar-stub.php" />
-  <property name="_phar_file" value="${_build_dir}/${project_slug}.phar" />
-
-  <property name="_zip_file" value="${_build_dir}/${project_slug}.zip" />
-  <property name="_tgz_file" value="${_build_dir}/${project_slug}.tar.gz" />
-
   <!-- Codex ignore list. -->
 
   <property name="_codex_ignore" value="*/assets/*,*/tests/*,*/vendor/*" />
@@ -44,6 +32,7 @@
     <exclude name="**/.coveralls.yml" />
     <exclude name="**/.scrutinizer.yml" />
     <exclude name="**/.build.properties" />
+    <exclude name="**/.build-*.xml" />
     <exclude name="**/.build.xml" />
 
     <exclude name="assets/**" />
@@ -101,6 +90,7 @@
     <exclude name="**/.coveralls.yml" />
     <exclude name="**/.scrutinizer.yml" />
     <exclude name="**/.build.properties" />
+    <exclude name="**/.build-*.xml" />
     <exclude name="**/.build.xml" />
 
     <exclude name="assets/**" />
@@ -128,6 +118,7 @@
     <fail unless="project_title" message="Missing `project_title` in properties file!" />
     <fail unless="project_org" message="Missing `project_org` in properties file!" />
     <fail unless="project_slug" message="Missing `project_slug` in properties file!" />
+    <fail unless="project_ns" message="Missing `project_ns` in properties file!" />
     <fail unless="project_sns" message="Missing `project_sns` in properties file!" />
     <fail unless="project_version" message="Missing `project_version` in properties file!" />
 
@@ -159,29 +150,41 @@
 
     <echo msg="Project Org.: ${project_org}" />
     <echo msg="Project Slug: ${project_slug}" />
+    <echo msg="Project NS: ${project_ns}" />
     <echo msg="Project SNS: ${project_sns}" />
     <echo msg="------------------------------------" />
+
+    <if>
+      <and>
+        <not>
+          <isset property="is_lite_variation" />
+        </not>
+        <isset property="project_lite_title" />
+        <istrue value="${project_lite_title}" />
+
+        <isset property="project_lite_ns" />
+        <istrue value="${project_lite_ns}" />
+
+        <isset property="project_lite_sns" />
+        <istrue value="${project_lite_sns}" />
+
+        <isset property="project_lite_slug" />
+        <istrue value="${project_lite_slug}" />
+      </and>
+      <then>
+        <echo msg="Project Lite Title: ${project_lite_title}" />
+        <echo msg="Project Lite Slug: ${project_lite_slug}" />
+        <echo msg="Project Lite NS: ${project_lite_ns}" />
+        <echo msg="Project Lite SNS: ${project_lite_sns}" />
+        <echo msg="------------------------------------" />
+      </then>
+    </if>
 
     <echo msg="Project Version: ${project_version}" />
     <echo msg="Project PHP Required Version: ${project_php_required_version}" />
     <echo msg="Project PHP Tested Up To Version: ${project_php_up_to_version}" />
     <echo msg="Project WP Required Version: ${project_wp_required_version}" />
     <echo msg="Project WP Tested Up To Version: ${project_wp_up_to_version}" />
-    <echo msg="------------------------------------" />
-
-    <echo msg="Build Directory: ${_build_dir}" />
-    <echo msg="Src Directory: ${_src_dir}" />
-    <echo msg="Vendor Directory: ${_vendor_dir}" />
-    <echo msg="Codex Directory: ${_codex_dir}" />
-    <echo msg="------------------------------------" />
-
-    <echo msg="Stub File: ${_stub_file}" />
-    <echo msg="PHAR Stub: ${_phar_stub_file}" />
-    <echo msg="PHAR File: ${_phar_file}" />
-    <echo msg="------------------------------------" />
-
-    <echo msg="ZIP File: ${_zip_file}" />
-    <echo msg="TGZ File: ${_tgz_file}" />
     <echo msg="------------------------------------" />
 
   </target>
@@ -195,12 +198,12 @@
     <echo msg="Preparing to build..." />
     <echo msg="------------------------------------" />
 
-    <echo msg="Deleting previous: ${_build_dir} ..." />
-    <delete dir="${_build_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="Deleting previous: ${project.basedir}/.~build ..." />
+    <delete dir="${project.basedir}/.~build" includeemptydirs="true" quiet="true" />
     <echo msg="------------------------------------" />
 
-    <echo msg="Creating: ${_build_dir} ..." />
-    <mkdir dir="${_build_dir}" />
+    <echo msg="Creating: ${project.basedir}/.~build ..." />
+    <mkdir dir="${project.basedir}/.~build" />
     <echo msg="------------------------------------" />
 
   </target>
@@ -223,6 +226,7 @@
           <fileset dir="${project.basedir}" casesensitive="false">
             <include pattern="readme.txt" />
             <include pattern="plugin.php" />
+            <include pattern="${project_slug}.php" />
             <include pattern="uninstall.php" />
             <include pattern="functions.php" />
             <include pattern="style.css" />
@@ -296,8 +300,8 @@
         <available file="${project.basedir}/composer.json" />
       </and>
       <then>
-        <echo msg="Deleting previous: ${_vendor_dir} ..." />
-        <delete dir="${_vendor_dir}" includeemptydirs="true" quiet="true" />
+        <echo msg="Deleting previous: ${project.basedir}/src/vendor ..." />
+        <delete dir="${project.basedir}/src/vendor" includeemptydirs="true" quiet="true" />
         <echo msg="------------------------------------" />
 
         <echo msg="Deleting previous: ${project.basedir}/composer.lock ..." />
@@ -325,14 +329,14 @@
 
     <if>
       <and>
-        <available file="${_vendor_dir}/composer/autoload_psr4.php" />
-        <available resource="${_vendor_dir}/websharks/core" type="dir" />
+        <available file="${project.basedir}/src/vendor/composer/autoload_psr4.php" />
+        <available resource="${project.basedir}/src/vendor/websharks/core" type="dir" />
       </and>
       <then>
-        <echo msg="Rebranding: ${_vendor_dir}/websharks/core ..." />
+        <echo msg="Rebranding: ${project.basedir}/src/vendor/websharks/core ..." />
 
         <reflexive>
-          <fileset dir="${_vendor_dir}/websharks/core" casesensitive="false">
+          <fileset dir="${project.basedir}/src/vendor/websharks/core" casesensitive="false">
             <include pattern="src/includes/classes/**.php" />
             <include pattern="src/includes/interfaces/**.php" />
             <include pattern="src/includes/traits/**.php" />
@@ -347,7 +351,7 @@
         </reflexive>
 
         <reflexive>
-          <fileset dir="${_vendor_dir}/composer" casesensitive="false">
+          <fileset dir="${project.basedir}/src/vendor/composer" casesensitive="false">
             <include pattern="autoload_psr4.php" />
           </fileset>
           <filterchain>
@@ -367,14 +371,14 @@
 
     <if>
       <and>
-        <available file="${_vendor_dir}/composer/autoload_psr4.php" />
-        <available resource="${_vendor_dir}/websharks/wp-core" type="dir" />
+        <available file="${project.basedir}/src/vendor/composer/autoload_psr4.php" />
+        <available resource="${project.basedir}/src/vendor/websharks/wp-core" type="dir" />
       </and>
       <then>
-        <echo msg="Rebranding: ${_vendor_dir}/websharks/wp-core ..." />
+        <echo msg="Rebranding: ${project.basedir}/src/vendor/websharks/wp-core ..." />
 
         <reflexive>
-          <fileset dir="${_vendor_dir}/websharks/wp-core" casesensitive="false">
+          <fileset dir="${project.basedir}/src/vendor/websharks/wp-core" casesensitive="false">
             <include pattern="src/includes/classes/**.php" />
             <include pattern="src/includes/interfaces/**.php" />
             <include pattern="src/includes/traits/**.php" />
@@ -389,7 +393,7 @@
         </reflexive>
 
         <reflexive>
-          <fileset dir="${_vendor_dir}/composer" casesensitive="false">
+          <fileset dir="${project.basedir}/src/vendor/composer" casesensitive="false">
             <include pattern="autoload_psr4.php" />
           </fileset>
           <filterchain>
@@ -416,7 +420,7 @@
     <!-- WordPress POT translation. -->
     <if>
       <and>
-        <available resource="${_vendor_dir}/websharks/wp-i18n-tools" type="dir" />
+        <available resource="${project.basedir}/src/vendor/websharks/wp-i18n-tools" type="dir" />
       </and>
       <then>
 
@@ -429,10 +433,10 @@
           </and>
           <then>
             <echo msg="Building POT translation file for WP theme: ${project.basedir} ..." />
-            <exec executable="${_vendor_dir}/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
+            <exec executable="${project.basedir}/src/vendor/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
               <arg value="wp-theme" />
               <arg value="${project.basedir}" />
-              <arg value="${_src_dir}/includes/translations/${project_slug}.pot" />
+              <arg value="${project.basedir}/src/includes/translations/${project_slug}.pot" />
             </exec>
             <echo msg="------------------------------------" />
           </then>
@@ -447,10 +451,10 @@
           </and>
           <then>
             <echo msg="Building POT translation file for WP plugin: ${project.basedir} ..." />
-            <exec executable="${_vendor_dir}/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
+            <exec executable="${project.basedir}/src/vendor/websharks/wp-i18n-tools/makepot.php" dir="${project.basedir}" passthru="true" checkreturn="true">
               <arg value="wp-plugin" />
               <arg value="${project.basedir}" />
-              <arg value="${_src_dir}/includes/translations/${project_slug}.pot" />
+              <arg value="${project.basedir}/src/includes/translations/${project_slug}.pot" />
             </exec>
             <echo msg="------------------------------------" />
           </then>
@@ -458,8 +462,8 @@
 
         <!-- Remove WP i18n Tools package now. -->
 
-        <echo msg="Deleting: ${_vendor_dir}/websharks/wp-i18n-tools ..." />
-        <delete dir="${_vendor_dir}/websharks/wp-i18n-tools" includeemptydirs="true" quiet="false" />
+        <echo msg="Deleting: ${project.basedir}/src/vendor/websharks/wp-i18n-tools ..." />
+        <delete dir="${project.basedir}/src/vendor/websharks/wp-i18n-tools" includeemptydirs="true" quiet="false" />
         <echo msg="------------------------------------" />
       </then>
     </if>
@@ -467,26 +471,35 @@
   </target>
 
   <!-- ============================================  -->
-  <!-- Package generation. -->
+  <!-- Codex generation. -->
   <!-- ============================================  -->
 
   <target name="-apigen" hidden="true">
 
-    <echo msg="Deleting previous: ${_codex_dir} ..." />
-    <delete dir="${_codex_dir}" includeemptydirs="true" quiet="true" />
+    <echo msg="Deleting previous: ${project.basedir}/.~build/codex ..." />
+    <delete dir="${project.basedir}/.~build/codex" includeemptydirs="true" quiet="true" />
     <echo msg="------------------------------------" />
 
     <echo msg="Running ApiGen (i.e., building codex)..." />
     <exec executable="/usr/bin/env" dir="${project.basedir}" passthru="true" checkreturn="true">
       <arg value="apigen" />
       <arg value="generate" />
-      <arg value="--source=${_src_dir}" />
-      <arg value="--destination=${_codex_dir}" />
-      <arg value="--title=${project_title}" />
+
+      <arg value="--source" />
+      <arg value="${project.basedir}/src" />
+
+      <arg value="--destination" />
+      <arg value="${project.basedir}/.~build/codex" />
+
+      <arg value="--title" />
+      <arg value="${project_title}" />
+
+      <arg value="--exclude" />
+      <arg value="vendor" />
+
       <arg value="--download" />
       <arg value="--deprecated" />
       <arg value="--todo" />
-      <arg value="--php" />
       <arg value="--debug" />
     </exec>
     <echo msg="------------------------------------" />
@@ -502,16 +515,16 @@
     <!-- PHAR file generation. -->
     <if>
       <and>
-        <available file="${_phar_stub_file}" />
-        <available resource="${_src_dir}" type="dir" />
+        <available file="${project.basedir}/src/includes/phar-stub.php" />
+        <available resource="${project.basedir}/src" type="dir" />
       </and>
       <then>
-        <echo msg="Deleting previous: ${_phar_file} ..." />
-        <delete file="${_phar_file}" quiet="true" />
+        <echo msg="Deleting previous: ${project.basedir}/.~build/${project_slug}.phar ..." />
+        <delete file="${project.basedir}/.~build/${project_slug}.phar" quiet="true" />
         <echo msg="------------------------------------" />
 
-        <echo msg="Creating PHAR file: ${_phar_file}" />
-        <pharpackage basedir="${project.basedir}" stub="${_phar_stub_file}" destfile="${_phar_file}">
+        <echo msg="Creating PHAR file: ${project.basedir}/.~build/${project_slug}.phar" />
+        <pharpackage basedir="${project.basedir}" stub="${project.basedir}/src/includes/phar-stub.php" destfile="${project.basedir}/.~build/${project_slug}.phar">
           <fileset refid="_phar_fileset" />
         </pharpackage>
         <echo msg="------------------------------------" />
@@ -520,24 +533,24 @@
 
     <!-- ZIP file generation. -->
 
-    <echo msg="Deleting previous: ${_zip_file} ..." />
-    <delete file="${_zip_file}" quiet="true" />
+    <echo msg="Deleting previous: ${project.basedir}/.~build/${project_slug}.zip ..." />
+    <delete file="${project.basedir}/.~build/${project_slug}.zip" quiet="true" />
     <echo msg="------------------------------------" />
 
-    <echo msg="Creating ZIP file: ${_zip_file}" />
-    <zip basedir="${project.basedir}" destfile="${_zip_file}">
+    <echo msg="Creating ZIP file: ${project.basedir}/.~build/${project_slug}.zip" />
+    <zip basedir="${project.basedir}" prefix="${project_slug}/" includeemptydirs="false" destfile="${project.basedir}/.~build/${project_slug}.zip">
       <fileset refid="_zip_tgz_fileset" />
     </zip>
     <echo msg="------------------------------------" />
 
     <!-- TGZ file generation. -->
 
-    <echo msg="Deleting previous: ${_tgz_file} ..." />
-    <delete file="${_tgz_file}" quiet="true" />
+    <echo msg="Deleting previous: ${project.basedir}/.~build/${project_slug}.tar.gz ..." />
+    <delete file="${project.basedir}/.~build/${project_slug}.tar.gz" quiet="true" />
     <echo msg="------------------------------------" />
 
-    <echo msg="Creating TGZ file: ${_tgz_file}" />
-    <tar basedir="${project.basedir}" destfile="${_tgz_file}" compression="gzip">
+    <echo msg="Creating TGZ file: ${project.basedir}/.~build/${project_slug}.tar.gz" />
+    <tar basedir="${project.basedir}" prefix="${project_slug}/" includeemptydirs="false" destfile="${project.basedir}/.~build/${project_slug}.tar.gz" compression="gzip">
       <fileset refid="_zip_tgz_fileset" />
     </tar>
     <echo msg="------------------------------------" />
@@ -545,13 +558,320 @@
   </target>
 
   <!-- ============================================  -->
+  <!-- Distro generation. -->
+  <!-- ============================================  -->
+
+  <target name="-distros" hidden="true">
+
+    <unzip file="${project.basedir}/.~build/${project_slug}.zip" todir="${project.basedir}/.~build/${project_slug}" />
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Lite variation generation. -->
+  <!-- ============================================  -->
+
+  <target name="-lite-variation" hidden="true">
+
+    <if>
+      <and>
+        <not>
+          <isset property="is_lite_variation" />
+        </not>
+        <isset property="project_lite_title" />
+        <istrue value="${project_lite_title}" />
+
+        <isset property="project_lite_ns" />
+        <istrue value="${project_lite_ns}" />
+
+        <isset property="project_lite_sns" />
+        <istrue value="${project_lite_sns}" />
+
+        <isset property="project_lite_slug" />
+        <istrue value="${project_lite_slug}" />
+      </and>
+      <then>
+        <!-- Prepare for lite generation. -->
+
+        <echo msg="Deleting previous: ${project.basedir}/.~build/${project_lite_slug} ..." />
+        <delete dir="${project.basedir}/.~build/${project_lite_slug}" includeemptydirs="true" quiet="true" />
+        <echo msg="------------------------------------" />
+
+        <echo msg="Creating: ${project.basedir}/.~build/${project_lite_slug} ..." />
+        <copy todir="${project.basedir}/.~build/${project_lite_slug}">
+          <fileset dir="${project.basedir}">
+            <exclude pattern=".~build/**" />
+          </fileset>
+        </copy>
+        <echo msg="------------------------------------" />
+
+        <!-- WordPress plugin slug file rename. -->
+
+        <if>
+          <and>
+            <available file="${project.basedir}/.~build/${project_lite_slug}/readme.txt" />
+            <available file="${project.basedir}/.~build/${project_lite_slug}/${project_slug}.php" />
+          </and>
+          <then>
+            <echo msg="Renaming: ${project.basedir}/.~build/${project_lite_slug}/${project_slug}.php ..." />
+            <move file="${project.basedir}/.~build/${project_lite_slug}/${project_slug}.php" tofile="${project.basedir}/.~build/${project_lite_slug}/${project_lite_slug}.php" />
+            <echo msg="------------------------------------" />
+          </then>
+        </if>
+
+        <!-- WordPress token replacements. -->
+
+        <if>
+          <and>
+            <available file="${project.basedir}/.~build/${project_lite_slug}/readme.txt" />
+          </and>
+          <then>
+            <echo msg="Replacing WP tokens in: ${project.basedir}/.~build/${project_lite_slug} ..." />
+            <reflexive>
+              <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+                <include pattern="readme.txt" />
+                <include pattern="plugin.php" />
+                <include pattern="${project_lite_slug}.php" />
+                <include pattern="uninstall.php" />
+                <include pattern="functions.php" />
+                <include pattern="style.css" />
+              </fileset>
+              <filterchain>
+                <replaceregexp>
+                  <regexp pattern="^\=\=\=.+?\=\=\=\n" replace="=== ${project_lite_title} ===${line.separator}" />
+                  <regexp pattern="^Theme Name\:.+$" replace="Theme Name: ${project_lite_title}" modifiers="m" />
+                  <regexp pattern="^Plugin Name\:.+$" replace="Plugin Name: ${project_lite_title}" modifiers="m" />
+                </replaceregexp>
+              </filterchain>
+            </reflexive>
+            <echo msg="------------------------------------" />
+          </then>
+        </if>
+
+        <!-- Other token replacements. -->
+
+        <echo msg="Replacing other tokens in: ${project.basedir}/.~build/${project_lite_slug} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+            <include pattern="readme.md" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="^##.+?\n" replace="## ${project_lite_title}${line.separator}" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+
+        <!-- Namespace replacements. -->
+
+        <echo msg="Changing namespace in: ${project.basedir}/.~build/${project_lite_slug} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+            <exclude pattern="src/vendor/**" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\b(namespace|use)\s+${project_ns}\b" replace="\1 ${project_lite_ns}" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+
+        <!-- Composer replacements. -->
+
+        <echo msg="Modifying composer.json: ${project.basedir}/.~build/${project_lite_slug}/composer.json ..." />
+
+        <php expression="addslashes(addslashes('${project_ns}'))" returnproperty="_project_ns_slashes" />
+        <php expression="addslashes(addslashes('${project_lite_ns}'))" returnproperty="_project_lite_ns_slashes" />
+
+        <reflexive>
+          <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+            <include pattern="composer.json" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\b${project_slug}\b" replace="${project_lite_slug}" />
+              <regexp pattern="&quot;${_project_ns_slashes}\\\\&quot;" replace="&quot;${_project_lite_ns_slashes}\\\\&quot;" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+
+        <!-- Strip pro tokens. -->
+
+        <echo msg="Stripping pro tokens from: ${project.basedir}/.~build/${project_lite_slug} ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+            <exclude pattern="src/vendor/**" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="\/\*\!\[pro strip\-from\=['&quot;]lite['&quot;]\]\*\/(?:.*?)\/\*\!\[\/pro\]\*\/" replace="" modifiers="s" />
+              <regexp pattern="\/\*\[pro strip\-from\=['&quot;]lite['&quot;]\]\*\/(?:.*?)\/\*\[\/pro\]\*\/" replace="" modifiers="s" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+
+        <!-- Modify build properties. -->
+
+        <echo msg="Modifying lite build properties: ${project.basedir}/.~build/${project_lite_slug}/.build.properties ..." />
+        <reflexive>
+          <fileset dir="${project.basedir}/.~build/${project_lite_slug}" casesensitive="false">
+            <include pattern=".build.properties" />
+          </fileset>
+          <filterchain>
+            <replaceregexp>
+              <regexp pattern="^project_title\s+.*$" replace="" modifiers="m" />
+              <regexp pattern="^project_slug\s+.*$" replace="" modifiers="m" />
+              <regexp pattern="^project_ns\s+.*$" replace="" modifiers="m" />
+              <regexp pattern="^project_sns\s+.*$" replace="" modifiers="m" />
+
+              <regexp pattern="^project_lite_title(\s+)" replace="project_title\1" modifiers="m" />
+              <regexp pattern="^project_lite_slug(\s+)" replace="project_slug\1" modifiers="m" />
+              <regexp pattern="^project_lite_ns(\s+)" replace="project_ns\1" modifiers="m" />
+              <regexp pattern="^project_lite_sns(\s+)" replace="project_sns\1" modifiers="m" />
+            </replaceregexp>
+          </filterchain>
+        </reflexive>
+        <echo msg="------------------------------------" />
+
+        <!-- Build lite variation now. -->
+
+        <echo msg="Building lite variation from: ${project.basedir}/.~build/${project_lite_slug}/.build.xml ..." />
+        <phing phingfile="${project.basedir}/.~build/${project_lite_slug}/.build.xml" inheritall="false" inheritrefs="false" haltonfailure="true">
+          <property name="is_lite_variation" value="true" />
+        </phing>
+
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
+  <!-- Push lite variation to GitHub repo. -->
+  <!-- ============================================  -->
+
+  <target name="-push-lite-variation" hidden="true">
+
+    <!-- Prepare for lite generation. -->
+
+    <property name="_repo_dir" value="${project.basedir}/.~build/${project_lite_slug}/.~build/${project_lite_slug}-git-repo"/>
+    <property name="_repo_remote_path" value="git@github.com:${project_org}/${project_lite_slug}.git"/>
+
+    <echo msg="Preparing to push ${project_lite_title} to ${_repo_remote_path} ..." />
+    <echo msg="------------------------------------" />
+
+    <delete dir="${_repo_dir}" includeemptydirs="true" quiet="true" />
+
+    <!-- Clone repository. -->
+
+    <echo msg="Cloning the existing remote repo (be patient, this may take awhile) ..." />
+
+    <gitclone repository="${_repo_remote_path}" targetPath="${_repo_dir}" />
+
+    <!-- Switch to "000000-dev" branch. -->
+
+    <gitcheckout repository="${_repo_dir}" branchname="000000-dev" />
+
+    <!-- Delete all existing files in repo. -->
+
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="_repo_dir" />
+    </delete>
+
+    <!-- Copy generated Lite variation to repo. -->
+
+    <copy todir="${_repo_dir}">
+      <fileset dir="${project.basedir}/.~build/${project_lite_slug}">
+        <exclude pattern=".~build/**" />
+      </fileset>
+    </copy>
+
+    <echo msg="Staging changed files ..." />
+
+    <exec command="git add --all *" dir="${_repo_dir}" />
+    <exec command="git status" dir="${_repo_dir}" passthru="true" />
+
+    <echo msg="------------------------------------" />
+    <echo msg="To make changes or commit these files manually, choose 'no' at the next prompt and visit ${_repo_dir}" />
+    <echo msg="------------------------------------" />
+
+    <!-- Commit changes. -->
+
+    <propertyprompt propertyName="_commit_to_repo" defaultValue="no" promptText="Commit these changes? (yes/no)" />
+
+    <if>
+      <equals arg1="${_commit_to_repo}" arg2="yes" trim="yes" />
+      <then>
+
+        <echo msg="Generating commit message from changelog ..." />
+
+        <!-- Extract changelog for latest version, write to .~commit.msg, then trim last two lines. -->
+        <if>
+          <available property="_changelog_exists" file="${project.basedir}/.~build/${project_lite_slug}/CHANGELOG.md" />
+          <then>
+            <loadfile property="_changelog" file="${project.basedir}/.~build/${project_lite_slug}/CHANGELOG.md"/>
+            <if>
+              <contains string="${_changelog}" substring="v${project_version}" />
+              <then>
+                <exec command="sed -n -e '/^=\sv{project_version}\s=$/,/^=.*$/w .~commit.msg' CHANGELOG.md" dir="${_repo_dir}" passthru="true" />
+                <exec command="sed -i -e '$d' .~commit.msg; sed -i -e '$d' .~commit.msg" dir="${_repo_dir}" passthru="true" />
+
+                <exec command="cat .~commit.msg" dir="${_repo_dir}" passthru="true" />
+
+                <echo msg="Committing changes ..." />
+                <exec command="git commit -F .~commit.msg" dir="${_repo_dir}" passthru="true" /> <!-- GitCommitTask doesn't support the -F git option. -->
+                <property name="_commit_passed" value="true" />
+              </then>
+              <else>
+                <property name="_commit_passed" value="false" />
+                <echo level="error" msg="Unable to commit: Changelog entry for v${project_version} not found." />
+              </else>
+            </if>
+          </then>
+          <else>
+            <property name="_commit_passed" value="false" />
+            <echo level="error" msg="Unable to commit: CHANGELOG.md file missing." />
+          </else>
+        </if>
+
+        <!-- Push previous commit to remote repo -->
+
+        <if>
+          <istrue value="${_commit_passed}" />
+          <then>
+            <propertyprompt propertyName="_push_to_repo" defaultValue="no" promptText="Push commit to remote repo? (yes/no)" />
+            <if>
+              <equals arg1="${_push_to_repo}" arg2="yes" trim="yes" />
+              <then>
+                <gitpush repository="${_repo_dir}" />
+              </then>
+            </if>
+          </then>
+        </if>
+
+      </then>
+    </if>
+
+  </target>
+
+  <!-- ============================================  -->
   <!-- Default/visible build target. -->
   <!-- ============================================  -->
 
-  <target name="build" depends="-validate,-preamble,-prepare,-rtokens,-composer,-rebrand,-pots,-apigen,-packages">
+  <target name="build" depends="-validate,-preamble,-prepare,-rtokens,-composer,-rebrand,-pots,-apigen,-packages,-distros,-lite-variation">
 
     <echo msg="Build complete! :-)" />
 
   </target>
+
+  <target name="release" depends="-push-lite-variation">
+
+    <echo msg="Release complete! :-)" />
+
+  </target>
+
 
 </project>

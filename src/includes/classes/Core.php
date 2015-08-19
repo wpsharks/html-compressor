@@ -35,7 +35,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @type string Dated version string: `YYMMDD`.
      */
-    protected $version = '150511'; //version//
+    protected $version = '150819'; //version//
 
     /**
      * An array of class options.
