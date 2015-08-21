@@ -264,8 +264,8 @@ class Core // Heart of the HTML Compressor.
 
         # Benchmark and Hook API instances.
 
-        $this->benchmark = new Benchmark(); // Instance.
-        $this->hook_api  = new HookApi(); // Instance.
+        $this->benchmark = new Benchmark();
+        $this->hook_api  = new HookApi();
 
         # Product Title; i.e., White-Label HTML Compressor
 
@@ -681,6 +681,7 @@ class Core // Heart of the HTML Compressor.
                 $_css_code    = $this->moveSpecialCssAtRulesToTop($_css_code);
                 $_css_code    = $this->stripPrependCssCharsetUtf8($_css_code);
                 $_css_code    = $this->forceAbsRelativePathsInCss($_css_code);
+                $_css_code    = $this->maybeFilterCssUrls($_css_code);
                 $_css_code_cs = md5($_css_code); // Before compression.
                 $_css_code    = $this->maybeCompressCssCode($_css_code);
 
@@ -1191,6 +1192,63 @@ class Core // Heart of the HTML Compressor.
         $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
 
         return preg_replace($regex, '/', $css); // Absolute relative paths.
+    }
+
+    /**
+     * Maybe filter URLs in CSS code.
+     *
+     * @since 150821 Adding URL filter support.
+     *
+     * @param string $css CSS code.
+     *
+     * @return string CSS code after having filtered all URLs.
+     */
+    protected function maybeFilterCssUrls($css)
+    {
+        if (!($css = (string) $css)) {
+            return $css; // Nothing to do.
+        }
+        if (!$this->hook_api->hasFilter('css_url()')) {
+            return $css; // No reason to do this.
+        }
+        $import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/i';
+        $any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/i';
+
+        $css = preg_replace_callback($import_without_url_regex, array($this, 'filterCssUrlImportCb'), $css);
+        $css = preg_replace_callback($any_url_regex, array($this, 'filterCssUrlCb'), $css);
+
+        return $css;
+    }
+
+    /**
+     * Callback handler for CSS import URL filters.
+     *
+     * @since 150821 Adding URL filter support.
+     *
+     * @param array $m An array of regex matches.
+     *
+     * @return string CSS `@import` rule with filtered URL.
+     */
+    protected function filterCssUrlImportCb(array $m)
+    {
+        return $m['import'].$m['open_encap'].$this->hook_api->applyFilters('css_url()', $m['url']).$m['close_encap'];
+    }
+
+    /**
+     * Callback handler for CSS URL filters.
+     *
+     * @since 150821 Adding URL filter support.
+     *
+     * @param array $m An array of regex matches.
+     *
+     * @return string CSS `url()` resource with with filtered URL.
+     */
+    protected function filterCssUrlCb(array $m)
+    {
+        if (stripos($m['url'], 'data:') === 0) {
+            return $m[0]; // Don't filter `data:` URIs.
+        }
+        return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->hook_api->applyFilters('css_url()', $m['url']).$m['close_encap'].$m['close_bracket'];
     }
 
     /********************************************************************************************************/
