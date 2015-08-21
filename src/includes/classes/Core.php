@@ -3572,23 +3572,26 @@ class Core // Heart of the HTML Compressor.
             goto fopen_transport; // cURL will not work in this case.
         }
         $curl_opts = array(
-            CURLOPT_URL            => $url,
-            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_URL          => $url,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+
             CURLOPT_CONNECTTIMEOUT => $max_con_secs,
             CURLOPT_TIMEOUT        => $max_stream_secs,
-
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER         => false,
 
             CURLOPT_FOLLOWLOCATION => $can_follow,
             CURLOPT_MAXREDIRS      => $can_follow ? 5 : 0,
 
-            CURLOPT_ENCODING       => '',
-            CURLOPT_VERBOSE        => false,
-            CURLOPT_FAILONERROR    => $fail_on_error,
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING    => '',
+            CURLOPT_HTTPHEADER  => $headers,
+            CURLOPT_REFERER     => $this->currentUrl(),
+            CURLOPT_AUTOREFERER => true, // On redirects.
+            CURLOPT_USERAGENT   => $this->product_title,
 
-            CURLOPT_USERAGENT => $this->product_title,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => false,
+            CURLOPT_VERBOSE        => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_FAILONERROR    => $fail_on_error,
         );
         if ($body) {
             if ($custom_request_method) {
@@ -3633,22 +3636,21 @@ class Core // Heart of the HTML Compressor.
                                  ' Please install the cURL & OpenSSL extensions for PHP.');
         }
         $stream_options = array(
-            // See: <http://php.net/manual/en/context.http.php>
             'http' => array(
-             'method' => $custom_request_method
-                 ? $custom_request_method // Custom.
-                 : ($body ? 'POST' : 'GET'),
-
-             'header'  => $headers,
-             'content' => $body,
-
-             'ignore_errors' => $fail_on_error,
-             'timeout'       => $max_stream_secs,
+             'protocol_version' => 1.1,
+             'method'           => $custom_request_method
+                 ? $custom_request_method : ($body ? 'POST' : 'GET'),
 
              'follow_location' => $can_follow,
              'max_redirects'   => $can_follow ? 5 : 0,
 
+             'header'     => array_merge($headers, array('Referer: '.$this->currentUrl())),
              'user_agent' => $this->product_title,
+
+             'ignore_errors' => $fail_on_error,
+             'timeout'       => $max_stream_secs,
+
+             'content' => $body,
             ),
         );
         if (!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', false, $stream_context))) {
@@ -3661,7 +3663,6 @@ class Core // Heart of the HTML Compressor.
 
         if (!empty($stream_meta_data['timed_out'])) {
             // Based on `$max_stream_secs`.
-
             $response_code = 408; // Request timeout.
             $response_body = ''; // Connection timed out; ignore.
         } elseif (!empty($stream_meta_data['wrapper_data']) && is_array($stream_meta_data['wrapper_data'])) {
