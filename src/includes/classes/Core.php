@@ -553,7 +553,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_css_tag_frag['link_href']) {
                 if (($_css_tag_frag['link_href'] = $this->resolveRelativeUrl($_css_tag_frag['link_href']))) {
-                    if (($_css_code = $this->stripUtf8Bom($this->remote($_css_tag_frag['link_href'])))) {
+                    if (($_css_code = $this->stripUtf8Bom($this->mustGetUrl($_css_tag_frag['link_href'])))) {
                         $_css_code = $this->resolveCssRelatives($_css_code, $_css_tag_frag['link_href']);
                         $_css_code = $this->resolveResolvedCssImports($_css_code, $_css_tag_frag['media']);
 
@@ -1037,7 +1037,7 @@ class Core // Heart of the HTML Compressor.
         if (!empty($m['media']) && $m['media'] !== $this->current_css_media) {
             return $m[0]; // Not possible; different media.
         }
-        if (($css = $this->stripUtf8Bom($this->remote($m['url'])))) {
+        if (($css = $this->stripUtf8Bom($this->mustGetUrl($m['url'])))) {
             $css = $this->resolveCssRelatives($css, $m['url']);
         }
         return $css;
@@ -1338,7 +1338,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_src']) {
                 if (($_js_tag_frag['script_src'] = $this->resolveRelativeUrl($_js_tag_frag['script_src']))) {
-                    if (($_js_code = $this->stripUtf8Bom($this->remote($_js_tag_frag['script_src'])))) {
+                    if (($_js_code = $this->stripUtf8Bom($this->mustGetUrl($_js_tag_frag['script_src'])))) {
                         $_js_code = rtrim($_js_code, ';').';';
 
                         if ($_js_code) {
@@ -3507,6 +3507,28 @@ class Core // Heart of the HTML Compressor.
     /**
      * Remote HTTP communication.
      *
+     * @since 150820 Improving HTTP connection handling.
+     *
+     * @param string $url A URL to connect to.
+     *
+     * @throws \Exception If unable to get the URL; i.e., if the response code is >= 400.
+     *
+     * @return string Output data from the HTTP response; excluding headers (i.e., body only).
+     */
+    protected function mustGetUrl($url)
+    {
+        $url      = (string) $url; // Force string value.
+        $response = $this->remote($url, '', 5, 15, array(), '', true, true);
+
+        if ($response['code'] >= 400) {
+            throw new \Exception(sprintf('HTTP response code: `%1$s`. Unable to get URL: `%2$s`.', $response['code'], $url));
+        }
+        return $response['body'];
+    }
+
+    /**
+     * Remote HTTP communication.
+     *
      * @since 140417 Initial release.
      *
      * @param string       $url             A URL to connect to.
@@ -3521,7 +3543,7 @@ class Core // Heart of the HTML Compressor.
      * @throws \Exception If unable to find a workable HTTP transport layer.
      *                    Supported transports include: `curl` and `fopen`.
      *
-     * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
+     * @return string|array Output data from the HTTP response; excluding headers (i.e., body only).
      */
     protected function remote($url, $body = '', $max_con_secs = 5, $max_stream_secs = 15, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
     {
