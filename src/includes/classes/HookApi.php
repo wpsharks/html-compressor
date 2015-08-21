@@ -121,6 +121,50 @@ class HookApi // For plugins.
     }
 
     /**
+     * Do we have a specific hook?
+     *
+     * @since 150821 Enhancing hook support.
+     *
+     * @param string $hook The name of a filter hook.
+     *
+     * @return bool True if actions/filters exist on this hook.
+     */
+    public function hasHook($hook)
+    {
+        $hook = (string) $hook;
+
+        return $hook && !empty($this->hooks[$hook]);
+    }
+
+    /**
+     * Do we have a specific action?
+     *
+     * @since 150821 Enhancing hook support.
+     *
+     * @return bool True if hook exists for this action.
+     *
+     * @see hasHook()
+     */
+    public function hasAction() // Simple `hasHook()` alias.
+    {
+        return call_user_func_array(array($this, 'hasHook'), func_get_args());
+    }
+
+    /**
+     * Do we have a specific filter?
+     *
+     * @since 150821 Enhancing hook support.
+     *
+     * @return bool True if hook exists for this filter.
+     *
+     * @see hasHook()
+     */
+    public function hasFilter() // Simple `hasHook()` alias.
+    {
+        return call_user_func_array(array($this, 'hasHook'), func_get_args());
+    }
+
+    /**
      * Adds a new hook (works with both actions & filters).
      *
      * @since 150321 Adding hook API for plugins.
@@ -155,7 +199,7 @@ class HookApi // For plugins.
      *
      * @see addHook()
      */
-    public function addAction() // Simple `add_hook()` alias.
+    public function addAction() // Simple `addHook()` alias.
     {
         return call_user_func_array(array($this, 'addHook'), func_get_args());
     }
@@ -169,7 +213,7 @@ class HookApi // For plugins.
      *
      * @see addHook()
      */
-    public function addFilter() // Simple `add_hook()` alias.
+    public function addFilter() // Simple `addHook()` alias.
     {
         return call_user_func_array(array($this, 'addHook'), func_get_args());
     }
@@ -210,7 +254,7 @@ class HookApi // For plugins.
      *
      * @see removeHook()
      */
-    public function removeAction() // Simple `remove_hook()` alias.
+    public function removeAction() // Simple `removeHook()` alias.
     {
         return call_user_func_array(array($this, 'removeHook'), func_get_args());
     }
@@ -224,7 +268,7 @@ class HookApi // For plugins.
      *
      * @see removeHook()
      */
-    public function removeFilter() // Simple `remove_hook()` alias.
+    public function removeFilter() // Simple `removeHook()` alias.
     {
         return call_user_func_array(array($this, 'removeHook'), func_get_args());
     }
