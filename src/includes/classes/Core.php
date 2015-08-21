@@ -3523,7 +3523,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
      */
-    protected function remote($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
+    protected function remote($url, $body = '', $max_con_secs = 5, $max_stream_secs = 15, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
     {
         $can_follow = !filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) && !ini_get('open_basedir');
 
@@ -3576,6 +3576,7 @@ class Core // Heart of the HTML Compressor.
 
             CURLOPT_CONNECTTIMEOUT => $max_con_secs,
             CURLOPT_TIMEOUT        => $max_stream_secs,
+            // See: <http://jas.xyz/1gZKj8v>
 
             CURLOPT_FOLLOWLOCATION => $can_follow,
             CURLOPT_MAXREDIRS      => $can_follow ? 5 : 0,
