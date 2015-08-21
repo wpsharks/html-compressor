@@ -553,7 +553,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_css_tag_frag['link_href']) {
                 if (($_css_tag_frag['link_href'] = $this->resolveRelativeUrl($_css_tag_frag['link_href']))) {
-                    if (($_css_code = $this->stripUtf8Bom($this->remote($_css_tag_frag['link_href'])))) {
+                    if (($_css_code = $this->stripUtf8Bom($this->mustGetUrl($_css_tag_frag['link_href'])))) {
                         $_css_code = $this->resolveCssRelatives($_css_code, $_css_tag_frag['link_href']);
                         $_css_code = $this->resolveResolvedCssImports($_css_code, $_css_tag_frag['media']);
 
@@ -1037,10 +1037,8 @@ class Core // Heart of the HTML Compressor.
         if (!empty($m['media']) && $m['media'] !== $this->current_css_media) {
             return $m[0]; // Not possible; different media.
         }
-        if (($css = $this->remote($m['url']))) {
-            if (($css = $this->stripUtf8Bom($css))) {
-                $css = $this->resolveCssRelatives($css, $m['url']);
-            }
+        if (($css = $this->stripUtf8Bom($this->mustGetUrl($m['url'])))) {
+            $css = $this->resolveCssRelatives($css, $m['url']);
         }
         return $css;
     }
@@ -1340,7 +1338,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_src']) {
                 if (($_js_tag_frag['script_src'] = $this->resolveRelativeUrl($_js_tag_frag['script_src']))) {
-                    if (($_js_code = $this->remote($_js_tag_frag['script_src']))) {
+                    if (($_js_code = $this->stripUtf8Bom($this->mustGetUrl($_js_tag_frag['script_src'])))) {
                         $_js_code = rtrim($_js_code, ';').';';
 
                         if ($_js_code) {
@@ -1354,6 +1352,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_js']) {
                 $_js_code = $_js_tag_frag['script_js'];
+                $_js_code = $this->stripUtf8Bom($_js_code);
                 $_js_code = rtrim($_js_code, ';').';';
 
                 if ($_js_code) {
@@ -3508,6 +3507,33 @@ class Core // Heart of the HTML Compressor.
     /**
      * Remote HTTP communication.
      *
+     * @since 150820 Improving HTTP connection handling.
+     *
+     * @param string $url A URL to connect to.
+     *
+     * @throws \Exception If unable to get the URL; i.e., if the response code is >= 400.
+     *
+     * @return string Output data from the HTTP response; excluding headers (i.e., body only).
+     *
+     * @note By throwing an exception on any failure, we can avoid a circumstance where
+     *  multiple failures and/or timeouts occur in succession against the same host.
+     *  Any connection failure stops compression and a caller should catch the exception
+     *  and fail softly; using the exception message for debugging purposes.
+     */
+    protected function mustGetUrl($url)
+    {
+        $url      = (string) $url; // Force string value.
+        $response = $this->remote($url, '', 5, 15, array(), '', true, true);
+
+        if ($response['code'] >= 400) {
+            throw new \Exception(sprintf('HTTP response code: `%1$s`. Unable to get URL: `%2$s`.', $response['code'], $url));
+        }
+        return $response['body'];
+    }
+
+    /**
+     * Remote HTTP communication.
+     *
      * @since 140417 Initial release.
      *
      * @param string       $url             A URL to connect to.
@@ -3522,9 +3548,9 @@ class Core // Heart of the HTML Compressor.
      * @throws \Exception If unable to find a workable HTTP transport layer.
      *                    Supported transports include: `curl` and `fopen`.
      *
-     * @return string|array Output data from the HTTP response; excluding headers (e.g. body only).
+     * @return string|array Output data from the HTTP response; excluding headers (i.e., body only).
      */
-    protected function remote($url, $body = '', $max_con_secs = 20, $max_stream_secs = 20, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
+    protected function remote($url, $body = '', $max_con_secs = 5, $max_stream_secs = 15, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
     {
         $can_follow = !filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) && !ini_get('open_basedir');
 
@@ -3572,23 +3598,27 @@ class Core // Heart of the HTML Compressor.
             goto fopen_transport; // cURL will not work in this case.
         }
         $curl_opts = array(
-            CURLOPT_URL            => $url,
-            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_URL          => $url,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+
             CURLOPT_CONNECTTIMEOUT => $max_con_secs,
             CURLOPT_TIMEOUT        => $max_stream_secs,
-
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER         => false,
+            // See: <http://jas.xyz/1gZKj8v>
 
             CURLOPT_FOLLOWLOCATION => $can_follow,
             CURLOPT_MAXREDIRS      => $can_follow ? 5 : 0,
 
-            CURLOPT_ENCODING       => '',
-            CURLOPT_VERBOSE        => false,
-            CURLOPT_FAILONERROR    => $fail_on_error,
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING    => '',
+            CURLOPT_HTTPHEADER  => $headers,
+            CURLOPT_REFERER     => $this->currentUrl(),
+            CURLOPT_AUTOREFERER => true, // On redirects.
+            CURLOPT_USERAGENT   => $this->product_title,
 
-            CURLOPT_USERAGENT => $this->product_title,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER         => false,
+            CURLOPT_VERBOSE        => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_FAILONERROR    => $fail_on_error,
         );
         if ($body) {
             if ($custom_request_method) {
@@ -3633,22 +3663,21 @@ class Core // Heart of the HTML Compressor.
                                  ' Please install the cURL & OpenSSL extensions for PHP.');
         }
         $stream_options = array(
-            // See: <http://php.net/manual/en/context.http.php>
             'http' => array(
-             'method' => $custom_request_method
-                 ? $custom_request_method // Custom.
-                 : ($body ? 'POST' : 'GET'),
-
-             'header'  => $headers,
-             'content' => $body,
-
-             'ignore_errors' => $fail_on_error,
-             'timeout'       => $max_stream_secs,
+             'protocol_version' => 1.1,
+             'method'           => $custom_request_method
+                 ? $custom_request_method : ($body ? 'POST' : 'GET'),
 
              'follow_location' => $can_follow,
              'max_redirects'   => $can_follow ? 5 : 0,
 
+             'header'     => array_merge($headers, array('Referer: '.$this->currentUrl())),
              'user_agent' => $this->product_title,
+
+             'ignore_errors' => $fail_on_error,
+             'timeout'       => $max_stream_secs,
+
+             'content' => $body,
             ),
         );
         if (!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', false, $stream_context))) {
@@ -3661,7 +3690,6 @@ class Core // Heart of the HTML Compressor.
 
         if (!empty($stream_meta_data['timed_out'])) {
             // Based on `$max_stream_secs`.
-
             $response_code = 408; // Request timeout.
             $response_body = ''; // Connection timed out; ignore.
         } elseif (!empty($stream_meta_data['wrapper_data']) && is_array($stream_meta_data['wrapper_data'])) {
