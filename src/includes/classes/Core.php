@@ -35,7 +35,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @type string Dated version string: `YYMMDD`.
      */
-    protected $version = '150819'; //version//
+    protected $version = '150821'; //version//
 
     /**
      * An array of class options.
@@ -1914,7 +1914,7 @@ class Core // Heart of the HTML Compressor.
                 // `E_USER_NOTICE` to avoid a show-stopping problem.
                 trigger_error('CSS compression failure.', E_USER_NOTICE);
             } else {
-                $css = $compressed_css;
+                $css = $this->stripUtf8Bom($compressed_css);
             } // Use compressed CSS file.
         } catch (\Exception $exception) {
             trigger_error($exception->getMessage(), E_USER_NOTICE);
