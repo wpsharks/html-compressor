@@ -3514,6 +3514,11 @@ class Core // Heart of the HTML Compressor.
      * @throws \Exception If unable to get the URL; i.e., if the response code is >= 400.
      *
      * @return string Output data from the HTTP response; excluding headers (i.e., body only).
+     *
+     * @note By throwing an exception on any failure, we can avoid a circumstance where
+     *  multiple failures and/or timeouts occur in succession against the same host.
+     *  Any connection failure stops compression and a caller should catch the exception
+     *  and fail softly; using the exception message for debugging purposes.
      */
     protected function mustGetUrl($url)
     {
