@@ -209,6 +209,15 @@ class Core // Heart of the HTML Compressor.
     protected $current_css_media = '';
 
     /**
+     * Current global exclusion tokens.
+     *
+     * @since 150821 Adding global exclusion tokenizer.
+     *
+     * @type array Current global exclusion tokens.
+     */
+    protected $current_global_exclusion_tokens = array();
+
+    /**
      * Static cache array for this class.
      *
      * @since 140417 Initial release.
@@ -343,11 +352,13 @@ class Core // Heart of the HTML Compressor.
             $time = microtime(true);
         }
         $html = &$input; // Let's call this HTML now.
+        $html = $this->tokenizeGlobalExclusions($html);
         $html = $this->maybeCompressCombineHeadBodyCss($html);
         $html = $this->maybeCompressCombineHeadJs($html);
         $html = $this->maybeCompressCombineFooterJs($html);
         $html = $this->maybeCompressInlineJsCode($html);
         $html = $this->maybeCompressInlineJsonCode($html);
+        $html = $this->restoreGlobalExclusions($html);
         $html = $this->maybeCompressHtmlCode($html);
 
         if (!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs']) {
@@ -407,6 +418,68 @@ class Core // Heart of the HTML Compressor.
             return $this->{$property};
         }
         throw new \Exception(sprintf('Undefined property: `%1$s`.', $property));
+    }
+
+    /********************************************************************************************************/
+
+    /*
+     * Exclusion-Related Methods
+     */
+
+    /**
+     * Global exclusion tokenizer.
+     *
+     * @since 150821 Adding global exclusion tokenizer.
+     *
+     * @param string $html Input HTML code.
+     *
+     * @return string HTML code, after tokenizing exclusions.
+     */
+    protected function tokenizeGlobalExclusions($html)
+    {
+        $html              = (string) $html;
+        $_this             = $this;
+        $global_exclusions = array(
+            '/\<noscript(?:\s[^>]*)?\>.*?\<\/noscript\>/is',
+        );
+        $html = preg_replace_callback(
+            $global_exclusions,
+            function ($m) use ($_this) {
+                $_this->current_global_exclusion_tokens[] = $m[0]; // Tokenize.
+                return '<htmlc-gxt-'.(count($_this->current_global_exclusion_tokens) - 1).' />';
+            },
+            $html // Exclusions replaced by tokens.
+        );
+        return $html;
+    }
+
+    /**
+     * Restore global exclusions.
+     *
+     * @since 150821 Adding global exclusion tokenizer.
+     *
+     * @param string $html Input HTML code.
+     *
+     * @return string HTML code, after restoring exclusions.
+     */
+    protected function restoreGlobalExclusions($html)
+    {
+        $html = (string) $html;
+
+        if (!$this->current_global_exclusion_tokens) {
+            return $html; // Nothing to restore.
+        }
+        if (stripos($html, '<htmlc-gxt-') === false) {
+            return $html; // Nothing to restore.
+        }
+        foreach (array_reverse($this->current_global_exclusion_tokens, true) as $_token => $_value) {
+            // Must go in reverse order so nested tokens unfold properly.
+            $html = str_ireplace('<htmlc-gxt-'.$_token.' />', $_value, $html);
+        }
+        unset($_token, $_value); // Housekeeping.
+        $this->current_global_exclusion_tokens = array();
+
+        return $html;
     }
 
     /********************************************************************************************************/
