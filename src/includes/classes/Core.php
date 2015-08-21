@@ -1037,10 +1037,8 @@ class Core // Heart of the HTML Compressor.
         if (!empty($m['media']) && $m['media'] !== $this->current_css_media) {
             return $m[0]; // Not possible; different media.
         }
-        if (($css = $this->remote($m['url']))) {
-            if (($css = $this->stripUtf8Bom($css))) {
-                $css = $this->resolveCssRelatives($css, $m['url']);
-            }
+        if (($css = $this->stripUtf8Bom($this->remote($m['url'])))) {
+            $css = $this->resolveCssRelatives($css, $m['url']);
         }
         return $css;
     }
@@ -1340,7 +1338,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_src']) {
                 if (($_js_tag_frag['script_src'] = $this->resolveRelativeUrl($_js_tag_frag['script_src']))) {
-                    if (($_js_code = $this->remote($_js_tag_frag['script_src']))) {
+                    if (($_js_code = $this->stripUtf8Bom($this->remote($_js_tag_frag['script_src'])))) {
                         $_js_code = rtrim($_js_code, ';').';';
 
                         if ($_js_code) {
@@ -1354,6 +1352,7 @@ class Core // Heart of the HTML Compressor.
                 }
             } elseif ($_js_tag_frag['script_js']) {
                 $_js_code = $_js_tag_frag['script_js'];
+                $_js_code = $this->stripUtf8Bom($_js_code);
                 $_js_code = rtrim($_js_code, ';').';';
 
                 if ($_js_code) {
