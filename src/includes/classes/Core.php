@@ -3045,10 +3045,10 @@ class Core // Heart of the HTML Compressor.
         }
         if (!empty($this->options['current_url_scheme'])) {
             return (static::$static[__FUNCTION__] = $this->nUrlScheme($this->options['current_url_scheme']));
-        }
+        }/* See https://github.com/websharks/html-compressor/issues/73
         if (!empty($_SERVER['REQUEST_SCHEME'])) {
             return (static::$static[__FUNCTION__] = $this->nUrlScheme($_SERVER['REQUEST_SCHEME']));
-        }
+        }*/
         return (static::$static[__FUNCTION__] = ($this->currentUrlSsl()) ? 'https' : 'http');
     }
 
