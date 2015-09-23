@@ -5,6 +5,7 @@
         "This file is @generated automatically"
     ],
     "hash": "066672948827bc16629b0b0d20ff827d",
+    "content-hash": "72becf61f95e6d919847ed68ac78e8cc",
     "packages": [
         {
             "name": "websharks/css-minifier",
