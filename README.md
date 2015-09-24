@@ -1,4 +1,4 @@
-# HTML-Compressor (Beta)
+# HTML-Compressor
 
 <img src="assets/html-compressor-logo.png" width="300px" align="right" />
 
