@@ -1,0 +1,12 @@
+project_title                    = WebSharks HTML Compressor
+
+project_owner                    = websharks
+project_slug                     = html-compressor
+
+project_namespace                = WebSharks\\HtmlCompressor
+project_sub_namespace            = HtmlCompressor
+
+project_version                  = %y%m%d
+
+project_php_required_version     = 5.3.2
+project_php_tested_up_to_version = ${php.version}

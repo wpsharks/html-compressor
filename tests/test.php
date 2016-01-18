@@ -1,8 +1,8 @@
 <?php
 error_reporting(-1);
-ini_set('display_errors', true);
+ini_set('display_errors', 'yes');
 
-$html            = <<<HTML
+$html = <<<HTML
 <html>
     <head>
         <title>Test</title>
@@ -43,16 +43,17 @@ $html            = <<<HTML
 HTML;
 
 $html_compressor_options = array(
-    'css_exclusions'                 => array(),
-    'js_exclusions'                  => array('.php?'),
+    'css_exclusions' => array(),
+    'js_exclusions'  => array('.php?'),
+    'uri_exclusions' => array(),
 
-    'cache_dir_url_public'           => 'http://example.com/cache/public',
-    'cache_dir_public'               => dirname(__FILE__).'/.~cache/public',
-    'cache_dir_private'              => dirname(__FILE__).'/.~cache/private',
+    'cache_dir_url_public' => 'http://example.com/cache/public',
+    'cache_dir_public'     => dirname(__FILE__).'/.~cache/public',
+    'cache_dir_private'    => dirname(__FILE__).'/.~cache/private',
 
-    'current_url_scheme'             => 'http',
-    'current_url_host'               => 'www.example.com',
-    'current_url_uri'                => '/test.php?one=1&two=2',
+    'current_url_scheme' => 'http',
+    'current_url_host'   => 'www.example.com',
+    'current_url_uri'    => '/test.php?one=1&two=2',
 
     'compress_combine_head_body_css' => true,
     'compress_combine_head_js'       => true,
@@ -62,9 +63,9 @@ $html_compressor_options = array(
     'compress_js_code'               => true,
     'compress_html_code'             => true,
 
-    'benchmark'                      => true,
+    'benchmark' => true,
 );
-require_once dirname(dirname(__FILE__)).'/src/stub.php';
+require_once dirname(dirname(__FILE__)).'/src/includes/stub.php';
 # require_once dirname(dirname(__FILE__)).'/.~build/websharks-html-compressor.phar';
 $html_compressor = new WebSharks\HtmlCompressor\Core($html_compressor_options);
 $html            = $html_compressor->compress($html);
