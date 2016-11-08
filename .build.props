@@ -3,6 +3,9 @@ project_title                    = WebSharks HTML Compressor
 project_owner                    = websharks
 project_slug                     = html-compressor
 
+project_text_domain              = html-compressor
+project_slack_channel            = html-compressor
+
 project_namespace                = WebSharks\\HtmlCompressor
 project_sub_namespace            = HtmlCompressor
 

@@ -839,9 +839,9 @@ class Core // Heart of the HTML Compressor.
                         $_tag_frag_r['exclude'] = true;
                     } elseif ($_tag_frag_r['link_href'] && $_tag_frag_r['link_href_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js']) {
                         $_tag_frag_r['exclude'] = true;
-                    } elseif ($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css'])) {
+                    } elseif ($this->regex_css_exclusions && preg_match($this->regex_css_exclusions, $_tag_frag_r['link_self_closing_tag'].' '.$_tag_frag_r['style_open_tag'].' '.$_tag_frag_r['style_css'])) {
                         $_tag_frag_r['exclude'] = true;
-                    } elseif ($this->built_in_regex_css_exclusions && preg_match($this->built_in_regex_css_exclusions, $_tag_frag_r['link_href'].$_tag_frag_r['style_css'])) {
+                    } elseif ($this->built_in_regex_css_exclusions && preg_match($this->built_in_regex_css_exclusions, $_tag_frag_r['link_self_closing_tag'].' '.$_tag_frag_r['style_open_tag'].' '.$_tag_frag_r['style_css'])) {
                         $_tag_frag_r['exclude'] = true;
                     }
                 }
@@ -1668,9 +1668,9 @@ class Core // Heart of the HTML Compressor.
                             $_tag_frag_r['exclude'] = true;
                         } elseif ($_tag_frag_r['script_src'] && $_tag_frag_r['script_src_external'] && isset($this->options['compress_combine_remote_css_js']) && !$this->options['compress_combine_remote_css_js']) {
                             $_tag_frag_r['exclude'] = true;
-                        } elseif ($this->regex_js_exclusions && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
+                        } elseif ($this->regex_js_exclusions && preg_match($this->regex_js_exclusions, $_tag_frag_r['script_open_tag'].' '.$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
                             $_tag_frag_r['exclude'] = true;
-                        } elseif ($this->built_in_regex_js_exclusions && preg_match($this->built_in_regex_js_exclusions, $_tag_frag_r['script_src'].$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
+                        } elseif ($this->built_in_regex_js_exclusions && preg_match($this->built_in_regex_js_exclusions, $_tag_frag_r['script_open_tag'].' '.$_tag_frag_r['script_js'].$_tag_frag_r['script_json'])) {
                             $_tag_frag_r['exclude'] = true;
                         }
                     }
