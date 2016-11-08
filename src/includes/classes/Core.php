@@ -35,7 +35,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @type string Dated version string: `YYMMDD`.
      */
-    protected $version = '160118'; //version//
+    protected $version = '161108'; //version//
 
     /**
      * An array of class options.
@@ -2484,7 +2484,7 @@ class Core // Heart of the HTML Compressor.
     /**
      * Removes UTF-8 BOM (Byte Order Marker).
      *
-     * @since 15xxxx Correcting bug in CSS compilation.
+     * @since 161108 Correcting bug in CSS compilation.
      *
      * @param string $string Input string to strip.
      *

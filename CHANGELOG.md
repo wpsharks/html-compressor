@@ -1,4 +1,4 @@
-## $v
+## v161108
 
 - **Enhancing Exclusion Tests:** Now testing exclusion rules against full open tag instead of only the CSS or JS URL and content. This allows for exclusion rules that exclude CSS or JS based on an opening tag attribute; e.g., `<style id='rs-plugin-settings-inline-css'`. See also: [this Comet Cache issue](https://github.com/websharks/comet-cache/issues/614).
 
