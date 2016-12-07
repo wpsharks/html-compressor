@@ -24,7 +24,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140926 Enhance JS error reporting.
      *
-     * @type string Current product title.
+     * @var string Current product title.
      */
     protected $product_title = 'HTML Compressor';
 
@@ -33,7 +33,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140418 Version indicates release date.
      *
-     * @type string Dated version string: `YYMMDD`.
+     * @var string Dated version string: `YYMMDD`.
      */
     protected $version = '161108'; //version//
 
@@ -42,16 +42,16 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type array Set dynamically by class constructor.
+     * @var array Set dynamically by class constructor.
      */
-    protected $options = array();
+    protected $options = [];
 
     /**
      * Hook API class instance.
      *
      * @since 150321 Adding hook API for plugins.
      *
-     * @type HookApi Hook API class instance.
+     * @var HookApi Hook API class instance.
      */
     protected $hook_api; // Class instance.
 
@@ -60,7 +60,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150315 Adding additional benchmarks.
      *
-     * @type Benchmark Filled by various methods.
+     * @var Benchmark Filled by various methods.
      */
     protected $benchmark; // Class instance.
 
@@ -71,7 +71,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @note This indicates how long cache files can live.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $cache_expiration_time = '14 days';
 
@@ -80,7 +80,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $regex_vendor_css_prefixes = '';
 
@@ -89,22 +89,22 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type array These are used if no option value is supplied to override them.
+     * @var array These are used if no option value is supplied to override them.
      */
-    protected $default_vendor_css_prefixes = array(
+    protected $default_vendor_css_prefixes = [
         'moz',
         'webkit',
         'khtml',
         'ms',
         'o',
-    );
+    ];
 
     /**
      * CSS exclusions (regex).
      *
      * @since 140417 Initial release.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $regex_css_exclusions = '';
 
@@ -113,16 +113,16 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type array These are used if no option value is supplied to override them.
+     * @var array These are used if no option value is supplied to override them.
      */
-    protected $default_css_exclusions = array();
+    protected $default_css_exclusions = [];
 
     /**
      * Built-in CSS exclusions (regex).
      *
      * @since 140422 Changing the way CSS exclusions operate.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $built_in_regex_css_exclusions = '';
 
@@ -131,23 +131,23 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way CSS exclusions operate.
      *
-     * @type array These are on at all times; UNLESS options dictate otherwise.
+     * @var array These are on at all times; UNLESS options dictate otherwise.
      *            To disable these built-in CSS exclusions pass the option
      *            `disable_built_in_css_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_css_exclusions}.
      */
-    protected $built_in_regex_css_exclusion_patterns = array(
+    protected $built_in_regex_css_exclusion_patterns = [
         '\W#post\-[0-9]+\W',
-    );
+    ];
 
     /**
      * JS exclusions (regex).
      *
      * @since 140417 Initial release.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $regex_js_exclusions = '';
 
@@ -156,18 +156,18 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type array These are used if no option value is supplied to override them.
+     * @var array These are used if no option value is supplied to override them.
      */
-    protected $default_js_exclusions = array(
+    protected $default_js_exclusions = [
         '.php?',
-    );
+    ];
 
     /**
      * Built-in JS exclusions (regex).
      *
      * @since 140422 Changing the way JS exclusions operate.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $built_in_regex_js_exclusions = '';
 
@@ -176,26 +176,26 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way JS exclusions operate.
      *
-     * @type array These are on at all times; UNLESS options dictate otherwise.
+     * @var array These are on at all times; UNLESS options dictate otherwise.
      *            To disable these built-in JS exclusions pass the option
      *            `disable_built_in_js_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_js_exclusions}.
      */
-    protected $built_in_regex_js_exclusion_patterns = array(
+    protected $built_in_regex_js_exclusion_patterns = [
         '\.js#.',
         '\.google\-analytics\.com\/',
         '\Wga\s*\(',
         '\W_gaq\.push\s*\(',
-    );
+    ];
 
     /**
      * URI exclusions (regex).
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $regex_uri_exclusions = '';
 
@@ -204,16 +204,16 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @type array These are used if no option value is supplied to override them.
+     * @var array These are used if no option value is supplied to override them.
      */
-    protected $default_uri_exclusions = array();
+    protected $default_uri_exclusions = [];
 
     /**
      * Built-in URI exclusions (regex).
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @type string Set dynamically by class constructor.
+     * @var string Set dynamically by class constructor.
      */
     protected $built_in_regex_uri_exclusions = '';
 
@@ -222,21 +222,21 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @type array These are on at all times; UNLESS options dictate otherwise.
+     * @var array These are on at all times; UNLESS options dictate otherwise.
      *            To disable these built-in URI exclusions pass the option
      *            `disable_built_in_uri_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_uri_exclusions}.
      */
-    protected $built_in_regex_uri_exclusion_patterns = array();
+    protected $built_in_regex_uri_exclusion_patterns = [];
 
     /**
      * Current base HREF value.
      *
      * @since 140417 Initial release.
      *
-     * @type string Set by various routines that work together.
+     * @var string Set by various routines that work together.
      */
     protected $current_base = '';
 
@@ -245,7 +245,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140519 Improving CSS `@media` query support.
      *
-     * @type string Set by various routines that work together.
+     * @var string Set by various routines that work together.
      */
     protected $current_css_media = '';
 
@@ -254,27 +254,27 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150821 Adding global exclusion tokenizer.
      *
-     * @type array Current global exclusion tokens.
+     * @var array Current global exclusion tokens.
      */
-    protected $current_global_exclusion_tokens = array();
+    protected $current_global_exclusion_tokens = [];
 
     /**
      * Static cache array for this class.
      *
      * @since 140417 Initial release.
      *
-     * @type array Used by various routines for optimization.
+     * @var array Used by various routines for optimization.
      */
-    protected static $static = array();
+    protected static $static = [];
 
     /**
      * Data cache for this class instance.
      *
      * @since 140417 Initial release.
      *
-     * @type array Used by various routines for optimization.
+     * @var array Used by various routines for optimization.
      */
-    protected $cache = array();
+    protected $cache = [];
 
     /********************************************************************************************************/
 
@@ -297,7 +297,7 @@ class Core // Heart of the HTML Compressor.
      *                       Check README.md for a list of all possible option keys.
      *                       See: <http://github.com/websharks/html-compressor>
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         # Set Options
 
@@ -323,9 +323,9 @@ class Core // Heart of the HTML Compressor.
         # Vendor-Specific CSS Prefixes
 
         if (isset($this->options['vendor_css_prefixes']) && is_array($this->options['vendor_css_prefixes'])) {
-            $this->regex_vendor_css_prefixes = implode('|', $this->pregQuoteDeep($this->options['vendor_css_prefixes'], '/'));
+            $this->regex_vendor_css_prefixes = implode('|', $this->pregQuote($this->options['vendor_css_prefixes']));
         } else {
-            $this->regex_vendor_css_prefixes = implode('|', $this->pregQuoteDeep($this->default_vendor_css_prefixes, '/'));
+            $this->regex_vendor_css_prefixes = implode('|', $this->pregQuote($this->default_vendor_css_prefixes));
         }
 
         # CSS Exclusions (If Applicable)
@@ -334,13 +334,13 @@ class Core // Heart of the HTML Compressor.
             $this->regex_css_exclusions = $this->options['regex_css_exclusions'];
         } elseif (isset($this->options['css_exclusions']) && is_array($this->options['css_exclusions'])) {
             if ($this->options['css_exclusions']) {
-                $this->regex_css_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->options['css_exclusions'], '/')).'/i';
+                $this->regex_css_exclusions = '/'.implode('|', $this->pregQuote($this->options['css_exclusions'])).'/ui';
             }
         } elseif ($this->default_css_exclusions) {
-            $this->regex_css_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->default_css_exclusions, '/')).'/i';
+            $this->regex_css_exclusions = '/'.implode('|', $this->pregQuote($this->default_css_exclusions)).'/ui';
         }
         if ($this->built_in_regex_css_exclusion_patterns && empty($this->options['disable_built_in_css_exclusions'])) {
-            $this->built_in_regex_css_exclusions = '/'.implode('|', $this->built_in_regex_css_exclusion_patterns).'/i';
+            $this->built_in_regex_css_exclusions = '/'.implode('|', $this->built_in_regex_css_exclusion_patterns).'/ui';
         }
 
         # JavaScript Exclusions (If Applicable)
@@ -349,13 +349,13 @@ class Core // Heart of the HTML Compressor.
             $this->regex_js_exclusions = $this->options['regex_js_exclusions'];
         } elseif (isset($this->options['js_exclusions']) && is_array($this->options['js_exclusions'])) {
             if ($this->options['js_exclusions']) {
-                $this->regex_js_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->options['js_exclusions'], '/')).'/i';
+                $this->regex_js_exclusions = '/'.implode('|', $this->pregQuote($this->options['js_exclusions'])).'/ui';
             }
         } elseif ($this->default_js_exclusions) {
-            $this->regex_js_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->default_js_exclusions, '/')).'/i';
+            $this->regex_js_exclusions = '/'.implode('|', $this->pregQuote($this->default_js_exclusions)).'/ui';
         }
         if ($this->built_in_regex_js_exclusion_patterns && empty($this->options['disable_built_in_js_exclusions'])) {
-            $this->built_in_regex_js_exclusions = '/'.implode('|', $this->built_in_regex_js_exclusion_patterns).'/i';
+            $this->built_in_regex_js_exclusions = '/'.implode('|', $this->built_in_regex_js_exclusion_patterns).'/ui';
         }
 
         # URI Exclusions; i.e., Exclude from Everything (If Applicable)
@@ -364,13 +364,19 @@ class Core // Heart of the HTML Compressor.
             $this->regex_uri_exclusions = $this->options['regex_uri_exclusions'];
         } elseif (isset($this->options['uri_exclusions']) && is_array($this->options['uri_exclusions'])) {
             if ($this->options['uri_exclusions']) {
-                $this->regex_uri_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->options['uri_exclusions'], '/')).'/i';
+                $this->regex_uri_exclusions = '/'.implode('|', $this->pregQuote($this->options['uri_exclusions'])).'/ui';
             }
         } elseif ($this->default_uri_exclusions) {
-            $this->regex_uri_exclusions = '/'.implode('|', $this->pregQuoteDeep($this->default_uri_exclusions, '/')).'/i';
+            $this->regex_uri_exclusions = '/'.implode('|', $this->pregQuote($this->default_uri_exclusions)).'/ui';
         }
         if ($this->built_in_regex_uri_exclusion_patterns && empty($this->options['disable_built_in_uri_exclusions'])) {
-            $this->built_in_regex_uri_exclusions = '/'.implode('|', $this->built_in_regex_uri_exclusion_patterns).'/i';
+            $this->built_in_regex_uri_exclusions = '/'.implode('|', $this->built_in_regex_uri_exclusion_patterns).'/ui';
+        }
+
+        # Automatic APM Exclusions; i.e., Auto-Exclude Features (If Applicable)
+
+        if (!isset($this->options['amp_exclusions_enable'])) {
+            $this->options['amp_exclusions_enable'] = true;
         }
     }
 
@@ -401,7 +407,7 @@ class Core // Heart of the HTML Compressor.
         if (!($input = trim((string) $input))) {
             return $input; // Nothing to do.
         }
-        if (stripos($input, '</html>') === false) {
+        if (mb_stripos($input, '</html>') === false) {
             return $input; // Not an HTML doc.
         }
         if ($this->isCurrentUrlUriExcluded()) {
@@ -411,6 +417,13 @@ class Core // Heart of the HTML Compressor.
             $time = microtime(true);
         }
         $html = &$input; // Let's call this HTML now.
+
+        if (!empty($this->options['amp_exclusions_enable']) && $this->isDocAmpd($html)) {
+            $this->options['compress_combine_head_body_css'] = false;
+            $this->options['compress_combine_head_js']       = false;
+            $this->options['compress_combine_footer_js']     = false;
+            $this->options['compress_combine_remote_css_js'] = false;
+        }
         $html = $this->tokenizeGlobalExclusions($html);
         $html = $this->maybeCompressCombineHeadBodyCss($html);
         $html = $this->maybeCompressCombineHeadJs($html);
@@ -434,17 +447,16 @@ class Core // Heart of the HTML Compressor.
             foreach ($this->benchmark->times as $_benchmark_time) {
                 $html .= "\n".'<!-- '.sprintf(
                     '%1$s took %2$s seconds %3$s.',
-                    htmlspecialchars($this->product_title),
-                    htmlspecialchars($_benchmark_time['time']),
-                    htmlspecialchars($_benchmark_time['task'])
+                    htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
+                    htmlspecialchars($_benchmark_time['time'], ENT_NOQUOTES, 'UTF-8'),
+                    htmlspecialchars($_benchmark_time['task'], ENT_NOQUOTES, 'UTF-8')
                 ).' -->';
-            }
-            unset($_benchmark_time); // Housekeeping.
+            } // unset($_benchmark_time); // Housekeeping.
 
             $html .= "\n\n".'<!-- '.sprintf(
                 '%1$s took %2$s seconds (overall).',
-                htmlspecialchars($this->product_title),
-                htmlspecialchars($time)
+                htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
+                htmlspecialchars($time, ENT_NOQUOTES, 'UTF-8')
             ).' -->';
         }
         return $html; // HTML markup.
@@ -498,9 +510,9 @@ class Core // Heart of the HTML Compressor.
     {
         $html              = (string) $html;
         $_this             = $this;
-        $global_exclusions = array(
-            '/\<noscript(?:\s[^>]*)?\>.*?\<\/noscript\>/is',
-        );
+        $global_exclusions = [
+            '/\<noscript(?:\s[^>]*)?\>.*?\<\/noscript\>/uis',
+        ];
         $html = preg_replace_callback(
             $global_exclusions,
             function ($m) use ($_this) {
@@ -528,17 +540,38 @@ class Core // Heart of the HTML Compressor.
         if (!$this->current_global_exclusion_tokens) {
             return $html; // Nothing to restore.
         }
-        if (stripos($html, '<htmlc-gxt-') === false) {
+        if (mb_stripos($html, '<htmlc-gxt-') === false) {
             return $html; // Nothing to restore.
         }
         foreach (array_reverse($this->current_global_exclusion_tokens, true) as $_token => $_value) {
             // Must go in reverse order so nested tokens unfold properly.
             $html = str_ireplace('<htmlc-gxt-'.$_token.' />', $_value, $html);
-        }
-        unset($_token, $_value); // Housekeeping.
-        $this->current_global_exclusion_tokens = array();
+        } // unset($_token, $_value); // Housekeeping.
+
+        $this->current_global_exclusion_tokens = [];
 
         return $html;
+    }
+
+    /**
+     * Document is AMPd?
+     *
+     * @since 16xxxx AMP exclusions.
+     *
+     * @param string $html HTML markup.
+     *
+     * @return bool Returns `TRUE` if AMPd.
+     */
+    protected function isDocAmpd($html)
+    {
+        $html = (string) $html;
+
+        if (preg_match('/\/amp\/(?:$|[?&#])/ui', $this->currentUrlUri())) {
+            return true;
+        } elseif ($html && preg_match('/\<html(?:\s[^>]+?\s|\s)(?:⚡|amp)[\s=\>]/ui', $html)) {
+            return true;
+        }
+        return false;
     }
 
     /********************************************************************************************************/
@@ -580,7 +613,7 @@ class Core // Heart of the HTML Compressor.
                 $cleaned_head_contents      = $this->replaceOnce($css_tag_frags_all_compiled, '', $head_frag['contents']);
                 $cleaned_head_contents      = $this->cleanupSelfClosingHtmlTagLines($cleaned_head_contents);
 
-                $compressed_css_tags = array(); // Initialize.
+                $compressed_css_tags = []; // Initialize.
 
                 foreach ($css_parts as $_css_part) {
                     if (isset($_css_part['exclude_frag'], $css_tag_frags[$_css_part['exclude_frag']]['all'])) {
@@ -588,11 +621,10 @@ class Core // Heart of the HTML Compressor.
                     } else {
                         $compressed_css_tags[] = $_css_part['tag'];
                     }
-                }
-                unset($_css_part); // Housekeeping.
+                } // unset($_css_part); // Housekeeping.
 
                 $compressed_css_tags   = implode("\n", $compressed_css_tags);
-                $compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_css_tags, $head_frag['closing_tag']);
+                $compressed_head_parts = [$head_frag['open_tag'], $cleaned_head_contents, $compressed_css_tags, $head_frag['closing_tag']];
                 $html                  = $this->replaceOnce('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
 
                 if ($benchmark) {
@@ -644,7 +676,7 @@ class Core // Heart of the HTML Compressor.
             $time = microtime(true);
         }
         $for                = (string) $for; // Force string.
-        $css_parts          = array(); // Initialize.
+        $css_parts          = []; // Initialize.
         $css_parts_checksum = ''; // Initialize.
 
         if (!$css_tag_frags) {
@@ -692,7 +724,7 @@ class Core // Heart of the HTML Compressor.
                         if ($_css_code) {
                             if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
                                 ++$_css_part; // Starts new part; different `@media` spec here.
-                            } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
+                            } elseif (!empty($css_parts[$_css_part]['code']) && mb_stripos($css_parts[$_css_part]['code'], '@import') !== false) {
                                 ++$_css_part; // Starts new part; existing code contains an @import.
                             }
                             $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
@@ -714,7 +746,7 @@ class Core // Heart of the HTML Compressor.
                 if ($_css_code) {
                     if ($_css_tag_frag['media'] !== $_last_css_tag_frag_media) {
                         ++$_css_part; // Starts new part; different `@media` spec here.
-                    } elseif (!empty($css_parts[$_css_part]['code']) && stripos($css_parts[$_css_part]['code'], '@import') !== false) {
+                    } elseif (!empty($css_parts[$_css_part]['code']) && mb_stripos($css_parts[$_css_part]['code'], '@import') !== false) {
                         ++$_css_part; // Starts new part; existing code contains an @import.
                     }
                     $css_parts[$_css_part]['media'] = $_css_tag_frag['media'];
@@ -727,8 +759,7 @@ class Core // Heart of the HTML Compressor.
                 }
             }
             $_last_css_tag_frag_media = $_css_tag_frag['media'];
-        }
-        unset($_css_part, $_last_css_tag_frag_media, $_css_tag_frag_pos, $_css_tag_frag, $_css_code);
+        } // unset($_css_part, $_last_css_tag_frag_media, $_css_tag_frag_pos, $_css_tag_frag, $_css_code);
 
         foreach (array_keys($css_parts = array_values($css_parts)) as $_css_part) {
             if (!isset($css_parts[$_css_part]['exclude_frag']) && !empty($css_parts[$_css_part]['code'])) {
@@ -753,12 +784,11 @@ class Core // Heart of the HTML Compressor.
                 if (!(file_put_contents($_css_code_path_tmp, $_css_code) && rename($_css_code_path_tmp, $_css_code_path))) {
                     throw new \Exception(sprintf('Unable to cache CSS code file: `%1$s`.', $_css_code_path));
                 }
-                $css_parts[$_css_part]['tag'] = '<link type="text/css" rel="stylesheet" href="'.htmlspecialchars($_css_code_url, ENT_QUOTES).'" media="'.htmlspecialchars($_css_media, ENT_QUOTES).'" />';
+                $css_parts[$_css_part]['tag'] = '<link type="text/css" rel="stylesheet" href="'.htmlspecialchars($_css_code_url, ENT_QUOTES, 'UTF-8').'" media="'.htmlspecialchars($_css_media, ENT_QUOTES, 'UTF-8').'" />';
 
                 unset($css_parts[$_css_part]['code']); // Ditch this; no need to cache this code too.
             }
-        }
-        unset($_css_part, $_css_media, $_css_code, $_css_code_cs, $_css_code_path, $_css_code_path_tmp, $_css_code_url);
+        } // unset($_css_part, $_css_media, $_css_code, $_css_code_cs, $_css_code_path, $_css_code_path_tmp, $_css_code_url);
 
         if (!(file_put_contents($cache_parts_file_path_tmp, serialize($css_parts)) && rename($cache_parts_file_path_tmp, $cache_parts_file_path))) {
             throw new \Exception(sprintf('Unable to cache CSS parts into: `%1$s`.', $cache_parts_file_path));
@@ -793,7 +823,7 @@ class Core // Heart of the HTML Compressor.
         if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
             $time = microtime(true);
         }
-        $css_tag_frags = array(); // Initialize.
+        $css_tag_frags = []; // Initialize.
 
         if (!$html_frag) {
             goto finale; // Nothing to do.
@@ -803,7 +833,7 @@ class Core // Heart of the HTML Compressor.
                  '(?:(?P<link_self_closing_tag>\<link(?:\s+[^>]*?)?\>)'.// Or a <style></style> tag.
                  '|(?P<style_open_tag>\<style(?:\s+[^>]*?)?\>)(?P<style_css>.*?)(?P<style_closing_tag>\<\/style\>))'.
                  '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
-                 ')/is'; // Dot matches line breaks.
+                 ')/uis'; // Dot matches line breaks.
 
         if (!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER)) {
             foreach ($_tag_frags as $_tag_frag) {
@@ -815,7 +845,7 @@ class Core // Heart of the HTML Compressor.
                     $_media = $this->getStyleCssMedia($_tag_frag, false);
                 }
                 if ($_link_href || $_style_css) {
-                    $css_tag_frags[] = array(
+                    $css_tag_frags[] = [
                         'all' => $_tag_frag['all'],
 
                         'if_open_tag'    => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
@@ -832,7 +862,7 @@ class Core // Heart of the HTML Compressor.
                         'media' => $_media ? $_media : 'all', // Default value.
 
                         'exclude' => false, // Default value.
-                    );
+                    ];
                     $_tag_frag_r = &$css_tag_frags[count($css_tag_frags) - 1];
 
                     if ($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag']) {
@@ -846,8 +876,7 @@ class Core // Heart of the HTML Compressor.
                     }
                 }
             }
-        }
-        unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_link_href, $_style_css, $_media);
+        } // unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_link_href, $_style_css, $_media);
 
         finale: // Target point; finale/return value.
 
@@ -877,24 +906,22 @@ class Core // Heart of the HTML Compressor.
         }
         $type = $rel = ''; // Initialize.
 
-        if (stripos($tag_frag['link_self_closing_tag'], 'type') !== 0) {
-            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m)) {
+        if (mb_stripos($tag_frag['link_self_closing_tag'], 'type') !== 0) {
+            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['link_self_closing_tag'], $_m)) {
                 $type = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if (stripos($tag_frag['link_self_closing_tag'], 'rel') !== 0) {
-            if (preg_match('/\srel\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m)) {
+        if (mb_stripos($tag_frag['link_self_closing_tag'], 'rel') !== 0) {
+            if (preg_match('/\srel\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['link_self_closing_tag'], $_m)) {
                 $rel = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if ($type && stripos($type, 'css') === false) {
+        if ($type && mb_stripos($type, 'css') === false) {
             return false; // Not CSS.
         }
-        if ($rel && stripos($rel, 'stylesheet') === false) {
+        if ($rel && mb_stripos($rel, 'stylesheet') === false) {
             return false; // Not CSS.
         }
         return true; // Yes, this is CSS.
@@ -916,14 +943,13 @@ class Core // Heart of the HTML Compressor.
         }
         $type = ''; // Initialize.
 
-        if (stripos($tag_frag['style_open_tag'], 'type') !== 0) {
-            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $_m)) {
+        if (mb_stripos($tag_frag['style_open_tag'], 'type') !== 0) {
+            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['style_open_tag'], $_m)) {
                 $type = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if ($type && stripos($type, 'css') === false) {
+        if ($type && mb_stripos($type, 'css') === false) {
             return false; // Not CSS.
         }
         return true; // Yes, this is CSS.
@@ -945,10 +971,9 @@ class Core // Heart of the HTML Compressor.
         if ($test_for_css && !$this->isLinkTagFragCss($tag_frag)) {
             return ''; // This tag does not contain CSS.
         }
-        if (preg_match('/\shref\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m)) {
+        if (preg_match('/\shref\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['link_self_closing_tag'], $_m)) {
             return trim($this->nUrlAmps($_m['value']));
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
         return ''; // Unable to find an `href` attribute value.
     }
@@ -969,10 +994,9 @@ class Core // Heart of the HTML Compressor.
         if ($test_for_css && !$this->isLinkTagFragCss($tag_frag)) {
             return ''; // This tag does not contain CSS.
         }
-        if (preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['link_self_closing_tag'], $_m)) {
-            return trim(strtolower($_m['value']));
-        }
-        unset($_m); // Just a little housekeeping.
+        if (preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['link_self_closing_tag'], $_m)) {
+            return trim(mb_strtolower($_m['value']));
+        } // unset($_m); // Just a little housekeeping.
 
         return ''; // Unable to find a `media` attribute value.
     }
@@ -993,10 +1017,9 @@ class Core // Heart of the HTML Compressor.
         if ($test_for_css && !$this->isStyleTagFragCss($tag_frag)) {
             return ''; // This tag does not contain CSS.
         }
-        if (preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['style_open_tag'], $_m)) {
-            return trim(strtolower($_m['value']));
-        }
-        unset($_m); // Just a little housekeeping.
+        if (preg_match('/\smedia\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['style_open_tag'], $_m)) {
+            return trim(mb_strtolower($_m['value']));
+        } // unset($_m); // Just a little housekeeping.
 
         return ''; // Unable to find a `media` attribute value.
     }
@@ -1037,7 +1060,7 @@ class Core // Heart of the HTML Compressor.
         if (!($css = (string) $css)) {
             return $css; // Nothing to do.
         }
-        $css = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/i', '', $css);
+        $css = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/ui', '', $css);
         if ($css) {
             $css = trim($css);
         }
@@ -1087,17 +1110,16 @@ class Core // Heart of the HTML Compressor.
         if ($___recursion >= $max_recursions) {
             return $css; // All done.
         }
-        if (stripos($css, 'charset') === false && stripos($css, 'import') === false) {
+        if (mb_stripos($css, 'charset') === false && mb_stripos($css, 'import') === false) {
             return $css; // Save some time. Nothing to do here.
         }
-        if (preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
-           || preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import(?:\s+[^;]*?)?;)/i', $css, $rules, PREG_SET_ORDER)
+        if (preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;)/ui', $css, $rules, PREG_SET_ORDER)
+           || preg_match_all('/(?P<rule>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import(?:\s+[^;]*?)?;)/ui', $css, $rules, PREG_SET_ORDER)
         ) { // Searched in a specific order. Recursion dictates a precise order.
-            $top_rules = array(); // Initialize.
+            $top_rules = []; // Initialize.
             foreach ($rules as $_rule) {
                 $top_rules[] = $_rule['rule'];
-            }
-            unset($_rule); // Just a little housekeeping.
+            } // unset($_rule); // Just a little housekeeping.
 
             $css = $this->replaceOnce($top_rules, '', $css);
             $css = $this->moveSpecialCssAtRulesToTop($css, $___recursion + 1);
@@ -1126,29 +1148,27 @@ class Core // Heart of the HTML Compressor.
         if (!$media) {
             $media = $this->current_css_media = 'all';
         }
-        $import_media_without_url_regex = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*(["\'])(?P<url>.+?)\\1(?P<media>[^;]*?);/i';
-        $import_media_with_url_regex    = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s+url\s*\(\s*(["\']?)(?P<url>.+?)\\1\s*\)(?P<media>[^;]*?);/i';
+        $import_media_without_url_regex = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*(["\'])(?P<url>.+?)\\1(?P<media>[^;]*?);/ui';
+        $import_media_with_url_regex    = '/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s+url\s*\(\s*(["\']?)(?P<url>.+?)\\1\s*\)(?P<media>[^;]*?);/ui';
 
-        $css = preg_replace_callback($import_media_without_url_regex, array($this, 'resolveResolvedCssImportsCb'), $css);
-        $css = preg_replace_callback($import_media_with_url_regex, array($this, 'resolveResolvedCssImportsCb'), $css);
+        $css = preg_replace_callback($import_media_without_url_regex, [$this, 'resolveResolvedCssImportsCb'], $css);
+        $css = preg_replace_callback($import_media_with_url_regex, [$this, 'resolveResolvedCssImportsCb'], $css);
 
         if (preg_match_all($import_media_without_url_regex, $css, $_m)) {
             foreach ($_m['media'] as $_media) {
                 if (!$_media || $_media === $this->current_css_media) {
                     return $this->resolveResolvedCssImports($css, $this->current_css_media, true);
                 }
-            }
-        } // Recursive.
-        unset($_m, $_media); // Housekeeping.
+            } // unset($_media);
+        } // unset($_m); // Housekeeping.
 
         if (preg_match_all($import_media_with_url_regex, $css, $_m)) {
             foreach ($_m['media'] as $_media) {
                 if (!$_media || $_media === $this->current_css_media) {
                     return $this->resolveResolvedCssImports($css, $this->current_css_media, true);
                 }
-            }
-        } // Recursive.
-        unset($_m, $_media); // Housekeeping.
+            } // unset($_media);
+        } // unset($_m); // Housekeeping.
 
         return $css;
     }
@@ -1194,11 +1214,11 @@ class Core // Heart of the HTML Compressor.
         }
         $this->current_base = $base; // Make this available to callback handlers (possible empty string here).
 
-        $import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/i';
-        $any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/i';
+        $import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/ui';
+        $any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/ui';
 
-        $css = preg_replace_callback($import_without_url_regex, array($this, 'resolveCssRelativesImportCb'), $css);
-        $css = preg_replace_callback($any_url_regex, array($this, 'resolveCssRelativesUrlCb'), $css);
+        $css = preg_replace_callback($import_without_url_regex, [$this, 'resolveCssRelativesImportCb'], $css);
+        $css = preg_replace_callback($any_url_regex, [$this, 'resolveCssRelativesUrlCb'], $css);
 
         return $css;
     }
@@ -1228,7 +1248,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function resolveCssRelativesUrlCb(array $m)
     {
-        if (stripos($m['url'], 'data:') === 0) {
+        if (mb_stripos($m['url'], 'data:') === 0) {
             return $m[0]; // Don't resolve `data:` URIs.
         }
         return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->resolveRelativeUrl($m['url'], $this->current_base).$m['close_encap'].$m['close_bracket'];
@@ -1248,7 +1268,7 @@ class Core // Heart of the HTML Compressor.
         if (!($css = (string) $css)) {
             return $css; // Nothing to do.
         }
-        $regex = '/(?:[a-z0-9]+\:)?\/\/'.preg_quote($this->currentUrlHost(), '/').'\//i';
+        $regex = '/(?:[a-z0-9]+\:)?\/\/'.$this->pregQuote($this->currentUrlHost()).'\//ui';
 
         return preg_replace($regex, '/', $css); // Absolute relative paths.
     }
@@ -1270,11 +1290,11 @@ class Core // Heart of the HTML Compressor.
         if (!$this->hook_api->hasFilter('css_url()')) {
             return $css; // No reason to do this.
         }
-        $import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/i';
-        $any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/i';
+        $import_without_url_regex = '/(?P<import>@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?import\s*)(?P<open_encap>["\'])(?P<url>.+?)(?P<close_encap>\\2)/ui';
+        $any_url_regex            = '/(?P<url_>url\s*)(?P<open_bracket>\(\s*)(?P<open_encap>["\']?)(?P<url>.+?)(?P<close_encap>\\3)(?P<close_bracket>\s*\))/ui';
 
-        $css = preg_replace_callback($import_without_url_regex, array($this, 'filterCssUrlImportCb'), $css);
-        $css = preg_replace_callback($any_url_regex, array($this, 'filterCssUrlCb'), $css);
+        $css = preg_replace_callback($import_without_url_regex, [$this, 'filterCssUrlImportCb'], $css);
+        $css = preg_replace_callback($any_url_regex, [$this, 'filterCssUrlCb'], $css);
 
         return $css;
     }
@@ -1304,7 +1324,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function filterCssUrlCb(array $m)
     {
-        if (stripos($m['url'], 'data:') === 0) {
+        if (mb_stripos($m['url'], 'data:') === 0) {
             return $m[0]; // Don't filter `data:` URIs.
         }
         return $m['url_'].$m['open_bracket'].$m['open_encap'].$this->hook_api->applyFilters('css_url()', $m['url']).$m['close_encap'].$m['close_bracket'];
@@ -1348,7 +1368,7 @@ class Core // Heart of the HTML Compressor.
                 $cleaned_head_contents     = $this->replaceOnce($js_tag_frags_all_compiled, '', $head_frag['contents']);
                 $cleaned_head_contents     = $this->cleanupSelfClosingHtmlTagLines($cleaned_head_contents);
 
-                $compressed_js_tags = array(); // Initialize.
+                $compressed_js_tags = []; // Initialize.
 
                 foreach ($js_parts as $_js_part) {
                     if (isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all'])) {
@@ -1356,11 +1376,10 @@ class Core // Heart of the HTML Compressor.
                     } else {
                         $compressed_js_tags[] = $_js_part['tag'];
                     }
-                }
-                unset($_js_part); // Housekeeping.
+                } // unset($_js_part); // Housekeeping.
 
                 $compressed_js_tags    = implode("\n", $compressed_js_tags);
-                $compressed_head_parts = array($head_frag['open_tag'], $cleaned_head_contents, $compressed_js_tags, $head_frag['closing_tag']);
+                $compressed_head_parts = [$head_frag['open_tag'], $cleaned_head_contents, $compressed_js_tags, $head_frag['closing_tag']];
                 $html                  = $this->replaceOnce('%%htmlc-head%%', implode("\n", $compressed_head_parts), $html);
 
                 if ($benchmark) {
@@ -1424,7 +1443,7 @@ class Core // Heart of the HTML Compressor.
                 $html                      = $this->replaceOnce($footer_scripts_frag['all'], '%%htmlc-footer-scripts%%', $html);
                 $cleaned_footer_scripts    = $this->replaceOnce($js_tag_frags_all_compiled, '', $footer_scripts_frag['contents']);
 
-                $compressed_js_tags = array(); // Initialize.
+                $compressed_js_tags = []; // Initialize.
 
                 foreach ($js_parts as $_js_part) {
                     if (isset($_js_part['exclude_frag'], $js_tag_frags[$_js_part['exclude_frag']]['all'])) {
@@ -1432,11 +1451,10 @@ class Core // Heart of the HTML Compressor.
                     } else {
                         $compressed_js_tags[] = $_js_part['tag'];
                     }
-                }
-                unset($_js_part); // Housekeeping.
+                } // unset($_js_part); // Housekeeping.
 
                 $compressed_js_tags             = implode("\n", $compressed_js_tags);
-                $compressed_footer_script_parts = array($footer_scripts_frag['open_tag'], $cleaned_footer_scripts, $compressed_js_tags, $footer_scripts_frag['closing_tag']);
+                $compressed_footer_script_parts = [$footer_scripts_frag['open_tag'], $cleaned_footer_scripts, $compressed_js_tags, $footer_scripts_frag['closing_tag']];
                 $html                           = $this->replaceOnce('%%htmlc-footer-scripts%%', implode("\n", $compressed_footer_script_parts), $html);
 
                 if ($benchmark) {
@@ -1488,7 +1506,7 @@ class Core // Heart of the HTML Compressor.
             $time = microtime(true);
         }
         $for               = (string) $for; // Force string.
-        $js_parts          = array(); // Initialize.
+        $js_parts          = []; // Initialize.
         $js_parts_checksum = ''; // Initialize.
 
         if (!$js_tag_frags) {
@@ -1559,8 +1577,7 @@ class Core // Heart of the HTML Compressor.
                 $js_parts[$_js_part]['tag'] = $_js_tag_frag['all'];
                 ++$_js_part; // Always indicates a new part in the next iteration.
             }
-        }
-        unset($_js_part, $_js_tag_frag_pos, $_js_tag_frag, $_js_code);
+        } // unset($_js_part, $_js_tag_frag_pos, $_js_tag_frag, $_js_code);
 
         foreach (array_keys($js_parts = array_values($js_parts)) as $_js_part) {
             if (!isset($js_parts[$_js_part]['exclude_frag']) && !empty($js_parts[$_js_part]['code'])) {
@@ -1577,12 +1594,11 @@ class Core // Heart of the HTML Compressor.
                 if (!(file_put_contents($_js_code_path_tmp, $_js_code) && rename($_js_code_path_tmp, $_js_code_path))) {
                     throw new \Exception(sprintf('Unable to cache JS code file: `%1$s`.', $_js_code_path));
                 }
-                $js_parts[$_js_part]['tag'] = '<script type="text/javascript" src="'.htmlspecialchars($_js_code_url, ENT_QUOTES).'"></script>';
+                $js_parts[$_js_part]['tag'] = '<script type="text/javascript" src="'.htmlspecialchars($_js_code_url, ENT_QUOTES, 'UTF-8').'"></script>';
 
                 unset($js_parts[$_js_part]['code']); // Ditch this; no need to cache this code too.
             }
-        }
-        unset($_js_part, $_js_code, $_js_code_cs, $_js_code_path, $_js_code_path_tmp, $_js_code_url);
+        } // unset($_js_part, $_js_code, $_js_code_cs, $_js_code_path, $_js_code_path_tmp, $_js_code_url);
 
         if (!(file_put_contents($cache_parts_file_path_tmp, serialize($js_parts)) && rename($cache_parts_file_path_tmp, $cache_parts_file_path))) {
             throw new \Exception(sprintf('Unable to cache JS parts into: `%1$s`.', $cache_parts_file_path));
@@ -1617,7 +1633,7 @@ class Core // Heart of the HTML Compressor.
         if (($benchmark = !empty($this->options['benchmark']) && $this->options['benchmark'] === 'details')) {
             $time = microtime(true);
         }
-        $js_tag_frags = array(); // Initialize.
+        $js_tag_frags = []; // Initialize.
 
         if (!$html_frag) {
             goto finale; // Nothing to do.
@@ -1626,7 +1642,7 @@ class Core // Heart of the HTML Compressor.
                  '(?P<if_open_tag>\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>\s*)?'.
                  '(?P<script_open_tag>\<script(?:\s+[^>]*?)?\>)(?P<script_js>.*?)(?P<script_closing_tag>\<\/script\>)'.
                  '(?P<if_closing_tag>\s*\<\![^[>]*?\[endif\][^>]*?\>)?'.
-                 ')/is'; // Dot matches line breaks.
+                 ')/uis'; // Dot matches line breaks.
 
         if (!empty($html_frag['contents']) && preg_match_all($regex, $html_frag['contents'], $_tag_frags, PREG_SET_ORDER)) {
             foreach ($_tag_frags as $_tag_frag) {
@@ -1646,7 +1662,7 @@ class Core // Heart of the HTML Compressor.
                         $_script_async = ''; // Not applicable.
                     }
                     if ($_script_src || $_script_js || $_script_json) {
-                        $js_tag_frags[] = array(
+                        $js_tag_frags[] = [
                             'all' => $_tag_frag['all'],
 
                             'if_open_tag'    => isset($_tag_frag['if_open_tag']) ? $_tag_frag['if_open_tag'] : '',
@@ -1661,7 +1677,7 @@ class Core // Heart of the HTML Compressor.
                             'script_closing_tag'  => isset($_tag_frag['script_closing_tag']) ? $_tag_frag['script_closing_tag'] : '',
 
                             'exclude' => false, // Default value.
-                        );
+                        ];
                         $_tag_frag_r = &$js_tag_frags[count($js_tag_frags) - 1];
 
                         if ($_tag_frag_r['if_open_tag'] || $_tag_frag_r['if_closing_tag'] || $_tag_frag_r['script_async']) {
@@ -1675,8 +1691,7 @@ class Core // Heart of the HTML Compressor.
                         }
                     }
                 }
-            }
-            unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_script_src, $_script_js, $_script_json, $_script_async, $_is_js, $_is_json);
+            } // unset($_tag_frags, $_tag_frag, $_tag_frag_r, $_script_src, $_script_js, $_script_json, $_script_async, $_is_js, $_is_json);
         }
         finale: // Target point; finale/return value.
 
@@ -1706,30 +1721,28 @@ class Core // Heart of the HTML Compressor.
         }
         $type = $language = ''; // Initialize.
 
-        if (stripos($tag_frag['script_open_tag'], 'type') !== 0) {
-            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+        if (mb_stripos($tag_frag['script_open_tag'], 'type') !== 0) {
+            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['script_open_tag'], $_m)) {
                 $type = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if (stripos($tag_frag['script_open_tag'], 'language') !== 0) {
-            if (preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+        if (mb_stripos($tag_frag['script_open_tag'], 'language') !== 0) {
+            if (preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['script_open_tag'], $_m)) {
                 $language = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if ($type && stripos($type, 'json') !== false) {
+        if ($type && mb_stripos($type, 'json') !== false) {
             return false; // JSON; not JavaScript.
         }
-        if ($type && stripos($type, 'javascript') === false) {
+        if ($type && mb_stripos($type, 'javascript') === false) {
             return false; // Not JavaScript.
         }
-        if ($language && stripos($language, 'json') !== false) {
+        if ($language && mb_stripos($language, 'json') !== false) {
             return false; // JSON; not JavaScript.
         }
-        if ($language && stripos($language, 'javascript') === false) {
+        if ($language && mb_stripos($language, 'javascript') === false) {
             return false; // Not JavaScript.
         }
         return true; // Yes, this is JavaScript.
@@ -1751,25 +1764,23 @@ class Core // Heart of the HTML Compressor.
         }
         $type = $language = ''; // Initialize.
 
-        if (stripos($tag_frag['script_open_tag'], 'type') !== 0) {
-            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+        if (mb_stripos($tag_frag['script_open_tag'], 'type') !== 0) {
+            if (preg_match('/\stype\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['script_open_tag'], $_m)) {
                 $type = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if (stripos($tag_frag['script_open_tag'], 'language') !== 0) {
-            if (preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+        if (mb_stripos($tag_frag['script_open_tag'], 'language') !== 0) {
+            if (preg_match('/\slanguage\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['script_open_tag'], $_m)) {
                 $language = $_m['value'];
             }
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
-        if (($type && stripos($type, 'javascript') === false) || ($language && stripos($language, 'javascript') === false)) {
-            if ($type && stripos($type, 'json') !== false) {
+        if (($type && mb_stripos($type, 'javascript') === false) || ($language && mb_stripos($language, 'javascript') === false)) {
+            if ($type && mb_stripos($type, 'json') !== false) {
                 return true; // Yes, this is JSON.
             }
-            if ($language && stripos($language, 'json') !== false) {
+            if ($language && mb_stripos($language, 'json') !== false) {
                 return true; // Yes, this is JSON.
             }
         }
@@ -1792,10 +1803,9 @@ class Core // Heart of the HTML Compressor.
         if ($test_for_js && !$this->isScriptTagFragJs($tag_frag)) {
             return ''; // This script tag does not contain JavaScript.
         }
-        if (preg_match('/\ssrc\s*\=\s*(["\'])(?P<value>.+?)\\1/i', $tag_frag['script_open_tag'], $_m)) {
+        if (preg_match('/\ssrc\s*\=\s*(["\'])(?P<value>.+?)\\1/ui', $tag_frag['script_open_tag'], $_m)) {
             return trim($this->nUrlAmps($_m['value']));
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
         return ''; // Unable to find an `src` attribute value.
     }
@@ -1816,10 +1826,9 @@ class Core // Heart of the HTML Compressor.
         if ($test_for_js && !$this->isScriptTagFragJs($tag_frag)) {
             return ''; // This script tag does not contain JavaScript.
         }
-        if (preg_match('/\s(?:async|defer)(?:\>|\s+[^=]|\s*\=\s*(["\'])(?:1|on|yes|true|async|defer)\\1)/i', $tag_frag['script_open_tag'], $_m)) {
+        if (preg_match('/\s(?:async|defer)(?:\>|\s+[^=]|\s*\=\s*(["\'])(?:1|on|yes|true|async|defer)\\1)/ui', $tag_frag['script_open_tag'], $_m)) {
             return 'async'; // Yes, load this asynchronously.
-        }
-        unset($_m); // Just a little housekeeping.
+        } // unset($_m); // Just a little housekeeping.
 
         return ''; // Unable to find a TRUE `async|defer` attribute.
     }
@@ -1886,12 +1895,12 @@ class Core // Heart of the HTML Compressor.
     protected function getHtmlFrag($html)
     {
         if (!($html = (string) $html)) {
-            return array(); // Nothing to do.
+            return []; // Nothing to do.
         }
-        if (preg_match('/(?P<all>(?P<open_tag>\<html(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/html\>))/is', $html, $html_frag)) {
+        if (preg_match('/(?P<all>(?P<open_tag>\<html(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/html\>))/uis', $html, $html_frag)) {
             return $this->removeNumericKeysDeep($html_frag);
         }
-        return array();
+        return [];
     }
 
     /**
@@ -1906,12 +1915,12 @@ class Core // Heart of the HTML Compressor.
     protected function getHeadFrag($html)
     {
         if (!($html = (string) $html)) {
-            return array(); // Nothing to do.
+            return []; // Nothing to do.
         }
-        if (preg_match('/(?P<all>(?P<open_tag>\<head(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/head\>))/is', $html, $head_frag)) {
+        if (preg_match('/(?P<all>(?P<open_tag>\<head(?:\s+[^>]*?)?\>)(?P<contents>.*?)(?P<closing_tag>\<\/head\>))/uis', $html, $head_frag)) {
             return $this->removeNumericKeysDeep($head_frag);
         }
-        return array();
+        return [];
     }
 
     /**
@@ -1926,12 +1935,12 @@ class Core // Heart of the HTML Compressor.
     protected function getFooterScriptsFrag($html)
     {
         if (!($html = (string) $html)) {
-            return array(); // Nothing to do.
+            return []; // Nothing to do.
         }
-        if (preg_match('/(?P<all>(?P<open_tag>\<\!\-\-\s*footer[\s_\-]+scripts\s*\-\-\>)(?P<contents>.*?)(?P<closing_tag>(?P=open_tag)))/is', $html, $head_frag)) {
+        if (preg_match('/(?P<all>(?P<open_tag>\<\!\-\-\s*footer[\s_\-]+scripts\s*\-\-\>)(?P<contents>.*?)(?P<closing_tag>(?P=open_tag)))/uis', $html, $head_frag)) {
             return $this->removeNumericKeysDeep($head_frag);
         }
-        return array();
+        return [];
     }
 
     /**
@@ -1950,9 +1959,8 @@ class Core // Heart of the HTML Compressor.
     protected function getTagFragsChecksum(array $tag_frags)
     {
         foreach ($tag_frags as &$_frag) {
-            $_frag = $_frag['exclude'] ? array('exclude' => true) : $_frag;
-        }
-        unset($_frag); // A little housekeeping.
+            $_frag = $_frag['exclude'] ? ['exclude' => true] : $_frag;
+        } // unset($_frag); // A little housekeeping.
 
         return md5(serialize($tag_frags));
     }
@@ -2027,29 +2035,28 @@ class Core // Heart of the HTML Compressor.
         $static = &static::$static[__FUNCTION__];
 
         if (!isset($static['preservations'], $static['compressions'], $static['compress_with'])) {
-            $static['preservations'] = array(
+            $static['preservations'] = [
                 'special_tags'            => '\<(pre|code|script|style|textarea)(?:\s+[^>]*?)?\>.*?\<\/\\2>',
                 'ie_conditional_comments' => '\<\![^[>]*?\[if\W[^\]]*?\][^>]*?\>.*?\<\![^[>]*?\[endif\][^>]*?\>',
                 'special_attributes'      => '\s(?:style|on[a-z]+)\s*\=\s*(["\']).*?\\3',
-            );
+            ];
             $static['preservations'] = // Implode for regex capture.
-                '/(?P<preservation>'.implode('|', $static['preservations']).')/is';
+                '/(?P<preservation>'.implode('|', $static['preservations']).')/uis';
 
-            $static['compressions']['remove_html_comments']  = '/\<\!\-{2}.*?\-{2}\>/is';
+            $static['compressions']['remove_html_comments']  = '/\<\!\-{2}.*?\-{2}\>/uis';
             $static['compress_with']['remove_html_comments'] = '';
 
-            $static['compressions']['remove_extra_whitespace']  = '/\s+/';
+            $static['compressions']['remove_extra_whitespace']  = '/\s+/u';
             $static['compress_with']['remove_extra_whitespace'] = ' ';
 
-            $static['compressions']['remove_extra_whitespace_in_self_closing_tags']  = '/\s+\/\>/';
+            $static['compressions']['remove_extra_whitespace_in_self_closing_tags']  = '/\s+\/\>/u';
             $static['compress_with']['remove_extra_whitespace_in_self_closing_tags'] = '/>';
         }
         if (preg_match_all($static['preservations'], $html, $preservation_matches, PREG_SET_ORDER)) {
             foreach ($preservation_matches as $_preservation_match_key => $_preservation_match) {
                 $preservations[]             = $_preservation_match['preservation'];
                 $preservation_placeholders[] = '%%minify-html-'.$_preservation_match_key.'%%';
-            }
-            unset($_preservation_match_key, $_preservation_match);
+            } // unset($_preservation_match_key, $_preservation_match);
 
             if (isset($preservations, $preservation_placeholders)) {
                 $html = $this->replaceOnce($preservations, $preservation_placeholders, $html);
@@ -2219,8 +2226,7 @@ class Core // Heart of the HTML Compressor.
                     $js_tag_frags_script_js_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
                     $js_tag_frags_script_js_part_placeholder_key_replacements[] = $_js_tag_frag_key;
                 }
-            }
-            unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
+            } // unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
 
             if (isset($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements)) {
                 $html = $this->replaceOnce($js_tag_frags_script_js_parts, $js_tag_frags_script_js_part_placeholders, $html);
@@ -2233,8 +2239,7 @@ class Core // Heart of the HTML Compressor.
                     $_js_tag_frag_key_replacement .= $this->compressInlineJsCode($_js_tag_frag['script_js']);
                     $_js_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
                     $_js_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
-                }
-                unset($_js_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
+                } // unset($_js_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
 
                 $html = $this->replaceOnce($js_tag_frags_script_js_part_placeholders, $js_tag_frags_script_js_part_placeholder_key_replacements, $html);
 
@@ -2323,8 +2328,7 @@ class Core // Heart of the HTML Compressor.
                     $js_tag_frags_script_json_part_placeholders[]                 = '%%htmlc-'.$_js_tag_frag_key.'%%';
                     $js_tag_frags_script_json_part_placeholder_key_replacements[] = $_js_tag_frag_key;
                 }
-            }
-            unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
+            } // unset($_js_tag_frag_key, $_js_tag_frag); // Housekeeping.
 
             if (isset($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements)) {
                 $html = $this->replaceOnce($js_tag_frags_script_json_parts, $js_tag_frags_script_json_part_placeholders, $html);
@@ -2337,8 +2341,7 @@ class Core // Heart of the HTML Compressor.
                     $_json_tag_frag_key_replacement .= $this->compressInlineJsonCode($_js_tag_frag['script_json']);
                     $_json_tag_frag_key_replacement .= $_js_tag_frag['script_closing_tag'];
                     $_json_tag_frag_key_replacement .= $_js_tag_frag['if_closing_tag'];
-                }
-                unset($_json_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
+                } // unset($_json_tag_frag_key_replacement, $_js_tag_frag); // Housekeeping.
 
                 $html = $this->replaceOnce($js_tag_frags_script_json_part_placeholders, $js_tag_frags_script_json_part_placeholder_key_replacements, $html);
 
@@ -2426,9 +2429,9 @@ class Core // Heart of the HTML Compressor.
     {
         if ($___current_dimension === 1) {
             $keys              = (array) $keys;
-            $search_dimensions = (integer) $search_dimensions;
+            $search_dimensions = (int) $search_dimensions;
         }
-        $key_elements = array(); // Initialize.
+        $key_elements = []; // Initialize.
 
         foreach ($array as $_key => $_value) {
             if (in_array($_key, $keys, true)) {
@@ -2443,8 +2446,7 @@ class Core // Heart of the HTML Compressor.
             ) {
                 $key_elements = array_merge($key_elements, $_key_elements);
             }
-        }
-        unset($_key, $_value, $_key_elements);
+        } // unset($_key, $_value, $_key_elements);
 
         return $key_elements;
     }
@@ -2469,8 +2471,7 @@ class Core // Heart of the HTML Compressor.
             } elseif (is_array($_value)) {
                 $_value = $this->removeNumericKeysDeep($_value, true);
             }
-        }
-        unset($_key, $_value);
+        } // unset($_key, $_value);
 
         return $array;
     }
@@ -2495,137 +2496,148 @@ class Core // Heart of the HTML Compressor.
         if (!($string = (string) $string)) {
             return $string;
         }
-        return preg_replace('/^\xEF\xBB\xBF/', '', $string);
+        return preg_replace('/^\xEF\xBB\xBF/u', '', $string);
     }
 
     /**
-     * Escapes regex special chars deeply (i.e. `preg_quote()` deeply).
+     * Escapes regex special chars deeply.
      *
      * @since 140417 Initial release.
      *
-     * @note This is a recursive scan running deeply into multiple dimensions of arrays/objects.
-     * @note This routine will usually NOT include private, protected or static properties of an object class.
-     *    However, private/protected properties *will* be included, if the current scope allows access to these private/protected properties.
-     *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by `foreach()`.
-     *
-     * @param mixed  $value        Any value can be converted into a quoted string.
-     *                             Actually, objects can't, but this recurses into objects.
-     * @param string $delimiter    Same as PHP's `preg_quote()`.
-     * @param bool   $___recursion Internal use only.
+     * @param mixed  $value     Input value.
+     * @param string $delimiter Delimiter.
      *
      * @return string|array|object Escaped string, array, object.
      */
-    protected function pregQuoteDeep($value, $delimiter = '', $___recursion = false)
+    protected function pregQuote($value, $delimiter = '/')
     {
         if (is_array($value) || is_object($value)) {
             foreach ($value as &$_value) {
-                $_value = $this->pregQuoteDeep($_value, $delimiter, true);
-            }
-            unset($_value); // Housekeeping.
-
+                $_value = $this->pregQuote($_value, $delimiter);
+            } // unset($_value); // Housekeeping.
             return $value;
         }
         return preg_quote((string) $value, (string) $delimiter);
     }
 
     /**
-     * String replace (ONE time), and deeply into arrays/objects.
+     * Multibyte `substr_replace()`.
      *
-     * @since 140417 Initial release.
+     * @since 16xxxx Enhancing multibyte.
      *
-     * @note This is a recursive scan running deeply into multiple dimensions of arrays/objects.
-     * @note This routine will usually NOT include private, protected or static properties of an object class.
-     *    However, private/protected properties *will* be included, if the current scope allows access to these private/protected properties.
-     *    Static properties are NEVER considered by this routine, because static properties are NOT iterated by `foreach()`.
+     * @param mixed    $value   Input value.
+     * @param string   $replace Replacement string.
+     * @param int      $start   Substring start position.
+     * @param int|null $length  Substring length.
      *
-     * @param string|array $needle           String, or an array of strings, to search for.
-     * @param string|array $replace          String, or an array of strings, to use as replacements.
-     * @param mixed        $value            Any value can be converted into a string to run replacements on.
-     *                                       Actually, objects can't, but this recurses into objects.
-     * @param bool         $case_insensitive Case insensitive? Defaults to FALSE.
-     *                                       If TRUE, the search is NOT case sensitive.
-     * @param bool         $___recursion     Internal use only.
+     * @return string|array|object Output value.
      *
-     * @return mixed Values after ONE string replacement (deeply).
-     *               Any values that were NOT strings|arrays|objects, will be converted to strings by this routine.
+     * @link http://php.net/manual/en/function.substr-replace.php
      *
-     * @see http://stackoverflow.com/questions/8177296/when-to-use-strtr-vs-str-replace
+     * @warning Does NOT support mixed `$replace`, `$start`, `$length` params like `substr_replace()` does.
      */
-    protected function replaceOnceDeep($needle, $replace, $value, $case_insensitive = false, $___recursion = false)
+    protected function substrReplace($value, $replace, $start, $length = null)
     {
         if (is_array($value) || is_object($value)) {
-            foreach ($value as &$_value) {
-                $_value = $this->replaceOnceDeep($needle, $replace, $_value, $case_insensitive, true);
-            }
-            unset($_value); // Housekeeping.
-
-            return $value; // Array or object.
+            foreach ($value as $_key => &$_value) {
+                $_value = $this->substrReplace($_value, $replace, $start, $length);
+            } // unset($_key, $_value);
+            return $value;
         }
-        $value  = (string) $value; // Force string value.
-        $strpos = $case_insensitive ? 'stripos' : 'strpos';
+        $string = (string) $value;
 
-        if (is_array($needle)) {
-            if (is_array($replace)) {
-                foreach ($needle as $_key => $_needle) {
-                    if (($_strpos = $strpos($value, ($_needle = (string) $_needle))) !== false) {
-                        $_length  = strlen($_needle);
-                        $_replace = (isset($replace[$_key])) ? (string) $replace[$_key] : '';
-                        $value    = substr_replace($value, $_replace, $_strpos, $_length);
-                    }
-                }
-                unset($_key, $_needle, $_strpos, $_length, $_replace);
-
-                return $value; // String value.
-            } else {
-                $replace = (string) $replace;
-
-                foreach ($needle as $_needle) {
-                    if (($_strpos = $strpos($value, ($_needle = (string) $_needle))) !== false) {
-                        $_length = strlen($_needle);
-                        $value   = substr_replace($value, $replace, $_strpos, $_length);
-                    }
-                }
-                unset($_needle, $_strpos, $_length);
-
-                return $value; // String value.
-            }
-        } else {
-            $needle = (string) $needle;
-
-            if (($_strpos = $strpos($value, $needle)) !== false) {
-                $_length = strlen($needle);
-
-                if (is_array($replace)) {
-                    $_replace = (isset($replace[0])) ? (string) $replace[0] : '';
-                } else {
-                    $_replace = (string) $replace;
-                }
-                $value = substr_replace($value, $_replace, $_strpos, $_length);
-            }
-            unset($_strpos, $_length, $_replace);
-
-            return $value; // String value.
+        if (!isset($string[0])) {
+            return $string; // Nothing to do.
         }
+        $mb_strlen = mb_strlen($string);
+
+        if ($start < 0) {
+            $start = max(0, $mb_strlen + $start);
+        } elseif ($start > $mb_strlen) {
+            $start = $mb_strlen;
+        }
+        if ($length < 0) {
+            $length = max(0, $mb_strlen - $start + $length);
+        } elseif (!isset($length) || $length > $mb_strlen) {
+            $length = $mb_strlen;
+        }
+        if ($start + $length > $mb_strlen) {
+            $length = $mb_strlen - $start;
+        }
+        return mb_substr($string, 0, $start).
+                $replace.// The replacement string.
+            mb_substr($string, $start + $length, $mb_strlen - $start - $length);
     }
 
     /**
-     * String replace (ONE time).
+     * String replace (ONE time) deeply.
      *
      * @since 140417 Initial release.
      *
      * @param string|array $needle           String, or an array of strings, to search for.
      * @param string|array $replace          String, or an array of strings, to use as replacements.
-     * @param string       $string           The subject value to search/replace; i.e. a string.
-     * @param bool         $case_insensitive Case insensitive? Defaults to FALSE.
-     *                                       If TRUE, the search is NOT case sensitive.
+     * @param mixed        $value            Any input value will do just fine here.
+     * @param bool         $caSe_insensitive Case insensitive? Defaults to FALSE.
      *
-     * @return string String value after having been searched/replaced.
-     *
-     * @see http://stackoverflow.com/questions/8177296/when-to-use-strtr-vs-str-replace
+     * @return string|array|object Values after ONE string replacement deeply.
      */
-    protected function replaceOnce($needle, $replace, $string, $case_insensitive = false)
+    protected function replaceOnce($needle, $replace, $value, $case_insensitive = false)
     {
-        return $this->replaceOnceDeep($needle, $replace, (string) $string, $case_insensitive);
+        if (is_array($value) || is_object($value)) {
+            foreach ($value as $_key => &$_value) {
+                $_value = $this->replaceOnce($needle, $replace, $_value, $caSe_insensitive);
+            } // unset($_key, $_value); // Housekeeping.
+            return $value;
+        }
+        $value     = (string) $value; // Force string (always).
+        $mb_strpos = $caSe_insensitive ? 'mb_stripos' : 'mb_strpos';
+
+        if (is_array($needle) || is_object($needle)) {
+            $needle = (array) $needle; // Force array.
+
+            if (is_array($replace) || is_object($replace)) {
+                $replace = (array) $replace; // Force array.
+
+                foreach ($needle as $_key => $_needle) {
+                    $_needle = (string) $_needle;
+                    if (($_mb_strpos = $mb_strpos($value, $_needle)) !== false) {
+                        $_mb_strlen = mb_strlen($_needle);
+                        $_replace   = isset($replace[$_key]) ? (string) $replace[$_key] : '';
+                        $value      = $this->substrReplace($value, $_replace, $_mb_strpos, $_mb_strlen);
+                    }
+                } // unset($_key, $_needle, $_mb_strpos, $_mb_strlen, $_replace);
+
+                return $value;
+            } else {
+                $replace = (string) $replace; // Force string.
+
+                foreach ($needle as $_key => $_needle) {
+                    $_needle = (string) $_needle;
+                    if (($_mb_strpos = $mb_strpos($value, $_needle)) !== false) {
+                        $_mb_strlen = mb_strlen($_needle);
+                        $value      = $this->substrReplace($value, $replace, $_mb_strpos, $_mb_strlen);
+                    }
+                } // unset($_key, $_needle, $_mb_strpos, $_mb_strlen);
+
+                return $value;
+            }
+        } else {
+            $needle = (string) $needle; // Force string.
+
+            if (($_mb_strpos = $mb_strpos($value, $needle)) !== false) {
+                $_mb_strlen = mb_strlen($needle);
+
+                if (is_array($replace) || is_object($replace)) {
+                    $replace  = array_values((array) $replace); // Force array.
+                    $_replace = isset($replace[0]) ? (string) $replace[0] : '';
+                } else {
+                    $_replace = (string) $replace; // Force string.
+                }
+                $value = $this->substrReplace($value, $_replace, $_mb_strpos, $_mb_strlen);
+                // unset($_mb_strpos, $_mb_strlen, $_replace);
+            }
+            return $value;
+        }
     }
 
     /**
@@ -2650,15 +2662,13 @@ class Core // Heart of the HTML Compressor.
         if (is_array($value) || is_object($value)) {
             foreach ($value as &$_value) {
                 $_value = $this->escRefsDeep($_value, $times, true);
-            }
-            unset($_value); // Housekeeping.
-
+            } // unset($_value); // Housekeeping.
             return $value;
         }
         $value = (string) $value;
-        $times = abs((integer) $times);
+        $times = abs((int) $times);
 
-        return str_replace(array('\\', '$'), array(str_repeat('\\', $times).'\\', str_repeat('\\', $times).'$'), $value);
+        return str_replace(['\\', '$'], [str_repeat('\\', $times).'\\', str_repeat('\\', $times).'$'], $value);
     }
 
     /**
@@ -2690,7 +2700,7 @@ class Core // Heart of the HTML Compressor.
         if (!($html = (string) $html)) {
             return $html; // Nothing to do.
         }
-        return trim(preg_replace('/\>\s*?'."[\r\n]+".'\s*\</', ">\n<", $html));
+        return trim(preg_replace('/\>\s*?'."[\r\n]+".'\s*\</u', ">\n<", $html));
     }
 
     /********************************************************************************************************/
@@ -2704,7 +2714,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type string Indicates a public directory type.
+     * @var string Indicates a public directory type.
      *
      * @internal This is for internal use only.
      */
@@ -2715,7 +2725,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type string Indicates a private directory type.
+     * @var string Indicates a private directory type.
      *
      * @internal This is for internal use only.
      */
@@ -2750,7 +2760,7 @@ class Core // Heart of the HTML Compressor.
         } else {
             $checksum = ''; // Invalid or empty.
         }
-        $cache_key = $type.$checksum.(integer) $base_only;
+        $cache_key = $type.$checksum.(int) $base_only;
 
         if (isset($this->cache[__FUNCTION__.'_'.$cache_key])) {
             return $this->cache[__FUNCTION__.'_'.$cache_key];
@@ -2768,7 +2778,7 @@ class Core // Heart of the HTML Compressor.
             $dir = $basedir; // Caller wants only the base directory.
         } else {
             $dir = $basedir; // Start with the base directory.
-            $dir .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
+            $dir .= '/'.trim(preg_replace('/[^a-z0-9]/ui', '-', $this->currentUrlHost()), '-');
             $dir .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         if (!is_dir($dir) && mkdir($dir, 0755, true)) {
@@ -2819,7 +2829,7 @@ class Core // Heart of the HTML Compressor.
         } else {
             $checksum = ''; // Invalid or empty.
         }
-        $cache_key = $type.$checksum.(integer) $base_only;
+        $cache_key = $type.$checksum.(int) $base_only;
 
         if (isset($this->cache[__FUNCTION__.'_'.$cache_key])) {
             return $this->cache[__FUNCTION__.'_'.$cache_key];
@@ -2830,7 +2840,7 @@ class Core // Heart of the HTML Compressor.
             $baseurl = $this->setUrlScheme(rtrim($this->options['cache_dir_url_'.$type], '/'));
         } elseif (defined('WP_CONTENT_DIR') && defined('WP_CONTENT_URL') && $basedir === $this->nDirSeps(WP_CONTENT_DIR.'/htmlc/cache/'.$type)) {
             $baseurl = $this->setUrlScheme(rtrim(WP_CONTENT_URL, '/').'/htmlc/cache/'.$type);
-        } elseif (!empty($_SERVER['DOCUMENT_ROOT']) && strpos($basedir, $_SERVER['DOCUMENT_ROOT']) === 0) {
+        } elseif (!empty($_SERVER['DOCUMENT_ROOT']) && mb_strpos($basedir, $_SERVER['DOCUMENT_ROOT']) === 0) {
             $baseurl = $this->currentUrlScheme().'://'.$this->currentUrlHost();
             $baseurl .= str_replace(rtrim($_SERVER['DOCUMENT_ROOT'], '/'), '', $basedir);
         } else {
@@ -2840,7 +2850,7 @@ class Core // Heart of the HTML Compressor.
             $url = $baseurl; // Caller wants only the base directory.
         } else {
             $url = $baseurl; // Start with the base URL.
-            $url .= '/'.trim(preg_replace('/[^a-z0-9]/i', '-', $this->currentUrlHost()), '-');
+            $url .= '/'.trim(preg_replace('/[^a-z0-9]/ui', '-', $this->currentUrlHost()), '-');
             $url .= $checksum ? '/'.implode('/', str_split($checksum)) : '';
         }
         return $this->cache[__FUNCTION__.'_'.$cache_key] = $url;
@@ -2863,7 +2873,7 @@ class Core // Heart of the HTML Compressor.
         $private_cache_dir = $this->cacheDir($this::DIR_PRIVATE_TYPE);
         $min_mtime         = strtotime('-'.$this->cache_expiration_time);
 
-        /** @type $_dir_file \RecursiveDirectoryIterator For IDEs. */
+        /** @var $_dir_file \RecursiveDirectoryIterator For IDEs. */
         foreach ($this->dirRegexIteration($public_cache_dir, '/\/compressor\-part\..*$/') as $_dir_file) {
             if (($_dir_file->isFile() || $_dir_file->isLink()) && $_dir_file->getMTime() < $min_mtime - 3600) {
                 if ($_dir_file->isWritable()) {
@@ -2871,15 +2881,14 @@ class Core // Heart of the HTML Compressor.
                 }
             }
         }
-        /** @type $_dir_file \RecursiveDirectoryIterator For IDEs. */
+        /** @var $_dir_file \RecursiveDirectoryIterator For IDEs. */
         foreach ($this->dirRegexIteration($private_cache_dir, '/\/compressor\-parts\..*$/') as $_dir_file) {
             if (($_dir_file->isFile() || $_dir_file->isLink()) && $_dir_file->getMTime() < $min_mtime) {
                 if ($_dir_file->isWritable()) {
                     unlink($_dir_file->getPathname());
                 }
             }
-        }
-        unset($_dir_file); // Housekeeping.
+        } // unset($_dir_file); // Housekeeping.
 
         if ($benchmark && !empty($time)) {
             $this->benchmark->addTime(
@@ -2928,20 +2937,20 @@ class Core // Heart of the HTML Compressor.
         if (($dir_file = (string) $dir_file) === '') {
             return $dir_file; // Nothing to do.
         }
-        if (strpos($dir_file, '://' !== false)) {
-            if (preg_match('/^(?P<stream_wrapper>[a-z0-9]+)\:\/\//i', $dir_file, $stream_wrapper)) {
-                $dir_file = preg_replace('/^(?P<stream_wrapper>[a-z0-9]+)\:\/\//i', '', $dir_file);
+        if (mb_strpos($dir_file, '://' !== false)) {
+            if (preg_match('/^(?P<stream_wrapper>[a-z0-9]+)\:\/\//ui', $dir_file, $stream_wrapper)) {
+                $dir_file = preg_replace('/^(?P<stream_wrapper>[a-z0-9]+)\:\/\//ui', '', $dir_file);
             }
-            if (strpos($dir_file, ':' !== false)) {
-                if (preg_match('/^(?P<drive_letter>[a-z])\:[\/\\\\]/i', $dir_file)) {
-                    $dir_file = preg_replace_callback('/^(?P<drive_letter>[a-z])\:[\/\\\\]/i', create_function('$m', 'return strtoupper($m[0]);'), $dir_file);
+            if (mb_strpos($dir_file, ':' !== false)) {
+                if (preg_match('/^(?P<drive_letter>[a-z])\:[\/\\\\]/ui', $dir_file)) {
+                    $dir_file = preg_replace_callback('/^(?P<drive_letter>[a-z])\:[\/\\\\]/ui', create_function('$m', 'return mb_strtoupper($m[0]);'), $dir_file);
                 }
-                $dir_file = preg_replace('/\/+/', '/', str_replace(array(DIRECTORY_SEPARATOR, '\\', '/'), '/', $dir_file));
+                $dir_file = preg_replace('/\/+/u', '/', str_replace([DIRECTORY_SEPARATOR, '\\', '/'], '/', $dir_file));
             }
             $dir_file = ($allow_trailing_slash) ? $dir_file : rtrim($dir_file, '/'); // Strip trailing slashes.
         }
         if (!empty($stream_wrapper[0])) {
-            $dir_file = strtolower($stream_wrapper[0]).$dir_file;
+            $dir_file = mb_strtolower($stream_wrapper[0]).$dir_file;
         }
         return $dir_file; // Normalized now.
     }
@@ -2951,7 +2960,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type string Compatible with Apache 2.1+. Tested up to 2.4.7.
+     * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
      */
     protected $dir_htaccess_deny = "<IfModule authz_core_module>\n\tRequire all denied\n</IfModule>\n<IfModule !authz_core_module>\n\tdeny from all\n</IfModule>";
 
@@ -2960,7 +2969,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150321 Improving publicly cacheable files.
      *
-     * @type string Compatible with Apache 2.1+. Tested up to 2.4.7.
+     * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
      */
     protected $dir_htaccess_allow = "<IfModule authz_core_module>\n\tRequire all granted\n</IfModule>\n<IfModule !authz_core_module>\n\tallow from all\n</IfModule>\n\n<IfModule headers_module>\n\t<FilesMatch \"\\.(html|js|css)$\">\n\t\tHeader append Vary: Accept-Encoding\n\t</FilesMatch>\n</IfModule>";
 
@@ -2975,7 +2984,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -2986,7 +2995,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -2997,7 +3006,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3008,7 +3017,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3019,7 +3028,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3030,7 +3039,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3041,7 +3050,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3052,7 +3061,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @type int Part of a bitmask.
+     * @var int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3071,7 +3080,7 @@ class Core // Heart of the HTML Compressor.
             return static::$static[__FUNCTION__];
         }
         if (!empty($_SERVER['SERVER_PORT'])) {
-            if ((integer) $_SERVER['SERVER_PORT'] === 443) {
+            if ((int) $_SERVER['SERVER_PORT'] === 443) {
                 return static::$static[__FUNCTION__] = true;
             }
         }
@@ -3207,10 +3216,10 @@ class Core // Heart of the HTML Compressor.
         if (!($scheme = (string) $scheme)) {
             return $scheme; // Nothing to do.
         }
-        if (strpos($scheme, ':') !== false) {
+        if (mb_strpos($scheme, ':') !== false) {
             $scheme = strstr($scheme, ':', true);
         }
-        return strtolower($scheme);
+        return mb_strtolower($scheme);
     }
 
     /**
@@ -3227,7 +3236,7 @@ class Core // Heart of the HTML Compressor.
         if (!($host = (string) $host)) {
             return $host; // Nothing to do.
         }
-        return strtolower($host);
+        return mb_strtolower($host);
     }
 
     /**
@@ -3245,10 +3254,10 @@ class Core // Heart of the HTML Compressor.
         if (!($url_uri_query_fragment = (string) $url_uri_query_fragment)) {
             return $url_uri_query_fragment; // Nothing to do.
         }
-        if (strpos($url_uri_query_fragment, '&') === false) {
+        if (mb_strpos($url_uri_query_fragment, '&') === false) {
             return $url_uri_query_fragment; // Nothing to do.
         }
-        return preg_replace('/&amp;|&#0*38;|&#[xX]0*26;/', '&', $url_uri_query_fragment);
+        return preg_replace('/&amp;|&#0*38;|&#[xX]0*26;/u', '&', $url_uri_query_fragment);
     }
 
     /**
@@ -3303,7 +3312,7 @@ class Core // Heart of the HTML Compressor.
         if ($scheme !== '//') {
             $scheme = $this->nUrlScheme($scheme).'://';
         }
-        return preg_replace('/^(?:[a-z0-9]+\:)?\/\//i', $this->escRefs($scheme), $url);
+        return preg_replace('/^(?:[a-z0-9]+\:)?\/\//ui', $this->escRefs($scheme), $url);
     }
 
     /**
@@ -3322,10 +3331,10 @@ class Core // Heart of the HTML Compressor.
      */
     protected function isUrlExternal($url_uri_query_fragment)
     {
-        if (strpos($url_uri_query_fragment, '//') === false) {
+        if (mb_strpos($url_uri_query_fragment, '//') === false) {
             return false; // Relative.
         }
-        return stripos($url_uri_query_fragment, '//'.$this->currentUrlHost()) === false;
+        return mb_stripos($url_uri_query_fragment, '//'.$this->currentUrlHost()) === false;
     }
 
     /**
@@ -3362,7 +3371,7 @@ class Core // Heart of the HTML Compressor.
         if (!isset($normalize)) {
             $normalize = $this::URL_SCHEME | $this::URL_HOST | $this::URL_PATH;
         }
-        if (strpos($url_uri_query_fragment, '//') === 0) {
+        if (mb_strpos($url_uri_query_fragment, '//') === 0) {
             $url_uri_query_fragment = $this->currentUrlScheme().':'.$url_uri_query_fragment; // So URL is parsed properly.
             // Works around a bug in `parse_url()` prior to PHP v5.4.7. See: <http://php.net/manual/en/function.parse-url.php>.
             $x_protocol_scheme = true; // Flag this, so we can remove scheme below.
@@ -3410,7 +3419,7 @@ class Core // Heart of the HTML Compressor.
                     $parsed['path'] = '/'; // Home directory.
                 }
                 $parsed['path'] = $this->nUrlPathSeps($parsed['path'], true);
-                if (strpos($parsed['path'], '/') !== 0) {
+                if (mb_strpos($parsed['path'], '/') !== 0) {
                     $parsed['path'] = '/'.$parsed['path'];
                 }
             } elseif ($component === PHP_URL_PATH) {
@@ -3418,14 +3427,14 @@ class Core // Heart of the HTML Compressor.
                     $parsed = '/'; // Home directory.
                 }
                 $parsed = $this->nUrlPathSeps($parsed, true);
-                if (strpos($parsed, '/') !== 0) {
+                if (mb_strpos($parsed, '/') !== 0) {
                     $parsed = '/'.$parsed;
                 }
             }
         }
-        if (in_array(gettype($parsed), array('array', 'string', 'integer'), true)) {
+        if (in_array(gettype($parsed), ['array', 'string', 'integer'], true)) {
             if (is_array($parsed)) {
-                $defaults = array(
+                $defaults = [
                     'fragment' => '',
                     'host'     => '',
                     'pass'     => '',
@@ -3434,9 +3443,9 @@ class Core // Heart of the HTML Compressor.
                     'query'    => '',
                     'scheme'   => '',
                     'user'     => '',
-                );
+                ];
                 $parsed         = array_merge($defaults, $parsed);
-                $parsed['port'] = (integer) $parsed['port'];
+                $parsed['port'] = (int) $parsed['port'];
                 ksort($parsed); // Sort by key.
             }
             return $parsed; // A `string|integer|array`.
@@ -3458,7 +3467,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function mustParseUrl() // Arguments are NOT listed here.
     {
-        if (is_null($parsed = call_user_func_array(array($this, 'parseUrl'), func_get_args()))) {
+        if (is_null($parsed = call_user_func_array([$this, 'parseUrl'], func_get_args()))) {
             throw new \Exception(sprintf('Unable to parse: `%1$s`.', (string) func_get_arg(0)));
         }
         return $parsed;
@@ -3520,7 +3529,7 @@ class Core // Heart of the HTML Compressor.
                 $parsed['path'] = '/'; // Home directory.
             }
             $parsed['path'] = $this->nUrlPathSeps($parsed['path'], true);
-            if (strpos($parsed['path'], '/') !== 0) {
+            if (mb_strpos($parsed['path'], '/') !== 0) {
                 $parsed['path'] = '/'.$parsed['path'];
             }
         }
@@ -3550,7 +3559,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function mustUnparseUrl() // Arguments are NOT listed here.
     {
-        if (($unparsed = call_user_func_array(array($this, 'unparseUrl'), func_get_args())) === '') {
+        if (($unparsed = call_user_func_array([$this, 'unparseUrl'], func_get_args())) === '') {
             throw new \Exception(sprintf('Unable to unparse: `%1$s`.', print_r(func_get_arg(0), true)));
         }
         return $unparsed;
@@ -3576,7 +3585,7 @@ class Core // Heart of the HTML Compressor.
     protected function parseUriParts($url_uri_query_fragment, $normalize = null)
     {
         if (($parts = $this->parseUrl($url_uri_query_fragment, null, $normalize))) {
-            return array('path' => $parts['path'], 'query' => $parts['query'], 'fragment' => $parts['fragment']);
+            return ['path' => $parts['path'], 'query' => $parts['query'], 'fragment' => $parts['fragment']];
         }
         return; // Default return value.
     }
@@ -3595,7 +3604,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function mustParseUriParts() // Arguments are NOT listed here.
     {
-        if (is_null($parts = call_user_func_array(array($this, 'parseUriParts'), func_get_args()))) {
+        if (is_null($parts = call_user_func_array([$this, 'parseUriParts'], func_get_args()))) {
             throw new \Exception(sprintf('Unable to parse: `%1$s`.', (string) func_get_arg(0)));
         }
         return $parts;
@@ -3640,7 +3649,7 @@ class Core // Heart of the HTML Compressor.
      */
     protected function mustParseUri() // Arguments are NOT listed here.
     {
-        if (is_null($parsed = call_user_func_array(array($this, 'parseUri'), func_get_args()))) {
+        if (is_null($parsed = call_user_func_array([$this, 'parseUri'], func_get_args()))) {
             throw new \Exception(sprintf('Unable to parse: `%1$s`.', (string) func_get_arg(0)));
         }
         return $parsed;
@@ -3684,17 +3693,16 @@ class Core // Heart of the HTML Compressor.
         if (!$base_parts['host']) {
             throw new \Exception(sprintf('Unable to parse (missing base host name): `%1$s`.', $base_url));
         }
-        if (strlen($relative_parts['path'])) {
-            if (strpos($relative_parts['path'], '/') === 0) {
+        if (isset($relative_parts['path'][0])) {
+            if (mb_strpos($relative_parts['path'], '/') === 0) {
                 $parts['path'] = ''; // Reduce to nothing if relative is absolute.
             } else {
-                $parts['path'] = preg_replace('/\/[^\/]*$/', '', $parts['path']).'/'; // Reduce to nearest `/`.
+                $parts['path'] = preg_replace('/\/[^\/]*$/u', '', $parts['path']).'/'; // Reduce to nearest `/`.
             }
             // Replace `/./` and `/foo/../` with `/` (resolve relatives).
             for ($_i = 1, $parts['path'] = $parts['path'].$relative_parts['path']; $_i > 0;) {
-                $parts['path'] = preg_replace(array('/\/\.\//', '/\/(?!\.\.)[^\/]+\/\.\.\//'), '/', $parts['path'], -1, $_i);
-            }
-            unset($_i); // Just a little housekeeping.
+                $parts['path'] = preg_replace(['/\/\.\//u', '/\/(?!\.\.)[^\/]+\/\.\.\//u'], '/', $parts['path'], -1, $_i);
+            } // unset($_i); // Just a little housekeeping.
 
             // We can ditch any unresolvable `../` patterns now.
             // For instance, if there were too many `../../../../../` back references.
@@ -3702,7 +3710,7 @@ class Core // Heart of the HTML Compressor.
 
             $parts['query'] = $relative_parts['query'];
             // Use relative query.
-        } elseif (strlen($relative_parts['query'])) {
+        } elseif (isset($relative_parts['query'][0])) {
             $parts['query'] = $relative_parts['query'];
         } // Relative query string supersedes base.
 
@@ -3730,7 +3738,7 @@ class Core // Heart of the HTML Compressor.
     protected function mustGetUrl($url)
     {
         $url      = (string) $url; // Force string value.
-        $response = $this->remote($url, '', 5, 15, array(), '', true, true);
+        $response = $this->remote($url, '', 5, 15, [], '', true, true);
 
         if ($response['code'] >= 400) {
             throw new \Exception(sprintf('HTTP response code: `%1$s`. Unable to get URL: `%2$s`.', $response['code'], $url));
@@ -3757,7 +3765,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @return string|array Output data from the HTTP response; excluding headers (i.e., body only).
      */
-    protected function remote($url, $body = '', $max_con_secs = 5, $max_stream_secs = 15, array $headers = array(), $cookie_file = '', $fail_on_error = true, $return_array = false)
+    protected function remote($url, $body = '', $max_con_secs = 5, $max_stream_secs = 15, array $headers = [], $cookie_file = '', $fail_on_error = true, $return_array = false)
     {
         $can_follow = !filter_var(ini_get('safe_mode'), FILTER_VALIDATE_BOOLEAN) && !ini_get('open_basedir');
 
@@ -3769,22 +3777,21 @@ class Core // Heart of the HTML Compressor.
 
         $custom_request_method = '';
         $url                   = (string) $url;
-        $max_con_secs          = (integer) $max_con_secs;
-        $max_stream_secs       = (integer) $max_stream_secs;
+        $max_con_secs          = (int) $max_con_secs;
+        $max_stream_secs       = (int) $max_stream_secs;
 
         if (!is_array($headers)) {
-            $headers = array();
+            $headers = [];
         }
         $cookie_file = (string) $cookie_file;
 
         $custom_request_regex = // e.g.`PUT::http://www.example.com/`
-            '/^(?P<custom_request_method>(?:GET|POST|PUT|PATCH|DELETE))\:{2}(?P<url>.+)/i';
+            '/^(?P<custom_request_method>(?:GET|POST|PUT|PATCH|DELETE))\:{2}(?P<url>.+)/ui';
 
         if (preg_match($custom_request_regex, $url, $_url_parts)) {
             $url                   = $_url_parts['url']; // URL after `::`.
-            $custom_request_method = strtoupper($_url_parts['custom_request_method']);
-        }
-        unset($_url_parts); // Housekeeping.
+            $custom_request_method = mb_strtoupper($_url_parts['custom_request_method']);
+        } // unset($_url_parts); // Housekeeping.
 
         if (is_array($body)) {
             $body = http_build_query($body, '', '&');
@@ -3799,12 +3806,12 @@ class Core // Heart of the HTML Compressor.
         curl_transport: // cURL transport layer (recommended).
 
         if (!extension_loaded('curl') || !is_callable('curl_version')
-           || (stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
+           || (mb_stripos($url, 'https:') === 0 && !(is_array($curl_version = curl_version())
            && $curl_version['features'] & CURL_VERSION_SSL))
         ) {
             goto fopen_transport; // cURL will not work in this case.
         }
-        $curl_opts = array(
+        $curl_opts = [
             CURLOPT_URL          => $url,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 
@@ -3826,30 +3833,30 @@ class Core // Heart of the HTML Compressor.
             CURLOPT_VERBOSE        => false,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_FAILONERROR    => $fail_on_error,
-        );
+        ];
         if ($body) {
             if ($custom_request_method) {
-                $curl_opts += array(CURLOPT_CUSTOMREQUEST => $custom_request_method, CURLOPT_POSTFIELDS => $body);
+                $curl_opts += [CURLOPT_CUSTOMREQUEST => $custom_request_method, CURLOPT_POSTFIELDS => $body];
             } else {
-                $curl_opts += array(CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body);
+                $curl_opts += [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body];
             }
         } elseif ($custom_request_method) {
-            $curl_opts += array(CURLOPT_CUSTOMREQUEST => $custom_request_method);
+            $curl_opts += [CURLOPT_CUSTOMREQUEST => $custom_request_method];
         }
         if ($cookie_file) {
-            $curl_opts += array(CURLOPT_COOKIEJAR => $cookie_file, CURLOPT_COOKIEFILE => $cookie_file);
+            $curl_opts += [CURLOPT_COOKIEJAR => $cookie_file, CURLOPT_COOKIEFILE => $cookie_file];
         }
         if (!($curl = curl_init()) || !curl_setopt_array($curl, $curl_opts)) {
             throw new \Exception(sprintf('Failed to initialize cURL for remote connection to: `%1$s`.', $url).
                                  sprintf(' The following cURL options were necessary: `%1$s`.', print_r($curl_opts, true)));
         }
         $response_body = trim((string) curl_exec($curl));
-        $response_code = (integer) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         if ($benchmark) {
             $this->benchmark->addData(
                 __FUNCTION__,
-                array('curl_getinfo' => curl_getinfo($curl))
+                ['curl_getinfo' => curl_getinfo($curl)]
             );
         }
         curl_close($curl); // Close the resource handle now.
@@ -3864,13 +3871,13 @@ class Core // Heart of the HTML Compressor.
         fopen_transport: // Depends on `allow_url_fopen` in `php.ini`.
 
         if (!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN) || $cookie_file
-           || (stripos($url, 'https:') === 0 && !in_array('ssl', stream_get_transports(), true))
+           || (mb_stripos($url, 'https:') === 0 && !in_array('ssl', stream_get_transports(), true))
         ) {
             throw new \Exception('Unable to find a workable transport layer for remote HTTP communication.'.
                                  ' Please install the cURL & OpenSSL extensions for PHP.');
         }
-        $stream_options = array(
-            'http' => array(
+        $stream_options = [
+            'http' => [
              'protocol_version' => 1.1,
              'method'           => $custom_request_method
                  ? $custom_request_method : ($body ? 'POST' : 'GET'),
@@ -3878,15 +3885,15 @@ class Core // Heart of the HTML Compressor.
              'follow_location' => $can_follow,
              'max_redirects'   => $can_follow ? 5 : 0,
 
-             'header'     => array_merge($headers, array('Referer: '.$this->currentUrl())),
+             'header'     => array_merge($headers, ['Referer: '.$this->currentUrl()]),
              'user_agent' => $this->product_title,
 
              'ignore_errors' => $fail_on_error,
              'timeout'       => $max_stream_secs,
 
              'content' => $body,
-            ),
-        );
+            ],
+        ];
         if (!($stream_context = stream_context_create($stream_options)) || !($stream = fopen($url, 'rb', false, $stream_context))) {
             $response_code = 404; // Connection failure.
             $response_body = ''; // Connection failure; empty.
@@ -3901,9 +3908,9 @@ class Core // Heart of the HTML Compressor.
             $response_body = ''; // Connection timed out; ignore.
         } elseif (!empty($stream_meta_data['wrapper_data']) && is_array($stream_meta_data['wrapper_data'])) {
             foreach (array_reverse($stream_meta_data['wrapper_data']) as $_response_header /* Looking for the last one. */) {
-                if (is_string($_response_header) && stripos($_response_header, 'HTTP/') === 0 && strpos($_response_header, ' ')) {
+                if (is_string($_response_header) && mb_stripos($_response_header, 'HTTP/') === 0 && mb_strpos($_response_header, ' ')) {
                     list(, $response_code) = explode(' ', $_response_header, 3);
-                    $response_code         = (integer) trim($response_code);
+                    $response_code         = (int) trim($response_code);
                     break; // Got the last status code.
                 }
             }
@@ -3932,6 +3939,6 @@ class Core // Heart of the HTML Compressor.
                 sprintf('fetching remote resource: `%1$s`; `%2$s` bytes received;', $url, strlen($response_body))
             );
         }
-        return $return_array ? array('code' => $response_code, 'body' => $response_body) : $response_body;
+        return $return_array ? ['code' => $response_code, 'body' => $response_body] : $response_body;
     }
 }

@@ -1,3 +1,16 @@
+## $v
+
+- Adding new config option: `amp_exclusions_enable` (default is enabled). This improves compatibility with [Accelerated Mobile Pages](https://www.ampproject.org/). When this option is enabled and the URI being compressed ends with `/amp/`, or the document contains a top-level `<html ⚡>` tag (`<html amp>` is accepted as well), then features which are incompatible with [Accelerated Mobile Pages](https://www.ampproject.org/) will be disabled accordingly, regardless of your other settings. See [Issue #695](https://github.com/websharks/comet-cache/issues/695) in the Comet Cache repo.
+- Adding `isDocAmpd()` conditional check against current URI & document.
+- Adding automatic AMP feature exclusions for improved AMP compatibility.
+- Optimizing for speed by removing unnecessary calls to `unset()`.
+- Enhancing unicode compatibility by taking full advantage of all `mb_*()` functions.
+- Adding multibyte compatible `pregQuote()`.
+- Adding multibyte compatible `replaceOnce()`.
+- Adding multibyte compatible `substrReplace()`.
+- Updating all regex patterns to add the `/u` flag for unicode compatibility.
+- Updating minimum PHP requirement. Now requires PHP v5.4+ in support of short array syntax `[]`.
+
 ## v161108
 
 - **Enhancing Exclusion Tests:** Now testing exclusion rules against full open tag instead of only the CSS or JS URL and content. This allows for exclusion rules that exclude CSS or JS based on an opening tag attribute; e.g., `<style id='rs-plugin-settings-inline-css'`. See also: [this Comet Cache issue](https://github.com/websharks/comet-cache/issues/614).

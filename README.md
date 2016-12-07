@@ -346,6 +346,8 @@ e.g., `new WebSharks\HtmlCompressor\Core($options);`
  please set this to a FALSE value. This can be helpful if your site (for whatever reason) is incompatible with the HTML compression routines.
  NOTE: if you disable this due to an incompatibility, please report it via GitHub so the issue can be resolved for everyone.
 
+- (boolean)`amp_exclusions_enable` TRUE by default. This improves compatibility with [Accelerated Mobile Pages](https://www.ampproject.org/). When this option is enabled and the URI being compressed ends with `/amp/`, or the document contains a top-level `<html ⚡>` tag (`<html amp>` is accepted as well), then features which are incompatible with [Accelerated Mobile Pages](https://www.ampproject.org/) will be disabled accordingly, regardless of your other settings.
+
 ----
 
 ##### Other misc. options. These don't really fall into any specific category yet.

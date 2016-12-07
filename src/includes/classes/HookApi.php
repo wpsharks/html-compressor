@@ -16,11 +16,11 @@ class HookApi // For plugins.
      */
 
     /**
-     * @type array An array of hooks.
+     * @var array An array of hooks.
      *
      * @since 150321 Adding hook API for plugins.
      */
-    protected $hooks = array();
+    protected $hooks = [];
 
     /*
      * Public API Methods
@@ -63,7 +63,7 @@ class HookApi // For plugins.
         }
         unset($_early_hook); // Just a little housekeeping.
 
-        $early_hooks = array(); // Empty; i.e., reset early hooks.
+        $early_hooks = []; // Empty; i.e., reset early hooks.
     }
 
     /**
@@ -106,7 +106,7 @@ class HookApi // For plugins.
             return $function;
         }
         if (is_object($function)) {
-            $function = array($function, '');
+            $function = [$function, ''];
         } else {
             $function = (array) $function;
         }
@@ -147,7 +147,7 @@ class HookApi // For plugins.
      */
     public function hasAction() // Simple `hasHook()` alias.
     {
-        return call_user_func_array(array($this, 'hasHook'), func_get_args());
+        return call_user_func_array([$this, 'hasHook'], func_get_args());
     }
 
     /**
@@ -161,7 +161,7 @@ class HookApi // For plugins.
      */
     public function hasFilter() // Simple `hasHook()` alias.
     {
-        return call_user_func_array(array($this, 'hasHook'), func_get_args());
+        return call_user_func_array([$this, 'hasHook'], func_get_args());
     }
 
     /**
@@ -179,14 +179,14 @@ class HookApi // For plugins.
     public function addHook($hook, $function, $priority = 10, $accepted_args = 1)
     {
         $hook          = (string) $hook;
-        $priority      = (integer) $priority;
-        $accepted_args = max(0, (integer) $accepted_args);
+        $priority      = (int) $priority;
+        $accepted_args = max(0, (int) $accepted_args);
         $hook_id       = $this->hookId($function);
 
-        $this->hooks[$hook][$priority][$hook_id] = array(
+        $this->hooks[$hook][$priority][$hook_id] = [
             'function'      => $function,
-            'accepted_args' => (integer) $accepted_args,
-        );
+            'accepted_args' => (int) $accepted_args,
+        ];
         return true; // Always returns true.
     }
 
@@ -201,7 +201,7 @@ class HookApi // For plugins.
      */
     public function addAction() // Simple `addHook()` alias.
     {
-        return call_user_func_array(array($this, 'addHook'), func_get_args());
+        return call_user_func_array([$this, 'addHook'], func_get_args());
     }
 
     /**
@@ -215,7 +215,7 @@ class HookApi // For plugins.
      */
     public function addFilter() // Simple `addHook()` alias.
     {
-        return call_user_func_array(array($this, 'addHook'), func_get_args());
+        return call_user_func_array([$this, 'addHook'], func_get_args());
     }
 
     /**
@@ -232,7 +232,7 @@ class HookApi // For plugins.
     public function removeHook($hook, $function, $priority = 10)
     {
         $hook     = (string) $hook;
-        $priority = (integer) $priority;
+        $priority = (int) $priority;
         $hook_id  = $this->hookId($function);
 
         if (!isset($this->hooks[$hook][$priority][$hook_id])) {
@@ -256,7 +256,7 @@ class HookApi // For plugins.
      */
     public function removeAction() // Simple `removeHook()` alias.
     {
-        return call_user_func_array(array($this, 'removeHook'), func_get_args());
+        return call_user_func_array([$this, 'removeHook'], func_get_args());
     }
 
     /**
@@ -270,7 +270,7 @@ class HookApi // For plugins.
      */
     public function removeFilter() // Simple `removeHook()` alias.
     {
-        return call_user_func_array(array($this, 'removeHook'), func_get_args());
+        return call_user_func_array([$this, 'removeHook'], func_get_args());
     }
 
     /**
