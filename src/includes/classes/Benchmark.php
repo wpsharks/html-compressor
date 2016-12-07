@@ -16,18 +16,18 @@ class Benchmark // For debugging.
      */
 
     /**
-     * @type array An array of times.
+     * @var array An array of times.
      *
      * @since 150315 Enhancing debugger.
      */
-    protected $times = array();
+    protected $times = [];
 
     /**
-     * @type array An array of data.
+     * @var array An array of data.
      *
      * @since 150315 Enhancing debugger.
      */
-    protected $data = array();
+    protected $data = [];
 
     /*
      * Public API Methods
