@@ -35,7 +35,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @var string Dated version string: `YYMMDD`.
      */
-    protected $version = '161108'; //version//
+    protected $version = '161207'; //version//
 
     /**
      * An array of class options.
@@ -556,7 +556,7 @@ class Core // Heart of the HTML Compressor.
     /**
      * Document is AMPd?
      *
-     * @since 16xxxx AMP exclusions.
+     * @since 161207 AMP exclusions.
      *
      * @param string $html HTML markup.
      *
@@ -2523,7 +2523,7 @@ class Core // Heart of the HTML Compressor.
     /**
      * Multibyte `substr_replace()`.
      *
-     * @since 16xxxx Enhancing multibyte.
+     * @since 161207 Enhancing multibyte.
      *
      * @param mixed    $value   Input value.
      * @param string   $replace Replacement string.
