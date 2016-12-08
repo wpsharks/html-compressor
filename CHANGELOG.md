@@ -1,4 +1,4 @@
-## v$s
+## v161208
 
 - **Bug Fix:** Undefined variable `$caSe_insensitive`, corrected in this release.
 

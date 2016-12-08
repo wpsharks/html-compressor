@@ -9,7 +9,7 @@ project_slack_channel            = html-compressor
 project_namespace                = WebSharks\\HtmlCompressor
 project_sub_namespace            = HtmlCompressor
 
-project_version                  = %y%m%d
+project_version                  = %y%m%d.%now
 
 project_php_required_version     = 5.4
 project_php_tested_up_to_version = ${php.version}
