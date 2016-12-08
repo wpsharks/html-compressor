@@ -2581,7 +2581,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @return string|array|object Values after ONE string replacement deeply.
      */
-    protected function replaceOnce($needle, $replace, $value, $case_insensitive = false)
+    protected function replaceOnce($needle, $replace, $value, $caSe_insensitive = false)
     {
         if (is_array($value) || is_object($value)) {
             foreach ($value as $_key => &$_value) {

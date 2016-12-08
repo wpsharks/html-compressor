@@ -1,3 +1,7 @@
+## v$s
+
+- **Bug Fix:** Undefined variable `$caSe_insensitive`, corrected in this release.
+
 ## v161207
 
 - Adding new config option: `amp_exclusions_enable` (default is enabled). This improves compatibility with [Accelerated Mobile Pages](https://www.ampproject.org/). When this option is enabled and the URI being compressed ends with `/amp/`, or the document contains a top-level `<html ⚡>` tag (`<html amp>` is accepted as well), then features which are incompatible with [Accelerated Mobile Pages](https://www.ampproject.org/) will be disabled accordingly, regardless of your other settings. See [Issue #695](https://github.com/websharks/comet-cache/issues/695) in the Comet Cache repo.
