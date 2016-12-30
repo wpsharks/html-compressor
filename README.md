@@ -352,16 +352,8 @@ e.g., `new WebSharks\HtmlCompressor\Core($options);`
 
 ##### Other misc. options. These don't really fall into any specific category yet.
 
-- (boolean|string)`benchmark` Off by default. If enabled, HTML comments are added to the final output with some useful information. If you set this to a `TRUE` value, it simply enables an overall time calculation. If you're debugging, and you need to see many other details too; you can set this to the string: `details` (not recommended in a production environment).
+- (boolean) or (string)`benchmark` Off by default. If enabled, HTML comments are added to the final output with some useful information. If you set this to a `TRUE` value, it simply enables an overall time calculation. If you're debugging, and you need to see many other details too; you can set this to the string: `details` (not recommended in a production environment).
 
 - (string)`product_title` Define this if you'd like to change the title of a particular HTML Compressor instance (i.e., to change the name from the default "HTML Compressor" to something else you like better). If undefined, this defaults to `HTML Compressor`. Note: this impacts the title of the product displayed in the HTML comments; assuming that `benchmark` is enabled where comments are included in the final output.
 
 - (array)`vendor_css_prefixes` An array of known vendor-specific CSS prefixes. Defaults to `array('moz','webkit','khtml','ms','o')`.
-
-----
-
-## License
-
-Copyright: © 2014 [WebSharks, Inc.](http://websharks-inc.com/) (coded in the USA)
-
-Released under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.html).
