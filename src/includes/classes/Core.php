@@ -416,33 +416,34 @@ class Core // Heart of the HTML Compressor.
         if (($benchmark = !empty($this->options['benchmark']))) {
             $time = microtime(true);
         }
-        $html = &$input; // Let's call this HTML now.
+        $html          = &$input; // Raw HTML.
+        $is_valid_utf8 = $this->isValidUtf8($html);
 
-        if (!empty($this->options['amp_exclusions_enable']) && $this->isDocAmpd($html)) {
-            $this->options['compress_combine_head_body_css'] = false;
-            $this->options['compress_combine_head_js']       = false;
-            $this->options['compress_combine_footer_js']     = false;
-            $this->options['compress_combine_remote_css_js'] = false;
+        if ($is_valid_utf8) { // Must have valid UTF-8.
+            if (!empty($this->options['amp_exclusions_enable']) && $this->isDocAmpd($html)) {
+                $this->options['compress_combine_head_body_css'] = false;
+                $this->options['compress_combine_head_js']       = false;
+                $this->options['compress_combine_footer_js']     = false;
+                $this->options['compress_combine_remote_css_js'] = false;
+            } // This auto-enables AMP compatibility.
+
+            $html = $this->tokenizeGlobalExclusions($html);
+            $html = $this->maybeCompressCombineHeadBodyCss($html);
+            $html = $this->maybeCompressCombineHeadJs($html);
+            $html = $this->maybeCompressCombineFooterJs($html);
+            $html = $this->maybeCompressInlineJsCode($html);
+            $html = $this->maybeCompressInlineJsonCode($html);
+            $html = $this->restoreGlobalExclusions($html);
+            $html = $this->maybeCompressHtmlCode($html);
         }
-        $html = $this->tokenizeGlobalExclusions($html);
-        $html = $this->maybeCompressCombineHeadBodyCss($html);
-        $html = $this->maybeCompressCombineHeadJs($html);
-        $html = $this->maybeCompressCombineFooterJs($html);
-        $html = $this->maybeCompressInlineJsCode($html);
-        $html = $this->maybeCompressInlineJsonCode($html);
-        $html = $this->restoreGlobalExclusions($html);
-        $html = $this->maybeCompressHtmlCode($html);
-
         if (!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs']) {
-            if (mt_rand(1, 20) === 1) {
-                $this->cleanupCacheDirs();
-            }
+            mt_rand(1, 20) === 1 ? $this->cleanupCacheDirs() : null;
         }
         if ($benchmark && !empty($time)) {
             $time = number_format(microtime(true) - $time, 5, '.', '');
 
             if ($this->benchmark->times) {
-                $html .= "\n";
+                $html .= "\n"; // Spacer.
             }
             foreach ($this->benchmark->times as $_benchmark_time) {
                 $html .= "\n".'<!-- '.sprintf(
@@ -453,11 +454,18 @@ class Core // Heart of the HTML Compressor.
                 ).' -->';
             } // unset($_benchmark_time); // Housekeeping.
 
-            $html .= "\n\n".'<!-- '.sprintf(
-                '%1$s took %2$s seconds (overall).',
-                htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
-                htmlspecialchars($time, ENT_NOQUOTES, 'UTF-8')
-            ).' -->';
+            if (!$is_valid_utf8) {
+                $html .= "\n\n".'<!-- '.sprintf(
+                    '%1$s did not run; HTML contains invalid UTF-8.',
+                    htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8')
+                ).' -->';
+            } else {
+                $html .= "\n\n".'<!-- '.sprintf(
+                    '%1$s took %2$s seconds (overall).',
+                    htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
+                    htmlspecialchars($time, ENT_NOQUOTES, 'UTF-8')
+                ).' -->';
+            }
         }
         return $html; // HTML markup.
     }
@@ -489,6 +497,19 @@ class Core // Heart of the HTML Compressor.
             return $this->{$property};
         }
         throw new \Exception(sprintf('Undefined property: `%1$s`.', $property));
+    }
+
+    /********************************************************************************************************/
+
+    /*
+     * Validation-Related Methods
+     */
+
+    protected function isValidUtf8($html)
+    {
+        preg_match('/./u', $html);
+        $last_error = preg_last_error();
+        return !in_array($last_error, [PREG_BAD_UTF8_ERROR, PREG_BAD_UTF8_OFFSET_ERROR], true);
     }
 
     /********************************************************************************************************/
