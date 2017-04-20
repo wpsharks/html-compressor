@@ -1,3 +1,7 @@
+## $v
+
+- **Bug Fix:** The HTML Compressor was returning an empty string upon encountering an invalid UTF-8 sequence. See [Issue #871](https://github.com/websharks/comet-cache/issues/871) reported by a Comet Cache user.
+
 ## v161208
 
 - **Bug Fix:** Undefined variable `$caSe_insensitive`, corrected in this release.
