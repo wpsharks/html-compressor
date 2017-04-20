@@ -24,7 +24,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140926 Enhance JS error reporting.
      *
-     * @var string Current product title.
+     * @type string Current product title.
      */
     protected $product_title = 'HTML Compressor';
 
@@ -33,16 +33,16 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140418 Version indicates release date.
      *
-     * @var string Dated version string: `YYMMDD`.
+     * @type string Dated version string: `YYMMDD`.
      */
-    protected $version = '161208'; //version//
+    protected $version = '170420.24924'; //version//
 
     /**
      * An array of class options.
      *
      * @since 140417 Initial release.
      *
-     * @var array Set dynamically by class constructor.
+     * @type array Set dynamically by class constructor.
      */
     protected $options = [];
 
@@ -51,7 +51,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150321 Adding hook API for plugins.
      *
-     * @var HookApi Hook API class instance.
+     * @type HookApi Hook API class instance.
      */
     protected $hook_api; // Class instance.
 
@@ -60,7 +60,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150315 Adding additional benchmarks.
      *
-     * @var Benchmark Filled by various methods.
+     * @type Benchmark Filled by various methods.
      */
     protected $benchmark; // Class instance.
 
@@ -71,7 +71,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @note This indicates how long cache files can live.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $cache_expiration_time = '14 days';
 
@@ -80,7 +80,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $regex_vendor_css_prefixes = '';
 
@@ -89,7 +89,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var array These are used if no option value is supplied to override them.
+     * @type array These are used if no option value is supplied to override them.
      */
     protected $default_vendor_css_prefixes = [
         'moz',
@@ -104,7 +104,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $regex_css_exclusions = '';
 
@@ -113,7 +113,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var array These are used if no option value is supplied to override them.
+     * @type array These are used if no option value is supplied to override them.
      */
     protected $default_css_exclusions = [];
 
@@ -122,7 +122,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way CSS exclusions operate.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $built_in_regex_css_exclusions = '';
 
@@ -131,9 +131,9 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way CSS exclusions operate.
      *
-     * @var array These are on at all times; UNLESS options dictate otherwise.
-     *            To disable these built-in CSS exclusions pass the option
-     *            `disable_built_in_css_exclusions` as TRUE.
+     * @type array These are on at all times; UNLESS options dictate otherwise.
+     *             To disable these built-in CSS exclusions pass the option
+     *             `disable_built_in_css_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_css_exclusions}.
@@ -147,7 +147,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $regex_js_exclusions = '';
 
@@ -156,7 +156,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var array These are used if no option value is supplied to override them.
+     * @type array These are used if no option value is supplied to override them.
      */
     protected $default_js_exclusions = [
         '.php?',
@@ -167,7 +167,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way JS exclusions operate.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $built_in_regex_js_exclusions = '';
 
@@ -176,9 +176,9 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140422 Changing the way JS exclusions operate.
      *
-     * @var array These are on at all times; UNLESS options dictate otherwise.
-     *            To disable these built-in JS exclusions pass the option
-     *            `disable_built_in_js_exclusions` as TRUE.
+     * @type array These are on at all times; UNLESS options dictate otherwise.
+     *             To disable these built-in JS exclusions pass the option
+     *             `disable_built_in_js_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_js_exclusions}.
@@ -195,7 +195,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $regex_uri_exclusions = '';
 
@@ -204,7 +204,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @var array These are used if no option value is supplied to override them.
+     * @type array These are used if no option value is supplied to override them.
      */
     protected $default_uri_exclusions = [];
 
@@ -213,7 +213,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @var string Set dynamically by class constructor.
+     * @type string Set dynamically by class constructor.
      */
     protected $built_in_regex_uri_exclusions = '';
 
@@ -222,9 +222,9 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 160117 Adding URI exclusion support.
      *
-     * @var array These are on at all times; UNLESS options dictate otherwise.
-     *            To disable these built-in URI exclusions pass the option
-     *            `disable_built_in_uri_exclusions` as TRUE.
+     * @type array These are on at all times; UNLESS options dictate otherwise.
+     *             To disable these built-in URI exclusions pass the option
+     *             `disable_built_in_uri_exclusions` as TRUE.
      *
      * @note These get converted to a regex pattern by the class constructor.
      *  Reference {@link $built_in_regex_uri_exclusions}.
@@ -236,7 +236,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Set by various routines that work together.
+     * @type string Set by various routines that work together.
      */
     protected $current_base = '';
 
@@ -245,7 +245,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140519 Improving CSS `@media` query support.
      *
-     * @var string Set by various routines that work together.
+     * @type string Set by various routines that work together.
      */
     protected $current_css_media = '';
 
@@ -254,7 +254,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150821 Adding global exclusion tokenizer.
      *
-     * @var array Current global exclusion tokens.
+     * @type array Current global exclusion tokens.
      */
     protected $current_global_exclusion_tokens = [];
 
@@ -263,7 +263,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var array Used by various routines for optimization.
+     * @type array Used by various routines for optimization.
      */
     protected static $static = [];
 
@@ -272,7 +272,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var array Used by various routines for optimization.
+     * @type array Used by various routines for optimization.
      */
     protected $cache = [];
 
@@ -416,33 +416,34 @@ class Core // Heart of the HTML Compressor.
         if (($benchmark = !empty($this->options['benchmark']))) {
             $time = microtime(true);
         }
-        $html = &$input; // Let's call this HTML now.
+        $html          = &$input; // Raw HTML.
+        $is_valid_utf8 = $this->isValidUtf8($html);
 
-        if (!empty($this->options['amp_exclusions_enable']) && $this->isDocAmpd($html)) {
-            $this->options['compress_combine_head_body_css'] = false;
-            $this->options['compress_combine_head_js']       = false;
-            $this->options['compress_combine_footer_js']     = false;
-            $this->options['compress_combine_remote_css_js'] = false;
+        if ($is_valid_utf8) { // Must have valid UTF-8.
+            if (!empty($this->options['amp_exclusions_enable']) && $this->isDocAmpd($html)) {
+                $this->options['compress_combine_head_body_css'] = false;
+                $this->options['compress_combine_head_js']       = false;
+                $this->options['compress_combine_footer_js']     = false;
+                $this->options['compress_combine_remote_css_js'] = false;
+            } // This auto-enables AMP compatibility.
+
+            $html = $this->tokenizeGlobalExclusions($html);
+            $html = $this->maybeCompressCombineHeadBodyCss($html);
+            $html = $this->maybeCompressCombineHeadJs($html);
+            $html = $this->maybeCompressCombineFooterJs($html);
+            $html = $this->maybeCompressInlineJsCode($html);
+            $html = $this->maybeCompressInlineJsonCode($html);
+            $html = $this->restoreGlobalExclusions($html);
+            $html = $this->maybeCompressHtmlCode($html);
         }
-        $html = $this->tokenizeGlobalExclusions($html);
-        $html = $this->maybeCompressCombineHeadBodyCss($html);
-        $html = $this->maybeCompressCombineHeadJs($html);
-        $html = $this->maybeCompressCombineFooterJs($html);
-        $html = $this->maybeCompressInlineJsCode($html);
-        $html = $this->maybeCompressInlineJsonCode($html);
-        $html = $this->restoreGlobalExclusions($html);
-        $html = $this->maybeCompressHtmlCode($html);
-
         if (!isset($this->options['cleanup_cache_dirs']) || $this->options['cleanup_cache_dirs']) {
-            if (mt_rand(1, 20) === 1) {
-                $this->cleanupCacheDirs();
-            }
+            mt_rand(1, 20) === 1 ? $this->cleanupCacheDirs() : null;
         }
         if ($benchmark && !empty($time)) {
             $time = number_format(microtime(true) - $time, 5, '.', '');
 
             if ($this->benchmark->times) {
-                $html .= "\n";
+                $html .= "\n"; // Spacer.
             }
             foreach ($this->benchmark->times as $_benchmark_time) {
                 $html .= "\n".'<!-- '.sprintf(
@@ -453,11 +454,18 @@ class Core // Heart of the HTML Compressor.
                 ).' -->';
             } // unset($_benchmark_time); // Housekeeping.
 
-            $html .= "\n\n".'<!-- '.sprintf(
-                '%1$s took %2$s seconds (overall).',
-                htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
-                htmlspecialchars($time, ENT_NOQUOTES, 'UTF-8')
-            ).' -->';
+            if (!$is_valid_utf8) {
+                $html .= "\n\n".'<!-- '.sprintf(
+                    '%1$s did not run; HTML contains invalid UTF-8.',
+                    htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8')
+                ).' -->';
+            } else {
+                $html .= "\n\n".'<!-- '.sprintf(
+                    '%1$s took %2$s seconds (overall).',
+                    htmlspecialchars($this->product_title, ENT_NOQUOTES, 'UTF-8'),
+                    htmlspecialchars($time, ENT_NOQUOTES, 'UTF-8')
+                ).' -->';
+            }
         }
         return $html; // HTML markup.
     }
@@ -489,6 +497,19 @@ class Core // Heart of the HTML Compressor.
             return $this->{$property};
         }
         throw new \Exception(sprintf('Undefined property: `%1$s`.', $property));
+    }
+
+    /********************************************************************************************************/
+
+    /*
+     * Validation-Related Methods
+     */
+
+    protected function isValidUtf8($html)
+    {
+        preg_match('/./u', $html);
+        $last_error = preg_last_error();
+        return !in_array($last_error, [PREG_BAD_UTF8_ERROR, PREG_BAD_UTF8_OFFSET_ERROR], true);
     }
 
     /********************************************************************************************************/
@@ -540,12 +561,12 @@ class Core // Heart of the HTML Compressor.
         if (!$this->current_global_exclusion_tokens) {
             return $html; // Nothing to restore.
         }
-        if (mb_stripos($html, '<htmlc-gxt-') === false) {
+        if (mb_strpos($html, '<htmlc-gxt-') === false) {
             return $html; // Nothing to restore.
         }
         foreach (array_reverse($this->current_global_exclusion_tokens, true) as $_token => $_value) {
             // Must go in reverse order so nested tokens unfold properly.
-            $html = str_ireplace('<htmlc-gxt-'.$_token.' />', $_value, $html);
+            $html = str_replace('<htmlc-gxt-'.$_token.' />', $_value, $html);
         } // unset($_token, $_value); // Housekeeping.
 
         $this->current_global_exclusion_tokens = [];
@@ -1060,11 +1081,8 @@ class Core // Heart of the HTML Compressor.
         if (!($css = (string) $css)) {
             return $css; // Nothing to do.
         }
-        $css = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/ui', '', $css);
-        if ($css) {
-            $css = trim($css);
-        }
-        return $css;
+        $css        = preg_replace('/@(?:\-(?:'.$this->regex_vendor_css_prefixes.')\-)?charset(?:\s+[^;]*?)?;/ui', '', $css);
+        return $css = $css ? trim($css) : $css;
     }
 
     /**
@@ -1081,11 +1099,8 @@ class Core // Heart of the HTML Compressor.
         if (!($css = (string) $css)) {
             return $css; // Nothing to do.
         }
-        $css = $this->stripExistingCssCharsets($css);
-        if ($css) {
-            $css = '@charset "UTF-8";'."\n".$css;
-        }
-        return $css;
+        $css        = $this->stripExistingCssCharsets($css);
+        return $css = $css ? '@charset "UTF-8";'."\n".$css : $css;
     }
 
     /**
@@ -1860,9 +1875,10 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150424 Adding support for JSON compression.
      *
-     * @param array $tag_frag    A JS tag fragment.
-     * @param bool  $test_for_js Defaults to a TRUE value.
-     *                           If TRUE, we will test tag fragment to make sure it's JSON.
+     * @param array $tag_frag      A JS tag fragment.
+     * @param bool  $test_for_js   Defaults to a TRUE value.
+     *                             If TRUE, we will test tag fragment to make sure it's JSON.
+     * @param mixed $test_for_json
      *
      * @return string The script JSON code (if possible); else an empty string.
      */
@@ -2379,7 +2395,8 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150424 Adding support for JSON compression.
      *
-     * @param string $js Raw JSON code.
+     * @param string $js   Raw JSON code.
+     * @param mixed  $json
      *
      * @return string JSON code (possibly minified).
      */
@@ -2714,7 +2731,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Indicates a public directory type.
+     * @type string Indicates a public directory type.
      *
      * @internal This is for internal use only.
      */
@@ -2725,7 +2742,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Indicates a private directory type.
+     * @type string Indicates a private directory type.
      *
      * @internal This is for internal use only.
      */
@@ -2873,7 +2890,7 @@ class Core // Heart of the HTML Compressor.
         $private_cache_dir = $this->cacheDir($this::DIR_PRIVATE_TYPE);
         $min_mtime         = strtotime('-'.$this->cache_expiration_time);
 
-        /** @var $_dir_file \RecursiveDirectoryIterator For IDEs. */
+        /** @type $_dir_file \RecursiveDirectoryIterator For IDEs. */
         foreach ($this->dirRegexIteration($public_cache_dir, '/\/compressor\-part\..*$/') as $_dir_file) {
             if (($_dir_file->isFile() || $_dir_file->isLink()) && $_dir_file->getMTime() < $min_mtime - 3600) {
                 if ($_dir_file->isWritable()) {
@@ -2881,7 +2898,7 @@ class Core // Heart of the HTML Compressor.
                 }
             }
         }
-        /** @var $_dir_file \RecursiveDirectoryIterator For IDEs. */
+        /** @type $_dir_file \RecursiveDirectoryIterator For IDEs. */
         foreach ($this->dirRegexIteration($private_cache_dir, '/\/compressor\-parts\..*$/') as $_dir_file) {
             if (($_dir_file->isFile() || $_dir_file->isLink()) && $_dir_file->getMTime() < $min_mtime) {
                 if ($_dir_file->isWritable()) {
@@ -2960,7 +2977,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
+     * @type string Compatible with Apache 2.1+. Tested up to 2.4.7.
      */
     protected $dir_htaccess_deny = "<IfModule authz_core_module>\n\tRequire all denied\n</IfModule>\n<IfModule !authz_core_module>\n\tdeny from all\n</IfModule>";
 
@@ -2969,7 +2986,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 150321 Improving publicly cacheable files.
      *
-     * @var string Compatible with Apache 2.1+. Tested up to 2.4.7.
+     * @type string Compatible with Apache 2.1+. Tested up to 2.4.7.
      */
     protected $dir_htaccess_allow = "<IfModule authz_core_module>\n\tRequire all granted\n</IfModule>\n<IfModule !authz_core_module>\n\tallow from all\n</IfModule>\n\n<IfModule headers_module>\n\t<FilesMatch \"\\.(html|js|css)$\">\n\t\tHeader append Vary: Accept-Encoding\n\t</FilesMatch>\n</IfModule>";
 
@@ -2984,7 +3001,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -2995,7 +3012,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3006,7 +3023,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3017,7 +3034,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3028,7 +3045,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3039,7 +3056,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3050,7 +3067,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3061,7 +3078,7 @@ class Core // Heart of the HTML Compressor.
      *
      * @since 140417 Initial release.
      *
-     * @var int Part of a bitmask.
+     * @type int Part of a bitmask.
      *
      * @internal Internal use only.
      */
@@ -3460,10 +3477,10 @@ class Core // Heart of the HTML Compressor.
      *
      * @throws \Exception If unable to parse.
      *
-     * @return array|string|int|null {@inheritdoc}
+     * @return array|string|int|null
      *
      * @see parseUrl()
-     * {@inheritdoc} parseUrl()
+     * parseUrl()
      */
     protected function mustParseUrl() // Arguments are NOT listed here.
     {
@@ -3552,10 +3569,10 @@ class Core // Heart of the HTML Compressor.
      *
      * @throws \Exception If unable to unparse.
      *
-     * @return string {@inheritdoc}
+     * @return string
      *
      * @see unparseUrl()
-     * {@inheritdoc} unparseUrl()
+     * unparseUrl()
      */
     protected function mustUnparseUrl() // Arguments are NOT listed here.
     {
@@ -3597,10 +3614,10 @@ class Core // Heart of the HTML Compressor.
      *
      * @throws \Exception If unable to parse.
      *
-     * @return array|null {@inheritdoc}
+     * @return array|null
      *
      * @see parseUriParts()
-     * {@inheritdoc} parseUriParts()
+     * parseUriParts()
      */
     protected function mustParseUriParts() // Arguments are NOT listed here.
     {
@@ -3642,10 +3659,10 @@ class Core // Heart of the HTML Compressor.
      *
      * @throws \Exception If unable to parse.
      *
-     * @return string|null {@inheritdoc}
+     * @return string|null
      *
      * @see parseUri()
-     * {@inheritdoc} parseUri()
+     * parseUri()
      */
     protected function mustParseUri() // Arguments are NOT listed here.
     {
